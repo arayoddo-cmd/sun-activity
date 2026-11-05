@@ -1,0 +1,1912 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>태양 관측소</title>
+<meta name="description" content="태양의 표면(광구·쌀알무늬·흑점)과 대기(채층·코로나·홍염·플레어)를 관측하고, 흑점 수 변화와 태양 활동이 지구에 미치는 영향을 찾는 수업 자료">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b1a; --panel:#111934; --line:#2a3768;
+  --text:#eef2ff; --muted:#a9b4d8; --accent:#ffcf5a; --accent2:#7cc4ff;
+  --ok:#5fe0a0; --bad:#ff8a8a; --chip:#1f2b5a; --chiph:#2b3a78;
+  --r:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",system-ui,sans-serif;line-height:1.6;min-height:100vh;-webkit-tap-highlight-color:transparent}
+/* 우주 배경: 오른쪽 위의 햇빛, 왼쪽 아래의 푸른 성운, 별, 태양을 둘러싼 궤도선 (화면을 내려도 그대로) */
+html{background:radial-gradient(1100px 760px at 100% -8%,rgba(255,160,60,.17),transparent 62%),radial-gradient(900px 700px at -12% 108%,rgba(80,90,230,.2),transparent 62%),radial-gradient(800px 560px at 55% 55%,rgba(120,60,200,.08),transparent 70%),#070b1a;background-attachment:fixed;min-height:100%}
+html body{background:transparent}
+body::before,body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1}
+body::before{background-image:radial-gradient(1.2px 1.2px at 24px 36px,#ffffffb0,transparent),radial-gradient(1px 1px at 132px 92px,#ffffff80,transparent),radial-gradient(1.6px 1.6px at 214px 170px,#fff4d8c0,transparent),radial-gradient(1px 1px at 318px 44px,#ffffff70,transparent),radial-gradient(1.2px 1.2px at 392px 226px,#d8e6ffa0,transparent),radial-gradient(1px 1px at 76px 210px,#ffffff60,transparent);background-size:440px 270px;opacity:.55}
+body::after{background:radial-gradient(circle at 100% 0,transparent 0 259px,rgba(255,207,90,.10) 260px 261px,transparent 262px),radial-gradient(circle at 100% 0,transparent 0 459px,rgba(124,196,255,.08) 460px 461px,transparent 462px),radial-gradient(circle at 100% 0,transparent 0 719px,rgba(124,196,255,.07) 720px 721px,transparent 722px),radial-gradient(circle at 100% 0,transparent 0 1039px,rgba(180,150,255,.06) 1040px 1041px,transparent 1042px)}
+.panel{backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#app{max-width:1280px;margin:0 auto;padding:14px 16px 60px}
+h1,h2,h3,.title{font-family:"Do Hyeon","Noto Sans KR",sans-serif;font-weight:400;letter-spacing:.5px;margin:0}
+h1{font-size:clamp(36px,6vw,58px);line-height:1.15}
+h3{font-size:22px;margin-bottom:6px}
+p{margin:.4em 0}
+button{font:inherit;color:inherit;cursor:pointer}
+.btn{background:var(--accent);color:#1b1400;border:0;border-radius:999px;padding:12px 24px;font-weight:700;font-size:17px}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--text);border:1.5px solid var(--line)}
+.btn.small{padding:7px 14px;font-size:14px}
+.panel{background:rgba(17,25,52,.86);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.muted{color:var(--muted)}
+.note{font-size:13px;color:var(--muted);margin-top:8px}
+input{font:inherit;color:var(--text);background:#0b1230;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+input:focus{outline:2px solid var(--accent2);border-color:transparent}
+label{display:block;font-weight:700;margin:10px 0 4px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.top .grow{flex:1}
+.pill{background:var(--chip);border-radius:999px;padding:5px 12px;font-size:14px;color:var(--muted)}
+.pill b{color:var(--text)}
+
+.intro{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;align-items:center;min-height:88vh}
+.intro>*{min-width:0}
+.intro-r{display:flex;flex-direction:column;gap:12px}
+.kicker{color:var(--accent2);font-weight:700;margin:0;font-size:14px}
+.lead{font-size:18px}
+.lead b{color:var(--accent)}
+@media (max-width:920px){.intro{grid-template-columns:1fr;min-height:auto}}
+
+/* 관측 화면 */
+.stage{position:relative;width:100%;height:min(66vh,640px);min-height:320px;border-radius:var(--r);overflow:hidden;background:#050914;border:1px solid var(--line);touch-action:none;user-select:none;-webkit-user-select:none}
+@media (max-width:920px){.stage{height:min(56vh,540px)}}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage .hud{position:absolute;left:10px;top:10px;right:10px;pointer-events:none;font-size:15px;font-weight:700;line-height:1.4}
+.stage .hud span{display:inline-block;background:#08102ecc;border:1px solid #ffffff26;border-radius:12px;padding:5px 12px}
+.stage .hud span:empty{display:none}
+
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.group{display:flex;gap:3px;flex-wrap:wrap;align-items:center;background:#0b1230;border:1px solid var(--line);border-radius:999px;padding:3px}
+.group .lbl{font-size:13px;color:var(--muted);padding:0 6px 0 10px}
+.chip{background:var(--chip);border:1.5px solid transparent;border-radius:999px;padding:6px 14px;font-size:15px;min-height:40px}
+.chip:hover{background:var(--chiph)}
+.chip.on{background:var(--accent2);color:#06142b;font-weight:700}
+.chip.big{font-weight:700;padding:6px 20px}
+.chip.play{background:var(--accent);color:#1b1400;font-weight:700}
+.chip.hot{background:#ff8a3d;color:#1b0a00;font-weight:700}
+.group .chip{min-height:36px;padding:4px 12px}
+.rng{width:min(300px,52vw);accent-color:var(--accent);background:transparent;border:0;padding:0 10px;margin:0;height:36px}
+
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{background:var(--chip);border:1.5px solid transparent;border-radius:12px;padding:8px 14px;font-weight:700;font-size:15px}
+.tab.on{border-color:var(--accent);color:var(--accent);background:var(--chiph)}
+.lesson{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);gap:14px;align-items:start}
+.lesson>*{min-width:0}
+@media (max-width:920px){.lesson{grid-template-columns:1fr}}
+.concept ol{padding-left:22px;margin:8px 0}
+.concept li{margin:10px 0;font-size:17px;line-height:2}
+.blank{display:inline-block;min-width:54px;text-align:center;border:0;border-bottom:2.5px solid var(--accent);background:#ffcf5a14;color:var(--accent);padding:0 8px;margin:0 2px;font-weight:700;border-radius:6px 6px 0 0;line-height:1.6}
+button.blank:not(.show){color:transparent}
+.blank.ok{border-color:var(--ok);color:var(--ok)}
+/* 수업 모드: TV로 함께 보도록 관측 화면을 크게, 정리 카드는 아래에 큰 글씨로 */
+.cl-stage .stage{height:max(420px,calc(100vh - 200px))}
+.cl-stage .chip{font-size:17px;min-height:46px}
+.cl-stage .group .chip{min-height:42px}
+.cl-stage .stage .hud{font-size:clamp(18px,1.9vw,28px)}
+.concept.big{margin-top:16px}
+.concept.big h3{font-size:clamp(24px,2.6vw,34px)}
+.concept.big li{font-size:clamp(22px,2.4vw,32px);margin:12px 0}
+.concept.big .ask{font-size:clamp(19px,1.9vw,26px)}
+.ask{background:#1c2a5c;border-left:4px solid var(--accent);border-radius:8px;padding:10px 14px;margin-top:12px;font-size:15px}
+.ask b{color:var(--accent)}
+
+.mcards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media (max-width:700px){.mcards{grid-template-columns:1fr}}
+.mcard{display:flex;flex-direction:column;gap:8px}
+.mcard .n{font-family:"Do Hyeon";color:var(--accent);font-size:15px}
+.mcard.lock{opacity:.5}
+.mcard .row{margin-top:auto}
+.st-done{color:var(--ok);font-weight:700}
+.check{list-style:none;padding:0;margin:6px 0 12px}
+.check li{padding:3px 0}
+.check li.ok{color:var(--ok)}
+.q{border-top:1px solid var(--line);padding:12px 0}
+.q:first-of-type{border-top:0}
+.q.locked{opacity:.4}
+.q .s{font-size:17px}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.opt{background:var(--chip);border:1.5px solid var(--line);border-radius:999px;padding:7px 16px;font-size:15px;text-align:left}
+.opt:hover{background:var(--chiph)}
+.opt:disabled{cursor:default}
+.opt.no{opacity:.35;text-decoration:line-through;pointer-events:none}
+.opt.sel{background:var(--accent);color:#1b1400;border-color:var(--accent);opacity:1}
+.fb{font-size:15px;margin-top:6px}
+.fb.ok{color:var(--ok)}
+.fb.bad{color:var(--bad)}
+.fb.ex{color:var(--text);background:#16224a;border-radius:8px;padding:6px 10px}
+.done{background:#173a2c;border:1px solid var(--ok);border-radius:12px;padding:12px 14px;margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.done b{flex:1;min-width:160px}
+.quiz{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.quiz>*{min-width:0}
+@media (max-width:820px){.quiz{grid-template-columns:1fr}}
+.quiz .q{border-top:0;padding:0}
+svg.fig{width:100%;max-height:230px;border-radius:10px;background:#0b1230;display:block;margin-bottom:10px}
+svg.fig.ph{max-height:320px}
+.score{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:16px;margin:10px 0}
+.score dt{color:var(--muted)}
+.score dd{margin:0;font-weight:700}
+.boxq{background:#0b1230;border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
+.bogi{background:#0b1230;border:1px dashed #5a6bb0;border-radius:10px;padding:8px 12px;margin:8px 0;font-size:15px;line-height:1.8}
+details.tip{background:#13204a;border:1px solid #3d5bb0;border-radius:12px;padding:10px 14px;margin:10px 0}
+details.tip summary{cursor:pointer;font-weight:700;color:var(--accent);font-size:16px}
+.ttable{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
+.ttable th,.ttable td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+.ttable th{color:#ffd9a8;font-weight:700;white-space:nowrap}
+
+/* 임무 2: 분류 카드 */
+.sort{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:8px 0}
+.scard{background:#0b1230;border:1.5px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.scard.ok{border-color:var(--ok)}
+.scard svg{width:84px;height:84px;border-radius:10px;display:block}
+.scard .nm{font-weight:700}
+.scard .opts{justify-content:center;margin-top:0}
+.scard .opt{padding:4px 10px;font-size:13px}
+
+.tstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.tstats div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:14px;color:var(--muted)}
+.tstats b{display:block;font-family:"Do Hyeon";font-size:28px;color:var(--text)}
+.tbl-wrap{overflow-x:auto}
+.ttbl{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
+.ttbl th,.ttbl td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left}
+.ttbl th{color:var(--muted);font-weight:500}
+.tok{color:var(--ok);font-weight:700}
+
+/* 마지막 게임: 태양 탐정 */
+.ghud{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.ghud .pill{font-size:16px;padding:6px 14px}
+.ghud .hearts{font-size:22px;letter-spacing:2px}
+.gwrap{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,1fr);gap:14px;align-items:start}
+.gwrap>*{min-width:0}
+@media (max-width:820px){.gwrap{grid-template-columns:1fr}}
+.gpic{position:relative;overflow:hidden;border-radius:14px;background:#000;margin:0 auto;border:1px solid var(--line);max-width:100%;width:min(100%,calc(56vh * var(--ar)))}
+/* 좁은 화면: 사진과 보기가 한 화면에 들어오게 사진을 줄여요 (1단계는 10초 안에 골라야 해서) */
+@media (max-width:820px){.gpic{width:min(100%,calc(34vh * var(--ar)))}}
+.gpic img{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;pointer-events:none}
+.gpic.tap{cursor:crosshair;touch-action:manipulation}
+.gmark{position:absolute;transform:translate(-50%,-50%);border:4px solid var(--ok);border-radius:50%;box-shadow:0 0 0 3px #000a,inset 0 0 0 2px #000a;pointer-events:none;aspect-ratio:1}
+.gdot{position:absolute;width:22px;height:22px;transform:translate(-50%,-50%);border-radius:50%;border:3px solid #fff;background:#ff5a5acc;pointer-events:none}
+.gdot.ok{background:#5fe0a0cc}
+.gbar{height:14px;background:#0b1230;border:1px solid var(--line);border-radius:99px;overflow:hidden;margin:10px 0}
+.gbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff8a3d,var(--accent))}
+.gq{font-family:"Do Hyeon","Noto Sans KR",sans-serif;font-size:clamp(24px,3vw,34px);line-height:1.3;margin:0 0 8px}
+.gopts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.gopts.one{grid-template-columns:1fr}
+.gopts .opt{font-size:19px;padding:14px 12px;text-align:center;border-radius:14px;font-weight:700}
+.gopts .opt.lv0{border-color:#5fe0a0}.gopts .opt.lv1{border-color:#ffcf5a}.gopts .opt.lv2{border-color:#ff8a8a}
+.gres{border-radius:14px;padding:14px 16px;margin:10px 0;font-size:18px}
+.gres.ok{background:#173a2c;border:1px solid var(--ok)}
+.gres.bad{background:#3a1c22;border:1px solid var(--bad)}
+.gres b{font-family:"Do Hyeon";font-size:26px;font-weight:400;display:block}
+.gnote{background:#0b1230;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:18px;margin:10px 0}
+.gnote b{color:var(--accent)}
+.glegend{list-style:none;padding:0;margin:8px 0;font-size:15px}
+.glegend li{padding:3px 0}
+.gpic>svg{position:absolute;inset:0;width:100%;height:100%;margin:0;max-width:none}
+/* 2단계 우주 기상 상황실 */.sim{background:#050914;border:1px solid var(--line);border-radius:16px;padding:12px;max-width:1000px;margin:0 auto}
+.simtop{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.simgraph{flex:1 1 240px;height:64px;background:#0b1230;border-radius:10px}
+.simstat{font-size:18px;line-height:1.5}
+.simstat b{color:var(--accent)}
+.simfield{position:relative;height:clamp(180px,34vh,320px);margin:10px 0;border-radius:12px;overflow:hidden;background:radial-gradient(circle at 12% 50%,#2a1606,#03050d 55%)}
+.simsun{position:absolute;left:3%;top:50%;width:clamp(78px,14vw,160px);aspect-ratio:1;transform:translateY(-50%);border-radius:50%;background:radial-gradient(circle at 40% 40%,#fff1b8,#ffb347 60%,#e8701a);box-shadow:0 0 calc(12px + var(--c,0) * 70px) calc(2px + var(--c,0) * 26px) #ffe6a099;transition:filter .2s}
+.simsun.fl{filter:brightness(1.8) saturate(1.3)}
+.simsun i{position:absolute;width:9%;aspect-ratio:1;border-radius:50%;background:#3a1806}
+.simearth{position:absolute;right:4%;top:50%;transform:translateY(-50%);font-size:clamp(44px,7vw,84px);line-height:1}
+.wind{position:absolute;top:50%;width:clamp(26px,4vw,46px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(#fff,#ffcf5a 35%,#ff8a3a00 70%);pointer-events:none}
+#simAlerts{position:absolute;left:50%;top:8px;transform:translateX(-50%);display:grid;gap:6px;width:min(70%,520px);pointer-events:none}
+.simalert{position:relative;overflow:hidden;background:#3a1c22f0;border:1px solid var(--bad);border-radius:10px;padding:6px 10px 8px;font-size:clamp(15px,1.9vw,21px);font-weight:700;color:#ffd6d6}
+.simalert.info{background:#0f2a4af0;border-color:#7cc4ff;color:#d6ecff}
+.simalert b{font-family:"Do Hyeon";font-weight:400;color:#fff;margin-right:6px}
+.simalert i{position:absolute;left:0;bottom:0;height:4px;background:#ff8a8a}
+.simmsg{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:94%;pointer-events:none}
+.simmsg span{border-radius:10px;padding:4px 10px;font-weight:700;font-size:clamp(14px,1.7vw,18px)}
+.simmsg .ok{background:#173a2cf0;color:#9ff0c4}.simmsg .bad{background:#3a1c22f0;color:#ffb0b0}
+.simaur{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:58px;background:#0b1230;border:1px dashed var(--line);border-radius:12px;padding:8px 12px;margin-top:10px;font-size:17px}
+.simaur.live{border:2px solid #9be8c8;background:#10302a;animation:gblink2 .8s ease-in-out 3}
+@keyframes gblink2{50%{background:#1d5a4a}}
+.simfac{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.simfac button{background:#0b1230;border:2px solid var(--line);border-radius:14px;color:inherit;font:inherit;padding:10px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:700;font-size:17px;touch-action:manipulation}
+.simfac .ico{font-size:clamp(28px,4vw,42px);line-height:1.1}
+.simfac small{color:#7cc4ff;font-size:13px}
+.simfac button.on{border-color:#7cc4ff;background:#10264a;box-shadow:0 0 0 4px #7cc4ff55,inset 0 0 20px #7cc4ff66}
+.simfac button.hurt{border-color:var(--bad);background:#3a1c22;animation:gshake .25s 3}
+@keyframes gshake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@media (max-width:620px){
+  .sim{padding:8px}.simgraph{height:44px;flex-basis:100%}.simstat{font-size:15px}.simstat br{display:none}
+  .simfield{height:170px;margin:8px 0}.simsun{width:64px;left:2%}.simearth{font-size:40px;right:2%}
+  #simAlerts{width:auto;left:76px;right:52px;transform:none;top:6px}.simalert{font-size:13px;padding:4px 7px 6px}
+  .simfac{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.simfac button{padding:5px 2px;font-size:14px}.simfac .ico{font-size:24px}.simfac small{font-size:12px}
+  .simscore{margin-top:6px;font-size:16px}.simaur{font-size:15px;min-height:0}
+}
+.simscore{display:flex;gap:14px;justify-content:center;margin-top:10px;font-size:18px}
+/* 교사 화면: 반 대항 방어율 막대 */
+.dbars{display:grid;gap:8px;margin-top:8px}
+.dbar{display:grid;grid-template-columns:minmax(90px,140px) 1fr 56px 64px;gap:10px;align-items:center;font-size:16px}
+.dbar .dt{height:20px;background:#0b1230;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.dbar .dt i{display:block;height:100%;background:linear-gradient(90deg,#3d7bd9,#7cc4ff)}
+.sndbtn{position:fixed;right:14px;bottom:14px;z-index:60;width:50px;height:50px;border-radius:50%;background:rgba(17,25,52,.92);border:1px solid var(--line);color:#fff;font-size:24px;line-height:1;cursor:pointer;box-shadow:0 4px 16px #0009}
+.sndbtn:hover{border-color:var(--accent)}.sndbtn.off{opacity:.65}
+.gbig{font-family:"Do Hyeon";font-size:clamp(48px,8vw,80px);color:var(--accent);line-height:1.1}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+'use strict';
+/* ───────── 설정 ─────────
+   SUBMIT_URL: 태양계 탐사대·일주운동·연주운동·달의 위상과 같은 Apps Script 주소. 결과는 같은 구글 시트의 '태양 현황' 탭에 모여요. */
+const CONFIG = {
+  SUBMIT_URL: 'https://script.google.com/macros/s/AKfycbwgcIJOTfz5PJHlA4DWjsth69Wyt_SMK7ea1NpXJUUEUCmBmyYRkA0Vpjh5du_2SHI/exec',
+  LESSON: '태양'
+};
+const D2R = Math.PI / 180;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const rng = seed => () => (seed = seed * 16807 % 2147483647) / 2147483647;
+
+/* ───────── 흑점 수 (학습지 탐구 그래프 모양을 본뜬 어림값) ─────────
+   극대기 1990·2001·2014년경, 극소기 1996·2008·2019년경. 극대기에서 다음 극대기까지 약 11년 */
+const EXT = [[1985.5, 12], [1990.6, 210], [1996.4, 10], [2001.6, 185], [2008.8, 3], [2014.2, 110], [2019.9, 2], [2025.4, 160]];
+const EXTS = EXT.slice(1, -1).map(([y], i) => [y, i % 2 ? 'min' : 'max']);
+function spotN(y) {
+  const i = EXT.findIndex(e => e[0] >= y);
+  if (i < 0) return EXT[EXT.length - 1][1];
+  if (i === 0) return EXT[0][1];
+  const [x0, v0] = EXT[i - 1], [x1, v1] = EXT[i], t = (y - x0) / (x1 - x0);
+  return v0 + (v1 - v0) * (1 - Math.cos(Math.PI * t)) / 2;
+}
+const Y0 = 1986, Y1 = 2024.5;
+
+/* 흑점: 위도·경도(°)와 크기(태양 반지름에 대한 비). 앞쪽 무리부터 차례로 나타나요 (조용할 때는 2개만) */
+const SPOTS = (() => {
+  const R1 = rng(23), out = [];
+  [[16, -38], [-13, -14], [24, 10], [-22, -58], [9, 30], [-7, -82]].forEach(([la, lo], g) => {
+    const k = g < 1 ? 2 : 2 + Math.floor(R1() * 2);
+    for (let i = 0; i < k; i++) out.push({ la: la + (R1() - .5) * 6, lo: lo + i * 6 + (R1() - .5) * 3, r: i === 0 ? .055 + R1() * .015 : .022 + R1() * .018 });
+  });
+  return out;
+})();
+const ROT = 360 / 27; // 태양이 하루에 자전하는 각(어림) — 8일이면 흑점이 화면 가운데에서 서쪽 가장자리까지 가요
+
+/* ───────── 실제 사진 (images 폴더) ─────────
+   disk-1019~1027: NASA SDO/HMI, 2014년 10월 19~27일 (큰 흑점 무리 AR 12192가 동 → 서로 지나가요)
+   사진 속 태양: 512px 사진의 가운데 (256, 256), 반지름 199px. 흑점 무리는 남위 약 18°, 10월 19일 경도 -58°에서 하루 약 13.7°씩 */
+const PHOTO = {};
+function photo(n) { let i = PHOTO[n]; if (!i) { i = PHOTO[n] = new Image(); i.src = 'images/' + n + '.jpg'; } return i.complete && i.naturalWidth ? i : null; }
+// 처음 화면을 여는 동안 사진을 미리 불러 둬요 (모두 합쳐 약 1MB)
+['eclipse-1999', 'eclipse-2017', 'zoom-chrom', 'zoom-corona', 'zoom-limb304', 'zoom-limb171', 'disk-quiet', 'spot', 'granulation', 'prom', 'flare', 'act-max', 'act-min', 'aurora'].concat(Array.from({ length: 9 }, (_, i) => 'disk-10' + (19 + i))).forEach(photo);
+const AR = day => { const lo = (-58 + 13.7 * day) * D2R, la = -18 * D2R; return { x: Math.cos(la) * Math.sin(lo), y: -Math.sin(la), f: Math.cos(lo) }; };
+// 사진 속 표시 위치 (사진 픽셀 기준)
+const PH_SPOT = [[330, 345, 135, 125], [420, 125, 85, 70], [690, 250, 95, 85], [710, 405, 65, 55]]; // spot.jpg 흑점 자리 (가운데 x, y, 가로·세로 반지름)
+const PH_ECL = { 'eclipse-1999': [448, 448, 204], 'eclipse-2017': [519, 324, 126] }; // 달 가운데와 반지름
+/* 채층·코로나 확대 사진 (1000px 폭). 원 = 달(일식 사진) 또는 태양(SDO 사진)의 가운데와 반지름 (사진 픽셀)
+   zoom-chrom: 1999년 일식에서 홍염이 있는 가장자리, zoom-corona: 같은 일식의 오른쪽 코로나
+   zoom-limb304·171: NASA SDO 2014년 2월 25일 태양 서쪽 가장자리 (자외선 사진, 304Å는 채층, 171Å는 코로나)
+   네 번째 값: 칸이 좁을 때도 가장자리가 잘리지 않게 칸 가운데에 둘 사진 속 자리 */
+const ZOOM = {
+  chrom: [['zoom-chrom', [-338.4, 1105.6, 1112], '1999년 개기 일식 · Luc Viatour (CC BY-SA 3.0)', [450, 380]], ['zoom-limb304', [-1000, 350, 1600], 'NASA SDO 자외선 사진 (색은 입힌 것)', [620, 350]]],
+  corona: [['zoom-corona', [154, 375.4, 384.7], '1999년 개기 일식 · Luc Viatour (CC BY-SA 3.0)', [600, 375]], ['zoom-limb171', [-1200, 350, 1920], 'NASA SDO 자외선 사진 (색은 입힌 것)', [740, 350]]]
+};
+
+/* ───────── 관측 화면 (2D 그림) ─────────
+   view: 'surface' 광구(확대·단면) · 'eclipse' 개기 일식 · 'events' 홍염과 플레어 · 'cycle' 흑점 수 변화 · 'earth' 지구에 미치는 영향 */
+const Stage = (() => {
+  const S = { view: 'surface', act: 1, speed: 1, playing: false, loop: false, day: 0, zoom: false, cut: false, grid: false, ghost: false, probe: null,
+    cover: 0, year: Y0, marks: false, ext: false, period: false, found: {}, pshape: 'loop', fx: null, fxSeen: {}, photo: false, big: false, ez: null, rotv: false };
+  const SPF = [0.5, 1, 2];
+  const hooks = { watch: null, change: null };
+  const el = document.createElement('div'); el.className = 'stage';
+  el.innerHTML = '<canvas></canvas><div class="hud"><span></span></div>';
+  const cv = el.querySelector('canvas'), ctx = cv.getContext('2d'), hudEl = el.querySelector('.hud span');
+  let W = 1, H = 1, DPR = 1, fs = 15, cache = {}, L = {};
+  new ResizeObserver(() => {
+    W = el.clientWidth; H = el.clientHeight; if (!W || !H) return;
+    DPR = Math.min(window.devicePixelRatio || 1, 2); cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+    fs = clamp(Math.min(W, H) / 30, 13, 21); cache = {};
+  }).observe(el);
+  const mark = k => { if (hooks.watch) hooks.watch(k); };
+  // 위쪽 설명 글(HUD) 바로 아래 y — 이름표가 설명 글에 가리지 않게
+  const hudBottom = () => Math.max(fs * 3.4, 10 + hudEl.offsetHeight + fs * 1.2);
+  const changed = () => { if (hooks.change) hooks.change(); };
+  const STARS = (() => { const R1 = rng(3); return Array.from({ length: 160 }, () => [R1(), R1(), R1()]); })();
+
+  /* ── 그리기 도구 ── */
+  function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+  const font = (z, b) => `${b ? '700 ' : ''}${z}px "Do Hyeon","Noto Sans KR",sans-serif`;
+  // 이름표: 천체를 가리지 않게 바깥쪽 자리를 골라 붙이고, 점선으로 가리켜요
+  function pill(t, x, y, o) {
+    o = o || {}; const z = o.s || fs; ctx.font = font(z);
+    const w = ctx.measureText(t).width + z * 1.1, h = z * 1.65;
+    let x0 = o.a === 'l' ? x : o.a === 'r' ? x - w : x - w / 2; x0 = clamp(x0, 4, Math.max(4, W - w - 4));
+    const y0 = clamp(y - h / 2, 4, H - h - 4);
+    rr(x0, y0, w, h, h / 2); ctx.fillStyle = o.bg || 'rgba(8,16,46,.9)'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = o.c || '#ffcf5a'; ctx.stroke();
+    ctx.fillStyle = o.tc || o.c || '#ffcf5a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x0 + w / 2, y0 + h / 2 + 1);
+    return { x: x0, y: y0, w, h };
+  }
+  function ptr(b, x, y, c) {
+    const px = clamp(x, b.x, b.x + b.w), py = clamp(y, b.y, b.y + b.h);
+    ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = c || '#ffcf5a'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(x, y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = c || '#ffcf5a'; ctx.beginPath(); ctx.arc(x, y, 3.2, 0, 7); ctx.fill(); ctx.restore();
+  }
+  // 사진을 칸(x, y, w, h)에 꽉 차게 그리고, 사진 픽셀 → 화면 좌표 바꾸는 함수를 돌려줘요
+  // fc: 칸 가운데에 오게 할 사진 속 자리 [x, y] (잘려 나가면 안 되는 태양 가장자리 등). 없으면 사진 가운데
+  function cover(img, x, y, w, h, fit, fc) {
+    const iw = img.naturalWidth, ih = img.naturalHeight, s = (fit ? Math.min : Math.max)(w / iw, h / ih);
+    const ox = fc && !fit ? clamp(x + w / 2 - fc[0] * s, x + w - iw * s, x) : x + (w - iw * s) / 2, oy = fc && !fit ? clamp(y + h / 2 - fc[1] * s, y + h - ih * s, y) : y + (h - ih * s) / 2;
+    ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip(); ctx.drawImage(img, ox, oy, iw * s, ih * s); ctx.restore();
+    return (ix, iy) => [ox + ix * s, oy + iy * s];
+  }
+  // 사진 출처: 오른쪽 아래 작은 글씨
+  function credit(t, x, y, w, left) {
+    const z = Math.max(12, fs * .62); ctx.font = font(z); const tw = ctx.measureText(t).width + z;
+    const rx = left ? 6 : (x == null ? W : x + (w || W)) - tw - 6, ry = (y == null ? H : y) - z * 1.7 - 6;
+    rr(rx, ry, tw, z * 1.6, 6); ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fill();
+    ctx.fillStyle = '#d8def5'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(t, rx + z / 2, ry + z * .82);
+  }
+  function wrap(t, maxW) {
+    const out = []; let line = '';
+    t.split(' ').forEach(w => { const s = line ? line + ' ' + w : w; if (ctx.measureText(s).width > maxW && line) { out.push(line); line = w; } else line = s; });
+    if (line) out.push(line); return out;
+  }
+  function card(title, text, x, y, w, c) {
+    const z = fs * 0.92; ctx.font = font(z); const lines = wrap(text, w - z * 1.4), lh = z * 1.45, h = z * 2.6 + lines.length * lh;
+    rr(x, y, w, h, 12); ctx.fillStyle = 'rgba(8,16,46,.93)'; ctx.fill(); ctx.strokeStyle = c || '#ffcf5a'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillStyle = c || '#ffcf5a'; ctx.font = font(z * 1.1); ctx.fillText(title, x + z * 0.7, y + z * 0.6);
+    ctx.fillStyle = '#eef2ff'; ctx.font = font(z); lines.forEach((l, i) => ctx.fillText(l, x + z * 0.7, y + z * 2.1 + i * lh));
+  }
+  function arrow(x1, y1, x2, y2, c, w) {
+    const a = Math.atan2(y2 - y1, x2 - x1), k = (w || 3) * 3.2;
+    ctx.strokeStyle = ctx.fillStyle = c; ctx.lineWidth = w || 3; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - Math.cos(a) * k * .6, y2 - Math.sin(a) * k * .6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - Math.cos(a - .45) * k, y2 - Math.sin(a - .45) * k); ctx.lineTo(x2 - Math.cos(a + .45) * k, y2 - Math.sin(a + .45) * k); ctx.closePath(); ctx.fill();
+  }
+  function stars(a) { ctx.fillStyle = '#fff'; STARS.forEach(([x, y, b]) => { ctx.globalAlpha = (0.25 + b * 0.6) * a; ctx.fillRect(x * W, y * H, 1.3, 1.3); }); ctx.globalAlpha = 1; }
+
+  // 광구 그림 (가장자리로 갈수록 어두워지는 둥근 태양 + 자잘한 무늬)
+  function sunSprite(R) {
+    const key = 'sun' + Math.round(R); if (cache[key]) return cache[key];
+    const s = Math.ceil(R * 2 * DPR), c = document.createElement('canvas'); c.width = c.height = s;
+    const g = c.getContext('2d'), r = s / 2, gr = g.createRadialGradient(r, r, 0, r, r, r);
+    gr.addColorStop(0, '#fff4c2'); gr.addColorStop(.55, '#ffd257'); gr.addColorStop(.86, '#ffa62b'); gr.addColorStop(1, '#e06a12');
+    g.fillStyle = gr; g.beginPath(); g.arc(r, r, r, 0, 7); g.fill();
+    g.save(); g.beginPath(); g.arc(r, r, r, 0, 7); g.clip();
+    const R1 = rng(5), n = Math.min(14000, Math.round(s * s / 90));
+    for (let i = 0; i < n; i++) { g.fillStyle = R1() < .5 ? 'rgba(255,255,230,.10)' : 'rgba(150,70,0,.10)'; g.beginPath(); g.arc(R1() * s, R1() * s, s * .005 + R1() * s * .006, 0, 7); g.fill(); }
+    g.restore(); return cache[key] = c;
+  }
+  // 쌀알무늬: 가운데는 밝고(상승) 경계는 어두운(하강) 작은 칸들
+  function granTex(w, h, cell) {
+    const key = `gran${w}x${h}`; if (cache[key]) return cache[key];
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const g = c.getContext('2d'), img = g.createImageData(w, h), d = img.data, R1 = rng(11);
+    const gx = Math.ceil(w / cell) + 2, gy = Math.ceil(h / cell) + 2, pts = [];
+    for (let j = 0; j < gy; j++) for (let i = 0; i < gx; i++) pts.push([(i - 1 + .15 + R1() * .7) * cell, (j - 1 + .15 + R1() * .7) * cell, .78 + R1() * .22]);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const ci = Math.floor(x / cell) + 1, cj = Math.floor(y / cell) + 1; let f1 = 1e9, f2 = 1e9, b = 1;
+      for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+        const p = pts[(cj + dj) * gx + ci + di]; if (!p) continue;
+        const dd = Math.hypot(x - p[0], y - p[1]); if (dd < f1) { f2 = f1; f1 = dd; b = p[2]; } else if (dd < f2) f2 = dd;
+      }
+      const v = clamp((f2 - f1) / cell * 3, 0, 1) * (1 - clamp(f1 / cell, 0, 1) * .35) * b, o = (y * w + x) * 4;
+      d[o] = 120 + 135 * v; d[o + 1] = 55 + 160 * v; d[o + 2] = 8 + 90 * v * v; d[o + 3] = 255;
+    }
+    g.putImageData(img, 0, 0); return cache[key] = c;
+  }
+  function spotsAt(cx, cy, R, n, day) {
+    const out = [];
+    SPOTS.slice(0, n).forEach(s => {
+      const lo = (s.lo + day * ROT) * D2R, la = s.la * D2R, f = Math.cos(lo);
+      if (f <= 0.04) return;
+      out.push({ x: cx + R * Math.cos(la) * Math.sin(lo), y: cy - R * Math.sin(la), rx: s.r * R * f, ry: s.r * R, f });
+    });
+    return out;
+  }
+  function drawSpots(list) {
+    list.forEach(p => {
+      ctx.globalAlpha = clamp(p.f * 2.2, 0, 1);
+      ctx.fillStyle = 'rgba(120,52,8,.85)'; ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#2a1205'; ctx.beginPath(); ctx.ellipse(p.x - p.rx * .08, p.y + p.ry * .05, p.rx * .55, p.ry * .5, 0, 0, 7); ctx.fill();
+      if (p.ry > 10) { ctx.beginPath(); ctx.ellipse(p.x + p.rx * .28, p.y - p.ry * .2, p.rx * .3, p.ry * .28, 0, 0, 7); ctx.fill(); }
+    });
+    ctx.globalAlpha = 1;
+  }
+  function drawGrid(cx, cy, R, day) {
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.clip();
+    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1;
+    [-60, -30, 0, 30, 60].forEach(la => { const y = cy - R * Math.sin(la * D2R), hw = R * Math.cos(la * D2R); ctx.lineWidth = la ? 1 : 2; ctx.beginPath(); ctx.moveTo(cx - hw, y); ctx.lineTo(cx + hw, y); ctx.stroke(); });
+    ctx.lineWidth = 1;
+    for (let m = -180; m < 180; m += 30) {
+      const lo = (m + day * ROT) * D2R; if (Math.cos(lo) <= 0) continue;
+      ctx.beginPath(); for (let la = -90; la <= 90; la += 6) { const x = cx + R * Math.cos(la * D2R) * Math.sin(lo), y = cy - R * Math.sin(la * D2R); la === -90 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function glow(cx, cy, r0, r1, c, a) {
+    const g = ctx.createRadialGradient(cx, cy, r0, cx, cy, r1); g.addColorStop(0, c.replace('A', a)); g.addColorStop(1, c.replace('A', 0));
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r1, 0, 7); ctx.fill();
+  }
+
+  // 사진 속 태양을 화면의 (cx, cy), 반지름 R에 맞춰 그려요 (둥근 태양 밖은 잘라서 별이 보이게)
+  function diskPhoto(n, cx, cy, R, a) {
+    const im = photo(n); if (!im) return false; const k = R / 199;
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R * 1.02, 0, 7); ctx.clip(); ctx.globalAlpha = a == null ? 1 : a;
+    ctx.drawImage(im, cx - 256 * k, cy - 256 * k, 512 * k, 512 * k); ctx.restore(); return true;
+  }
+  /* ── ① 광구 ── */
+  function drawSurface(t) {
+    if (S.zoom) return S.cut ? drawCut(t) : (S.photo && drawZoomPhoto()) || drawZoom();
+    if (S.rotv) return drawRotView(t);
+    ctx.fillStyle = '#03050d'; ctx.fillRect(0, 0, W, H); stars(1);
+    const R = Math.min(W * .36, H * .4), cx = W / 2, cy = H / 2 + fs * .5; L = { cx, cy, R };
+    glow(cx, cy, R * .95, R * 1.25, 'rgba(255,170,60,A)', .35);
+    // 실제 사진: 하루 간격 사진 9장을 겹쳐 가며 보여 줘요 (조용할 때는 흑점이 거의 없던 2019년 사진)
+    let ph = false;
+    if (S.photo) {
+      if (!S.act) ph = diskPhoto('disk-quiet', cx, cy, R);
+      else { const d = clamp(S.day, 0, 8), a = Math.floor(d); ph = diskPhoto('disk-10' + (19 + a), cx, cy, R); if (ph && d > a) diskPhoto('disk-10' + (19 + Math.min(8, a + 1)), cx, cy, R, d - a); }
+    }
+    L.ph = ph;
+    if (!ph) ctx.drawImage(sunSprite(R), cx - R, cy - R, 2 * R, 2 * R);
+    if (S.grid) drawGrid(cx, cy, R, S.day);
+    const n = S.act ? SPOTS.length : 2;
+    if (ph) {
+      if (S.act) {
+        const p = AR(S.day), x = cx + R * p.x, y = cy + R * p.y;
+        if (S.ghost && S.day > .05) {
+          const q = AR(0), x0 = cx + R * q.x, y0 = cy + R * q.y;
+          ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(x0, y0, R * .09 * q.f + 6, R * .09, 0, 0, 7); ctx.stroke(); ctx.restore();
+          if (Math.abs(x - x0) > R * .15) arrow(x0 + R * .1, y0 + R * .14, x - R * .1, y + R * .14, '#7cc4ff', Math.max(3, fs * .18));
+          pill('처음 위치', x0, y0 - R * .2, { c: '#eef2ff', s: fs * .8 });
+        }
+        if (p.f > .05) { const b = pill('흑점 무리', x, cy + R + fs * 1.3, { c: '#7cc4ff' }); ptr(b, x, y + R * .08, '#7cc4ff'); }
+      }
+      credit(S.act ? `실제 사진: NASA SDO · 2014년 10월 ${19 + Math.round(clamp(S.day, 0, 8))}일` : '실제 사진: NASA SDO · 2019년 12월 15일 (흑점이 거의 없을 때)', null, null, null, !(S.act && AR(S.day).x < 0)); // 흑점 무리 이름표와 겹치지 않게 반대쪽에
+    } else {
+      if (S.ghost && S.day > .05) {
+        ctx.save(); ctx.setLineDash([4, 3]); ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 1.5;
+        spotsAt(cx, cy, R, n, 0).forEach(p => { ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx + 2, p.ry + 2, 0, 0, 7); ctx.stroke(); });
+        ctx.restore();
+      }
+      drawSpots(spotsAt(cx, cy, R, n, S.day));
+    }
+    // 동쪽·서쪽은 지구에서 태양을 바라볼 때의 하늘 방향이에요 (🧭 자전 방향에서 자세히)
+    [[-1, '동쪽'], [1, '서쪽']].forEach(([sd, nm]) => {
+      const x = cx + sd * (R + fs * 1.7); pill(nm, x, cy, { c: '#7cc4ff' });
+      ctx.font = font(fs * .62); ctx.fillStyle = '#a9b4d8'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const x2 = clamp(x, fs * 1.6, W - fs * 1.6); ctx.fillText('지구에서', x2, cy + fs * 1.45); ctx.fillText('볼 때', x2, cy + fs * 2.15);
+    });
+    if (S.grid) { const be = pill('태양의 적도', cx + R * .98, cy + fs * 2.4, { c: '#eef2ff', a: 'l', s: fs * .85 }); ptr(be, cx + R * .97, cy, '#eef2ff'); }
+    if (S.probe) probeMark();
+    const d = S.day < .05 ? '처음' : `${Math.round(S.day)}일 후`;
+    return `☀ 광구 (태양의 표면) · 📅 ${d}${S.probe ? '' : ' · 👆 태양을 누르면 온도를 재요'}`;
+  }
+  function probeMark() {
+    const p = S.probe, spot = p.kind === 'spot';
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, 7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(p.x - 12, p.y); ctx.lineTo(p.x - 4, p.y); ctx.moveTo(p.x + 4, p.y); ctx.lineTo(p.x + 12, p.y); ctx.moveTo(p.x, p.y - 12); ctx.lineTo(p.x, p.y - 4); ctx.moveTo(p.x, p.y + 4); ctx.lineTo(p.x, p.y + 12); ctx.stroke();
+    const b = pill(spot ? '🌡 흑점: 약 4000℃ (주변보다 약 2000℃ 낮아요)' : '🌡 광구: 약 6000℃', p.x, p.y - fs * 2.6, { c: spot ? '#7cc4ff' : '#ffcf5a', bg: 'rgba(8,16,46,.95)' });
+    ptr(b, p.x, p.y - 9, spot ? '#7cc4ff' : '#ffcf5a');
+  }
+  /* 🧭 자전 방향: 태양의 북극 위에서 내려다본 모습
+     태양도 지구처럼 시계 반대 방향(지구의 자전으로 치면 서 → 동)으로 자전해요.
+     지구에서는 태양의 앞면을 바라보니까, 앞면이 동쪽 → 서쪽으로 지나가서 흑점이 동 → 서로 움직여 보여요 */
+  function drawRotView(t) {
+    ctx.fillStyle = '#03050d'; ctx.fillRect(0, 0, W, H); stars(.7); L = {};
+    const wide = W >= H * 1.2, top = hudBottom(), gw = wide ? W * .5 : W, gh = wide ? H - top - fs * .5 : (H - top) * .6;
+    // 위에서부터: 자전 이름표 → 태양 → 앞면 이름표 → 지구 (글씨 크기에 맞춰 간격을 잡아요)
+    const sR = Math.max(fs * .9, Math.min(gw * .2, (gh - fs * 4) / 3.3)), sx = gw / 2, sy = top + sR * 1.18 + fs * 1.8, eR = sR * .32, ex = sx;
+    const fy = sy + sR * 1.18 + fs * .95, ey = fy + Math.max(fs * 1.4, fs * .96 + eR * 1.45);
+    const P = (x, y, r, a) => [x + Math.cos(a) * r, y + Math.sin(a) * r];
+    const spin = (x, y, r, a0, a1, c, w) => { // 시계 반대 방향(캔버스 각이 줄어드는 쪽) 화살표
+      ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); ctx.arc(x, y, r, a0, a1 + .12, true); ctx.stroke();
+      const [x1, y1] = P(x, y, r, a1 + .3), [x2, y2] = P(x, y, r, a1); arrow(x1, y1, x2, y2, c, w);
+    };
+    // 지구에서 태양의 양쪽 가장자리를 보는 시선
+    ctx.save(); ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(124,196,255,.55)'; ctx.lineWidth = 1.5; ctx.beginPath();
+    ctx.moveTo(ex, ey - eR); ctx.lineTo(sx - sR, sy); ctx.moveTo(ex, ey - eR); ctx.lineTo(sx + sR, sy); ctx.stroke(); ctx.restore();
+    // 태양 (북극이 가운데), 표면의 흑점이 시계 반대 방향으로 돌아요
+    const g = ctx.createRadialGradient(sx, sy, sR * .1, sx, sy, sR); g.addColorStop(0, '#fff1b8'); g.addColorStop(.7, '#ffb347'); g.addColorStop(1, '#e8701a');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(sx, sy, sR, 0, 7); ctx.fill();
+    ctx.fillStyle = '#3a1806'; [[0, .72], [2.1, .6], [3.9, .78]].forEach(([a, r]) => { const [x, y] = P(sx, sy, sR * r, a - t * .45); ctx.beginPath(); ctx.arc(x, y, Math.max(3, sR * .07), 0, 7); ctx.fill(); });
+    ctx.fillStyle = '#5a2a08'; ctx.beginPath(); ctx.arc(sx, sy, Math.max(2.5, sR * .04), 0, 7); ctx.fill();
+    ctx.font = font(fs * .7); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('북극', sx, sy + sR * .08);
+    spin(sx, sy, sR * 1.18, Math.PI * .85, -Math.PI * .6, '#ffcf5a', Math.max(3, fs * .16));
+    pill('시계 반대 방향으로 자전', sx, sy - sR * 1.18 - fs * 1.1, { c: '#ffcf5a', s: fs * .8 });
+    // 지구를 향한 앞면: 동쪽 → 서쪽으로 지나가요
+    ctx.lineCap = 'round'; spin(sx, sy, sR * 1.04, Math.PI * .78, Math.PI * .22, '#7cc4ff', Math.max(4, fs * .22)); ctx.lineCap = 'butt';
+    pill('동쪽', sx - sR - fs * 1.9, sy + sR * .55, { c: '#7cc4ff', s: fs * .85 }); pill('서쪽', sx + sR + fs * 1.9, sy + sR * .55, { c: '#7cc4ff', s: fs * .85 });
+    pill('앞면이 동쪽 → 서쪽으로 지나가요', sx, fy, { c: '#7cc4ff', s: fs * .78 });
+    // 지구도 같은 방향으로 자전해요
+    ctx.fillStyle = '#3d7bd9'; ctx.beginPath(); ctx.arc(ex, ey, eR, 0, 7); ctx.fill(); ctx.fillStyle = '#5fbf6a'; ctx.beginPath(); ctx.arc(ex - eR * .25, ey - eR * .1, eR * .45, 0, 7); ctx.fill();
+    spin(ex, ey, eR * 1.45, Math.PI * .85, -Math.PI * .6, '#a9b4d8', Math.max(2, fs * .1));
+    pill('지구 (자전: 서 → 동)', ex + eR * 1.7, ey, { c: '#eef2ff', a: 'l', s: fs * .78 });
+    // 설명 카드: 넓은 화면은 오른쪽, 좁은 화면은 아래 (넘치면 글씨를 줄여요)
+    const C = [['☀ 북극 위에서 내려다보면', '태양도 지구처럼 시계 반대 방향으로 자전해요. (지구의 자전: 서쪽 → 동쪽)', '#ffcf5a'],
+      ['🔭 지구에서 바라보면', '우리를 향한 태양의 앞면이 동쪽 → 서쪽으로 지나가요. 그래서 흑점이 동쪽에서 서쪽으로 움직여 보여요.', '#7cc4ff']];
+    const bx = wide ? W * .52 : fs * .5, bw = wide ? W * .45 : W - fs, by0 = wide ? top : top + gh + fs * .2, room = H - by0 - fs * .4, f0 = fs;
+    const hOf = () => C.reduce((s, [, tx]) => { const z = fs * .92; ctx.font = font(z); return s + z * 2.6 + wrap(tx, bw - z * 1.4).length * z * 1.45 + fs * .5; }, 0);
+    for (let i = 0; i < 4 && hOf() > room; i++) fs *= Math.max(.6, room / hOf());
+    let by = by0 + (wide ? Math.max(0, (room - hOf()) / 2) : 0);
+    C.forEach(([tt, tx, c]) => { const z = fs * .92; ctx.font = font(z); const h = z * 2.6 + wrap(tx, bw - z * 1.4).length * z * 1.45; card(tt, tx, bx, by, bw, c); by += h + fs * .5; });
+    fs = f0;
+    return '🧭 태양의 자전 방향 · 태양의 북극 위에서 내려다본 모습';
+  }
+  // 확대: 쌀알무늬 속의 흑점
+  function drawZoom() {
+    const tw = Math.max(60, Math.round(W / 3)), th = Math.max(40, Math.round(H / 3));
+    ctx.imageSmoothingEnabled = true; ctx.drawImage(granTex(tw, th, 12), 0, 0, W, H);
+    const cx = W * .46, cy = H * .52, sR = Math.min(W, H) * .2; L = { zcx: cx, zcy: cy, sR };
+    ctx.save(); ctx.translate(cx, cy);
+    const R1 = rng(9);
+    ctx.fillStyle = 'rgba(105,48,10,.55)'; ctx.beginPath();
+    for (let a = 0; a <= 360; a += 10) { const r = sR * (1 + .12 * Math.sin(a * 3 * D2R) + .08 * Math.sin(a * 7 * D2R + 1)); const x = Math.cos(a * D2R) * r, y = Math.sin(a * D2R) * r * .85; a ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.fill();
+    for (let a = 0; a < 360; a += 2.5) { const r0 = sR * .42, r1 = sR * (.85 + R1() * .3); ctx.strokeStyle = `rgba(${R1() < .5 ? '70,30,5' : '160,90,30'},.6)`; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(Math.cos(a * D2R) * r0, Math.sin(a * D2R) * r0 * .85); ctx.lineTo(Math.cos(a * D2R) * r1, Math.sin(a * D2R) * r1 * .85); ctx.stroke(); }
+    ctx.fillStyle = '#1e0d04'; ctx.beginPath();
+    for (let a = 0; a <= 360; a += 10) { const r = sR * .44 * (1 + .18 * Math.sin(a * 3 * D2R + 2) + .1 * Math.sin(a * 5 * D2R)); const x = Math.cos(a * D2R) * r, y = Math.sin(a * D2R) * r * .85; a ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.fill(); ctx.restore();
+    ctx.fillStyle = '#2a1205'; [[.95, -.55, .05], [1.15, .3, .035], [-1.25, -.4, .04]].forEach(([x, y, r]) => { ctx.beginPath(); ctx.arc(cx + x * sR * 1.2, cy + y * sR, r * sR * 2, 0, 7); ctx.fill(); });
+    const b1 = pill('흑점 (어두운 부분)', cx - sR * 1.5, cy - sR * 1.25, { c: '#7cc4ff' }); ptr(b1, cx - sR * .25, cy - sR * .2, '#7cc4ff');
+    const gx = clamp(cx + sR * 1.75, 0, W - fs * 6), gy = cy + sR * 1.05;
+    const b2 = pill('쌀알무늬', gx, Math.min(H - fs * 2, gy + sR * .7), { c: '#ffcf5a' }); ptr(b2, gx, gy, '#ffcf5a');
+    if (S.probe) probeMark();
+    return `🔍 광구 확대 · 흑점과 쌀알무늬${S.probe ? '' : ' · 👆 눌러서 온도 재기'}`;
+  }
+  // 확대 실제 사진: 왼쪽(위) 흑점 무리, 오른쪽(아래) 쌀알무늬
+  function drawZoomPhoto() {
+    const a = photo('spot'), b = photo('granulation'); if (!a || !b) return null;
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+    const wide = W >= H * 1.15, g = 6, w = wide ? (W - g) / 2 : W, h = wide ? H : (H - g) / 2, x2 = wide ? w + g : 0, y2 = wide ? 0 : h + g;
+    const m1 = cover(a, 0, 0, w, h), m2 = cover(b, x2, y2, w, h);
+    L = { zph: { m1, w, h, x2, y2 } };
+    const [ux, uy] = m1(372, 380), b1 = pill('흑점: 주변보다 온도가 낮아 어두운 부분', w / 2, h - fs * 4.2, { c: '#7cc4ff' }); ptr(b1, ux, uy, '#7cc4ff');
+    const [gx, gy] = m2(625, 465), b2 = pill('쌀알무늬: 밝은 알갱이 + 어두운 경계', x2 + w / 2, y2 + h - fs * 4.2, { c: '#ffcf5a' }); ptr(b2, gx, gy, '#ffcf5a');
+    credit('NASA SDO · 2014년 10월 23일', 0, h, w); credit('NSF 이노우에 태양 망원경 (NSO/AURA/NSF, CC BY 4.0)', x2, y2 + h, w);
+    if (S.probe) probeMark();
+    return `📷 실제 사진 · 흑점과 쌀알무늬${S.probe ? '' : ' · 👆 눌러서 온도 재기'}`;
+  }
+  // 단면: 광구 아래의 대류 (상승하는 곳은 밝고, 하강하는 곳은 어두워요)
+  function drawCut(t) {
+    // 이름표 두 줄이 들어갈 자리를 글씨 크기에 맞춰 위쪽에 비워 둬요
+    const n = W > 900 ? 5 : W > 560 ? 4 : 3, cw = W / n, l1 = Math.max(H * .1, hudBottom()), l2 = Math.max(H * .2, l1 + fs * 2.2), yt = Math.max(H * .3, l2 + fs * 2.4), ys = yt + H * .1, yb = H * .95;
+    const bg = ctx.createLinearGradient(0, ys, 0, yb); bg.addColorStop(0, '#d9741c'); bg.addColorStop(1, '#5a1d06');
+    ctx.fillStyle = '#03050d'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = bg; ctx.fillRect(0, ys, W, yb - ys);
+    for (let i = 0; i < n; i++) { // 위에서 본 광구 띠
+      const x0 = i * cw, g = ctx.createLinearGradient(x0, 0, x0 + cw, 0);
+      g.addColorStop(0, '#7a3406'); g.addColorStop(.18, '#d88a24'); g.addColorStop(.5, '#ffe58a'); g.addColorStop(.82, '#d88a24'); g.addColorStop(1, '#7a3406');
+      ctx.fillStyle = g; ctx.fillRect(x0, yt, cw + 1, ys - yt);
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1; ctx.strokeRect(.5, yt, W - 1, ys - yt);
+    // 칸마다 양쪽으로 도는 대류 고리: 가운데에서 올라가고(고온), 위에서 옆으로 퍼진 뒤 경계에서 내려가요(저온)
+    const sp = SPF[S.speed] * .5, cym = (ys + yb) / 2 + (yb - ys) * .02, ry = (yb - ys) * .38, rx = cw * .22;
+    for (let i = 0; i < n; i++) {
+      const xc = (i + .5) * cw;
+      [-1, 1].forEach(sd => {
+        // th = π: 칸 가운데 쪽(올라감), 3π/2: 위, 2π: 칸 경계 쪽(내려감), π/2: 아래
+        const P = th => [xc + sd * (cw * .25 + rx * Math.cos(th)), cym + ry * Math.sin(th)];
+        ctx.lineWidth = 3.5; ctx.lineCap = 'round';
+        for (let s = 0; s < 4; s++) { // 고리 네 토막: 올라감(빨강) · 위(주황) · 내려감(파랑) · 아래(보라)
+          const a0 = Math.PI * .75 + s * Math.PI / 2 + .12, a1 = a0 + Math.PI / 2 - .24;
+          ctx.strokeStyle = ['#ff4a2a', '#ffb07a', '#4aa3ff', '#b9a3ff'][s]; ctx.beginPath();
+          for (let k = 0; k <= 12; k++) { const [x, y] = P(a0 + (a1 - a0) * k / 12); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+          ctx.stroke();
+          const [x1, y1] = P(a1 - .08), [x2, y2] = P(a1); arrow(x1, y1, x2, y2, ctx.strokeStyle, 3.5);
+        }
+        for (let k = 0; k < 6; k++) {
+          const th = Math.PI + ((t * sp + k / 6 + i * .17) % 1) * Math.PI * 2, [x, y] = P(th), up = Math.cos(th) < 0;
+          ctx.fillStyle = up ? '#ff6a3a' : '#7cc4ff'; ctx.beginPath(); ctx.arc(x, y, 4.5, 0, 7); ctx.fill();
+        }
+      });
+    }
+    const xc = cw * (n > 3 ? 1.5 : .5), xd = cw * (n > 3 ? 2 : 1);
+    const b1 = pill('밝은 곳: 고온의 기체가 상승', xc, l1, { c: '#ffb36b' }); ptr(b1, xc, yt + 4, '#ffb36b');
+    const b2 = pill('어두운 곳: 저온의 기체가 하강', clamp(xd + cw * .6, 0, W), l2, { c: '#7cc4ff' }); ptr(b2, xd, yt + 4, '#7cc4ff');
+    ctx.font = font(fs * .9); ctx.fillStyle = '#fff'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('▲ 위에서 본 광구 (쌀알무늬)', 8, yt - fs * .7);
+    ctx.fillText('▼ 광구 아래 단면 (대류)', 8, yb - fs * .4);
+    return '✂ 단면: 광구 아래에서 대류가 일어나요 · 🔴 상승(고온) 🔵 하강(저온)';
+  }
+
+  /* ── ② 개기 일식: 달이 광구를 완전히 가리면 채층·코로나·홍염이 보여요 ── */
+  function coronaSprite(R, act) {
+    const key = `cor${Math.round(R)}-${act}`; if (cache[key]) return cache[key];
+    const s = Math.ceil(R * 9 * DPR), c = document.createElement('canvas'); c.width = c.height = s;
+    const g = c.getContext('2d'), m = s / 2, r = R * DPR, ext = act ? 2.8 : 1.8, R1 = rng(act ? 31 : 17);
+    const gr = g.createRadialGradient(m, m, r * .98, m, m, r * ext);
+    gr.addColorStop(0, 'rgba(255,252,242,.95)'); gr.addColorStop(.18, 'rgba(244,240,255,.55)'); gr.addColorStop(.5, 'rgba(225,225,255,.16)'); gr.addColorStop(1, 'rgba(220,220,255,0)');
+    g.fillStyle = gr; g.beginPath(); g.arc(m, m, r * ext, 0, 7); g.fill();
+    const nS = act ? 20 : 8;
+    for (let i = 0; i < nS; i++) {
+      const a = act ? (i / nS) * 360 + R1() * 12 : (i % 2 ? 180 : 0) + (R1() - .5) * 50, len = r * (ext + .3 + R1() * (act ? 1.1 : .9)), w = r * (.12 + R1() * .14);
+      const ca = Math.cos(a * D2R), sa = Math.sin(a * D2R), px = -sa, py = ca;
+      // 너비를 바꿔 여러 번 겹쳐 칠해서 가장자리가 부드럽게 퍼지게 해요
+      [[1.7, .06], [1.15, .09], [.7, .12], [.35, .16]].forEach(([kw, al]) => {
+        const sg = g.createLinearGradient(m + ca * r, m + sa * r, m + ca * len, m + sa * len); sg.addColorStop(0, `rgba(250,248,255,${al * 2.4})`); sg.addColorStop(.5, `rgba(250,248,255,${al})`); sg.addColorStop(1, 'rgba(250,248,255,0)');
+        const ww = w * kw, l2 = len * (.75 + kw * .15);
+        g.fillStyle = sg; g.beginPath(); g.moveTo(m + ca * r + px * ww, m + sa * r + py * ww); g.quadraticCurveTo(m + ca * (r + l2) / 2 + px * ww * .5, m + sa * (r + l2) / 2 + py * ww * .5, m + ca * l2, m + sa * l2); g.quadraticCurveTo(m + ca * (r + l2) / 2 - px * ww * .5, m + sa * (r + l2) / 2 - py * ww * .5, m + ca * r - px * ww, m + sa * r - py * ww); g.closePath(); g.fill();
+      });
+    }
+    return cache[key] = c;
+  }
+  function promLoop(cx, cy, R, ang, span, hgt, k) { // 가장자리에서 솟아오른 고리 모양 홍염
+    const a1 = (ang - span) * D2R, a2 = (ang + span) * D2R, am = ang * D2R;
+    const p1 = [cx + Math.cos(a1) * R, cy + Math.sin(a1) * R], p2 = [cx + Math.cos(a2) * R, cy + Math.sin(a2) * R], pc = [cx + Math.cos(am) * R * (1 + hgt * 2), cy + Math.sin(am) * R * (1 + hgt * 2)];
+    [[R * .09, 'rgba(255,60,40,.25)'], [R * .05, 'rgba(255,80,50,.6)'], [R * .022, 'rgba(255,170,120,.9)']].forEach(([w, c]) => {
+      ctx.strokeStyle = c; ctx.lineWidth = w * k; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(p1[0], p1[1]); ctx.quadraticCurveTo(pc[0], pc[1], p2[0], p2[1]); ctx.stroke();
+    });
+    return [cx + Math.cos(am) * R * (1 + hgt), cy + Math.sin(am) * R * (1 + hgt)];
+  }
+  /* ── 첫 화면: 태양 관측소 장면 ──
+     흑점이 돌아가는 광구, 숨 쉬듯 일렁이는 코로나와 홍염, 가끔 번쩍이는 플레어,
+     지구로 날아가다 지구 자기장에 휘어지는 태양풍, 극지방의 오로라를 한 장에 담았어요 */
+  const HERO = (() => { const R1 = rng(41); return { wind: Array.from({ length: 80 }, () => [R1(), R1(), .5 + R1() * .5]), proms: [[-128, 9, .16, 0], [-40, 7, .11, 1.7], [155, 8, .14, 3.1], [95, 6, .09, 4.4]] }; })();
+  function drawHero(t) {
+    const bg = ctx.createLinearGradient(0, 0, W, H); bg.addColorStop(0, '#050a1f'); bg.addColorStop(.6, '#0b0a26'); bg.addColorStop(1, '#180a2c');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    glow(W * .85, H * .15, 0, Math.max(W, H) * .4, 'rgba(130,70,210,A)', .2); glow(W * .1, H * .95, 0, Math.max(W, H) * .45, 'rgba(40,110,210,A)', .15);
+    ctx.fillStyle = '#fff'; STARS.forEach(([x, y, b], i) => { ctx.globalAlpha = (.15 + b * .6) * (.65 + .35 * Math.sin(t * (.8 + b * 2) + i)); ctx.fillRect(x * W, y * H, 1.4, 1.4); }); ctx.globalAlpha = 1;
+    const R = Math.min(W * .26, H * .34), cx = W * .36, cy = H * .5;
+    // 코로나와 붉은 채층, 홍염
+    const cs = coronaSprite(R, 1), k = 1 + .035 * Math.sin(t * .6);
+    ctx.globalAlpha = .85; ctx.drawImage(cs, cx - R * 4.5 * k, cy - R * 4.5 * k, R * 9 * k, R * 9 * k); ctx.globalAlpha = 1;
+    glow(cx, cy, R * .95, R * 1.4, 'rgba(255,150,60,A)', .45);
+    HERO.proms.forEach(([a, sp, h, ph]) => promLoop(cx, cy, R, a + 3 * Math.sin(t * .2 + ph), sp, h * (.8 + .2 * Math.sin(t * .5 + ph)), .8 + .2 * Math.sin(t * .9 + ph)));
+    ctx.strokeStyle = 'rgba(255,70,90,.55)'; ctx.lineWidth = Math.max(2, R * .025); ctx.beginPath(); ctx.arc(cx, cy, R * 1.006, 0, 7); ctx.stroke();
+    // 광구와 흑점 (태양이 자전해서 흑점이 동 → 서로 지나가요)
+    ctx.drawImage(sunSprite(R), cx - R, cy - R, 2 * R, 2 * R);
+    const sp = spotsAt(cx, cy, R, SPOTS.length, (t * .45) % 27); drawSpots(sp);
+    // 플레어: 7초마다 흑점 부근이 잠깐 매우 밝아져요
+    const ph = (t % 7) / 7; if (ph < .14 && sp.length) { const p = sp[0], v = Math.sin(ph / .14 * Math.PI); glow(p.x + p.rx * 1.6, p.y, 0, R * .3, 'rgba(255,255,235,A)', .95 * v); }
+    // 지구와 지구 자기장
+    const er = Math.max(9, R * .15), ex = W * .85, ey = cy + R * .1, M = er * 3;
+    ctx.strokeStyle = 'rgba(124,196,255,.3)'; ctx.lineWidth = 1.3;
+    [1.7, 2.4, 3.2].forEach(L => [-1, 1].forEach(sd => { ctx.beginPath(); for (let la = -78; la <= 78; la += 6) { const c = Math.cos(la * D2R), r = L * er * c * c, x = ex + sd * r * c * (sd < 0 ? .75 : 1.5), y = ey - r * Math.sin(la * D2R); la === -78 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke(); }));
+    // 태양풍: 태양에서 나와 지구 쪽으로, 지구 자기장 앞에서 옆으로 휘어져요
+    const x0 = cx + R * 1.05, span = W + 20 - x0;
+    HERO.wind.forEach(([p, v, s]) => {
+      const f = (p + t * .07 * s) % 1, x = x0 + span * f; let y = cy + (v - .5) * R * 2 * (1 + f * .4);
+      const dy = y - ey, near = smooth(ex - M * 2, ex - M * .2, x) * (1 - smooth(ex + M, ex + M * 3, x));
+      if (Math.abs(dy) < M * 1.2) y += Math.sign(dy || 1) * (M * 1.2 - Math.abs(dy)) * near;
+      ctx.globalAlpha = .55 * Math.sin(f * Math.PI); ctx.strokeStyle = '#ffd59a'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x - 7, y); ctx.lineTo(x, y); ctx.stroke();
+    });
+    ctx.globalAlpha = 1;
+    const eg = ctx.createRadialGradient(ex - er * .45, ey - er * .3, er * .1, ex, ey, er); eg.addColorStop(0, '#7fc3ff'); eg.addColorStop(.6, '#2c6fd0'); eg.addColorStop(1, '#0d2a66');
+    ctx.fillStyle = eg; ctx.beginPath(); ctx.arc(ex, ey, er, 0, 7); ctx.fill();
+    ctx.fillStyle = 'rgba(95,191,106,.85)'; [[-.3, -.2, .35], [.25, .25, .28], [-.05, .45, .18]].forEach(([a, b, r]) => { ctx.beginPath(); ctx.arc(ex + a * er, ey + b * er, r * er, 0, 7); ctx.fill(); });
+    const ng = ctx.createLinearGradient(ex - er, 0, ex + er, 0); ng.addColorStop(.45, 'rgba(0,0,20,0)'); ng.addColorStop(1, 'rgba(0,0,20,.7)'); ctx.fillStyle = ng; ctx.beginPath(); ctx.arc(ex, ey, er, 0, 7); ctx.fill();
+    const au = .45 + .3 * Math.sin(t * 2.2); [-1, 1].forEach(sd => glow(ex, ey + sd * er * .95, 0, er * .8, 'rgba(90,255,170,A)', au));
+    return '';
+  }
+  function ovArea(d, R) { if (d >= 2 * R) return 0; return (2 * R * R * Math.acos(d / (2 * R)) - d / 2 * Math.sqrt(4 * R * R - d * d)) / (Math.PI * R * R); }
+  // 채층·코로나 확대: 왼쪽(위) 개기 일식 사진 확대, 오른쪽(아래) 위성이 자외선으로 찍은 가장자리
+  function drawAtmoZoom() {
+    const [[n1, c1, cr1, f1], [n2, c2, cr2, f2]] = ZOOM[S.ez], a = photo(n1), b = photo(n2); if (!a || !b) return null;
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+    const wide = W >= H * 1.15, g = 6, w = wide ? (W - g) / 2 : W, h = wide ? H : (H - g) / 2, x2 = wide ? w + g : 0, y2 = wide ? 0 : h + g;
+    const m1 = cover(a, 0, 0, w, h, false, f1), m2 = cover(b, x2, y2, w, h, false, f2);
+    // 원(가운데 cx, cy, 반지름 r)에서 각 deg 방향으로 반지름의 k배 되는 곳
+    const at = (m, [cx, cy, r], deg, k) => m(cx + Math.cos(deg * D2R) * r * k, cy + Math.sin(deg * D2R) * r * k);
+    const lab = (t, m, c, deg, k, bx, by, col) => { const [x, y] = at(m, c, deg, k), bb = pill(t, bx, by, { c: col }); ptr(bb, x, y, col); };
+    // 위 칸 이름표는 설명 글(두 줄이 되기도 해요) 아래에, 아래 칸(좁은 화면)은 칸 위쪽에
+    const top = hudBottom(), top2 = wide ? top : fs * 1.6, bot = h - fs * 4.2;
+    if (S.ez === 'chrom') {
+      lab('채층: 광구 바로 위 얇은 붉은 층', m1, c1, -49, 1.004, w * .5, top + fs * .2, '#ff8a9a');
+      lab('홍염', m1, c1, -41, 1.035, w * .78, top + fs * 2.6, '#ffb36b');
+      lab('달 (광구를 가림)', m1, c1, -41, .9, w * .3, bot, '#a9b4d8');
+      lab('채층', m2, c2, 0, 1.006, x2 + w * .72, y2 + top2 + fs * .2, '#ff8a9a');
+      lab('광구 쪽 (태양 안)', m2, c2, 0, .88, x2 + w * .3, y2 + bot, '#ffcf5a');
+    } else {
+      lab('코로나: 채층 위로 넓게 뻗은 진주색 대기', m1, c1, -8, 1.45, w * .55, top + fs * .2, '#e8e4ff');
+      lab('달 (광구를 가림)', m1, c1, 20, .6, w * .3, bot, '#a9b4d8');
+      lab('코로나 (온도가 매우 높아요)', m2, c2, -4, 1.07, x2 + w * .6, y2 + top2 + fs * .2, '#e8e4ff');
+      lab('태양 가장자리', m2, c2, 6, 1, x2 + w * .35, y2 + bot, '#ffcf5a');
+    }
+    credit(cr1, 0, h, w); credit(cr2, x2, y2 + h, w);
+    return S.ez === 'chrom' ? '🔍 채층 확대 · 광구 바로 위를 얇게 둘러싼 붉은색 대기층' : '🔍 코로나 확대 · 채층 위로 넓게 퍼진 진주색의 희박한 대기층';
+  }
+  function drawEclipse() {
+    if (S.ez) { const hz = drawAtmoZoom(); if (hz) return hz; }
+    const R = Math.min(W * .17, H * .2), cx = W / 2, cy = H / 2 + fs * .5;
+    const mx = cx + (1 - S.cover) * 2.4 * R, frac = ovArea(mx - cx, R), tf = smooth(.993, 1, S.cover);
+    const dark = smooth(.55, 1, frac);
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, `rgb(${Math.round(60 * (1 - dark) + 2)},${Math.round(120 * (1 - dark) + 4)},${Math.round(200 * (1 - dark) + 12)})`); sky.addColorStop(1, `rgb(${Math.round(120 * (1 - dark) + 4)},${Math.round(170 * (1 - dark) + 6)},${Math.round(225 * (1 - dark) + 18)})`);
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H); stars(dark * .9);
+    if (tf > 0) { ctx.globalAlpha = tf; const c = coronaSprite(R, S.act), s = R * 9; ctx.drawImage(c, cx - s / 2, cy - s / 2, s, s); ctx.globalAlpha = 1; }
+    const vis = 1 - frac; // 남은 광구의 눈부심 (광구가 밝아서 대기가 안 보여요)
+    if (vis > 0) glow(cx + (cx - mx) * .15, cy, R, R * (1.6 + vis), 'rgba(255,240,200,A)', .9 * Math.sqrt(vis));
+    ctx.drawImage(sunSprite(R), cx - R, cy - R, 2 * R, 2 * R);
+    ctx.fillStyle = tf > .5 ? '#020308' : '#101320'; ctx.beginPath(); ctx.arc(mx, cy, R * 1.002, 0, 7); ctx.fill();
+    let pp = null;
+    if (tf > 0) {
+      ctx.globalAlpha = tf;
+      ctx.strokeStyle = 'rgba(255,40,70,.45)'; ctx.lineWidth = R * .07; ctx.beginPath(); ctx.arc(cx, cy, R * 1.03, 0, 7); ctx.stroke();
+      ctx.strokeStyle = '#ff3b5c'; ctx.lineWidth = R * .03; ctx.beginPath(); ctx.arc(cx, cy, R * 1.015, 0, 7); ctx.stroke();
+      pp = promLoop(cx, cy, R * 1.01, -50, 7, .16, 1);
+      if (S.act) { promLoop(cx, cy, R * 1.01, 160, 5, .12, .8); promLoop(cx, cy, R * 1.01, 75, 4, .09, .7); }
+      ctx.globalAlpha = 1;
+    }
+    // 실제 사진: 개기 일식이 되면 사진으로 바뀌어요 (활발할 때 1999년, 조용할 때 2017년 — 코로나 크기 비교)
+    let phE = null;
+    if (S.photo && tf > 0) {
+      const nm = S.act ? 'eclipse-1999' : 'eclipse-2017', im = photo(nm);
+      if (im) {
+        const [ix, iy, ir] = PH_ECL[nm], k = R / ir, pa = (S.act ? -41 : -64) * D2R;
+        ctx.globalAlpha = tf; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); ctx.drawImage(im, cx - ix * k, cy - iy * k, im.naturalWidth * k, im.naturalHeight * k); ctx.globalAlpha = 1;
+        phE = nm; pp = [cx + Math.cos(pa) * R * 1.04, cy + Math.sin(pa) * R * 1.04];
+      }
+    }
+    if (tf < .3) pill('달', mx, cy - R * 1.5, { c: '#a9b4d8', s: fs * .85 });
+    if (tf > .6) {
+      const top = hudBottom();
+      const b1 = pill('채층: 광구 바로 위, 얇은 붉은색 대기', cx - R * 1.7, cy + R * 1.8, { c: '#ff8a9a' }); ptr(b1, cx + Math.cos(125 * D2R) * R * 1.02, cy + Math.sin(125 * D2R) * R * 1.02, '#ff8a9a');
+      const ca = 200 * D2R, b2 = pill('코로나: 넓게 뻗은 진주색 대기', cx - R * 1.8, Math.max(top, cy - R * 1.9), { c: '#e8e4ff' }); const cr = phE === 'eclipse-2017' ? 1.2 : 1.5; ptr(b2, cx + Math.cos(ca) * R * cr, cy + Math.sin(ca) * R * cr, '#e8e4ff');
+      if (pp) { const b3 = pill('홍염', pp[0] + R * .7, Math.max(top, pp[1] - R * .6), { c: '#ffb36b' }); ptr(b3, pp[0] + R * .08, pp[1] - R * .06, '#ffb36b'); }
+      mark('total');
+      if (phE) { credit(S.act ? '실제 사진: 1999년 8월 11일 개기 일식 · Luc Viatour (CC BY-SA 3.0)' : '실제 사진: 2017년 8월 21일 개기 일식 · NASA'); return `📷 실제 개기 일식 사진 · ${S.act ? '1999년, 태양 활동이 활발할 때 (코로나가 커요)' : '2017년, 태양 활동이 조용할 때 (코로나가 작아요)'}`; }
+      return `🌑 개기 일식! 광구가 가려져 태양의 대기(채층·코로나)가 보여요 · 태양 활동: ${S.act ? '활발할 때' : '조용할 때'}`;
+    }
+    return frac < .01 ? '☀ 낮 하늘의 태양 · 광구가 너무 밝아서 태양의 대기가 보이지 않아요' : `🌗 달이 태양을 오른쪽부터 가리고 있어요 (${Math.round(frac * 100)}%)`;
+  }
+
+  /* ── ③ 홍염과 플레어 (태양 가장자리 확대) ── */
+  const EV = { prom: 1, flare: -1, auto: 3 };
+  // 실제 사진: 홍염(2012년 8월 31일)과 플레어(2017년 9월 6일), NASA SDO
+  function drawEventsPhoto() {
+    const a = photo('prom'), b = photo('flare'); if (!a || !b) return null;
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+    const wide = W >= H * 1.15, g = 6, w = wide ? (W - g) / 2 : W, h = wide ? H : (H - g) / 2, x2 = wide ? w + g : 0, y2 = wide ? 0 : h + g;
+    const m1 = cover(a, 0, 0, w, h), m2 = cover(b, x2, y2, w, h);
+    const [px, py] = m1(250, 415), b1 = pill('홍염: 채층 위로 솟아오르는 가스', w * .42, h - fs * 4.2, { c: '#ffb36b' }); ptr(b1, px, py, '#ffb36b');
+    const [fx, fy] = m2(392, 300), b2 = pill('플레어: 흑점 부근 폭발로 매우 밝아짐', x2 + w / 2, y2 + h - fs * 4.2, { c: '#fff3a6' }); ptr(b2, fx, fy + fs, '#fff3a6');
+    credit('NASA SDO · 2012년 8월 31일', 0, h, w); credit('NASA SDO · 2017년 9월 6일', x2, y2 + h, w);
+    return '📷 실제 사진 · 홍염과 플레어 (태양 활동이 활발할 때 자주 나타나요)';
+  }
+  function drawEvents(t, dt) {
+    if (S.photo) { const h = drawEventsPhoto(); if (h) return h; }
+    ctx.fillStyle = '#060208'; ctx.fillRect(0, 0, W, H); stars(.6);
+    const R = Math.max(W, H) * 1.05, cx = W * .46, cy = H * .66 + R;
+    const g = ctx.createRadialGradient(cx, cy, R * .8, cx, cy, R); g.addColorStop(0, '#ffb23a'); g.addColorStop(.85, '#f0761c'); g.addColorStop(1, '#b83a0c');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fill();
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.clip(); ctx.globalAlpha = .35;
+    const tw = Math.max(60, Math.round(W / 3)), th = Math.max(40, Math.round(H / 3)); ctx.drawImage(granTex(tw, th, 7), 0, 0, W, H); ctx.globalAlpha = 1; ctx.restore();
+    ctx.strokeStyle = 'rgba(255,60,50,.75)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(cx, cy, R + 2, 0, 7); ctx.stroke();
+    // 흑점 무리 (플레어가 일어나는 곳)
+    const sa = -88 * D2R + Math.atan2(W * .2, R), sx = cx + Math.cos(sa) * R * .985, sy = cy + Math.sin(sa) * R * .985 + H * .1;
+    [[0, 0, 1], [-1.6, .5, .55], [1.5, -.3, .5], [2.6, .6, .35]].forEach(([dx, dy, k]) => { const r = fs * 1.1 * k; ctx.fillStyle = 'rgba(110,45,8,.9)'; ctx.beginPath(); ctx.ellipse(sx + dx * fs, sy + dy * fs, r * 1.4, r, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#2a1205'; ctx.beginPath(); ctx.ellipse(sx + dx * fs, sy + dy * fs, r * .7, r * .5, 0, 0, 7); ctx.fill(); });
+    // 홍염: 채층 위로 솟아오르는 가스
+    EV.prom = Math.min(1, EV.prom + dt / 3.5 * SPF[S.speed]);
+    const pa = -90 * D2R - Math.atan2(W * .22, R), hk = (S.act ? 1 : .6) * smooth(0, 1, EV.prom), top = drawProm(cx, cy, R, pa, hk, t, S.pshape);
+    if (S.act) drawProm(cx, cy, R, -90 * D2R - Math.atan2(W * .42, R), .45 * smooth(0, 1, EV.prom), t + 2, 'loop');
+    if (EV.prom >= 1 && EV.promAsk) { EV.promAsk = false; mark('prom'); }
+    // 플레어: 흑점 부근의 폭발로 채층 일부가 매우 밝아져요
+    if (S.act && EV.flare < 0) { EV.auto -= dt * SPF[S.speed]; if (EV.auto <= 0) { EV.flare = 0; EV.auto = 7; } }
+    let fl = 0;
+    if (EV.flare >= 0) {
+      EV.flare += dt * SPF[S.speed] / 3; fl = EV.flare < .12 ? EV.flare / .12 : Math.max(0, 1 - (EV.flare - .12) / .88);
+      if (EV.flare >= 1) { EV.flare = -1; if (EV.flareAsk) { EV.flareAsk = false; mark('flare'); } }
+    }
+    if (fl > 0) {
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      glow(sx, sy, 0, fs * (3 + 6 * fl), 'rgba(255,255,230,A)', fl);
+      glow(sx, sy, 0, fs * (6 + 8 * fl), 'rgba(255,200,90,A)', .7 * fl);
+      ctx.strokeStyle = `rgba(255,255,255,${fl})`; ctx.lineWidth = 4; [-1, 1].forEach(k => { ctx.beginPath(); ctx.ellipse(sx + k * fs * .9, sy, fs * .6, fs * 1.8, k * .3, 0, 7); ctx.stroke(); });
+      ctx.restore();
+    }
+    const bp = top[2] ? pill('홍염: 불꽃 모양으로 솟아오르는 가스', top[0] + fs * 2, top[1], { c: '#ffb36b', a: 'l' }) : pill('홍염: 고리 모양으로 솟아오르는 가스', clamp(top[0], fs * 9, W - fs * 9), Math.max(hudBottom(), top[1] - fs * 2.2), { c: '#ffb36b' });
+    ptr(bp, top[0], top[1] - (top[2] ? 0 : 4), '#ffb36b');
+    const bs = pill(fl > .05 ? '💥 플레어: 흑점 부근 폭발로 채층 일부가 매우 밝아져요' : '흑점', clamp(sx + fs * 2, fs * 10, W - fs * 10), Math.min(H - fs * 1.6, sy + fs * 4.2), { c: fl > .05 ? '#fff3a6' : '#7cc4ff' }); ptr(bs, sx, sy + fs * 1.2, fl > .05 ? '#fff3a6' : '#7cc4ff');
+    const ra = -90 * D2R + Math.atan2(W * .44, R), bc = pill('채층', cx + Math.cos(ra) * R + fs * 1.6, cy + Math.sin(ra) * R - fs * 2.2, { c: '#ff8a9a' }); ptr(bc, cx + Math.cos(ra) * R, cy + Math.sin(ra) * R - 3, '#ff8a9a');
+    return `🔥 태양 가장자리 확대 · 태양 활동: ${S.act ? '활발할 때 (홍염·플레어가 자주 나타나요)' : '조용할 때'}`;
+  }
+  function drawProm(cx, cy, R, a, hk, t, shape) {
+    const span = 4.2 * D2R, a1 = a - span, a2 = a + span, h = R * .3 * hk * (W < 600 ? .9 : 1) * (H / Math.max(W, H)) / .62;
+    const p1 = [cx + Math.cos(a1) * R, cy + Math.sin(a1) * R], p2 = [cx + Math.cos(a2) * R, cy + Math.sin(a2) * R];
+    const nx = Math.cos(a), ny = Math.sin(a), mx = (p1[0] + p2[0]) / 2, my = (p1[1] + p2[1]) / 2;
+    if (shape === 'flame') { // 불꽃 모양: 아래가 넓고 끝이 흔들리는 혀 모양을 여러 겹
+      const cw = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]), qx = -ny, qy = nx;
+      [[1.5, 'rgba(255,50,30,.22)'], [1, 'rgba(255,90,50,.5)'], [.55, 'rgba(255,170,110,.75)'], [.25, 'rgba(255,235,200,.85)']].forEach(([s, c]) => {
+        ctx.fillStyle = c;
+        for (let k = 0; k < 5; k++) {
+          const off = (k - 2) / 2, hh = h * s * (.55 + .45 * Math.abs(Math.sin(k * 2.3 + 1))) * (1 + .08 * Math.sin(t * 3 + k)), wob = Math.sin(t * 2.4 + k * 1.9) * cw * .12;
+          const bx = mx + qx * off * cw * .35, by = my + qy * off * cw * .35, w = cw * .16 * (.6 + s * .5);
+          const tx = bx + nx * hh + qx * wob, ty = by + ny * hh + qy * wob;
+          ctx.beginPath(); ctx.moveTo(bx - qx * w, by - qy * w);
+          ctx.quadraticCurveTo(bx + nx * hh * .45 - qx * w * .9, by + ny * hh * .45 - qy * w * .9, tx, ty);
+          ctx.quadraticCurveTo(bx + nx * hh * .45 + qx * w * .9, by + ny * hh * .45 + qy * w * .9, bx + qx * w, by + qy * w); ctx.closePath(); ctx.fill();
+        }
+      });
+      // 불꽃은 위로 길어서, 이름표는 옆(가운데 높이)에 붙여요
+      return [mx + nx * h * .55 + qx * cw * .5, my + ny * h * .55 + qy * cw * .5, 1];
+    }
+    const pc = [mx + nx * h * 2, my + ny * h * 2];
+    [[fs * 1.6, 'rgba(255,60,40,.22)'], [fs * .8, 'rgba(255,90,55,.6)'], [fs * .32, 'rgba(255,190,140,.9)']].forEach(([w, c]) => { ctx.strokeStyle = c; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(p1[0], p1[1]); ctx.quadraticCurveTo(pc[0], pc[1], p2[0], p2[1]); ctx.stroke(); });
+    for (let k = 0; k < 8; k++) { // 고리를 따라 흐르는 가스
+      const u = (t * .25 + k / 8) % 1, x = (1 - u) * (1 - u) * p1[0] + 2 * u * (1 - u) * pc[0] + u * u * p2[0], y = (1 - u) * (1 - u) * p1[1] + 2 * u * (1 - u) * pc[1] + u * u * p2[1];
+      ctx.fillStyle = 'rgba(255,230,200,.9)'; ctx.beginPath(); ctx.arc(x, y, fs * .16, 0, 7); ctx.fill();
+    }
+    return [mx + nx * h, my + ny * h];
+  }
+
+  /* ── ④ 흑점 수 변화 (그래프) ── */
+  function drawCycle() {
+    ctx.fillStyle = '#0b1230'; ctx.fillRect(0, 0, W, H);
+    const inset = W >= 640, gx0 = fs * 4, gx1 = inset ? W * .66 : W - fs * 1.2, gy0 = fs * 3.4, gy1 = H - fs * 3.6;
+    // 위쪽에 주기 화살표·극대기 이름표가 들어갈 자리를 남겨 두려고 세로축을 280까지 그려요
+    const X = y => gx0 + (y - Y0) / (Y1 - Y0) * (gx1 - gx0), Yv = n => gy1 - n / 280 * (gy1 - gy0);
+    L = { gx0, gx1, inv: x => Y0 + (x - gx0) / (gx1 - gx0) * (Y1 - Y0) };
+    ctx.strokeStyle = '#a9b4d8'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(gx0, gy0 - fs); ctx.lineTo(gx0, gy1); ctx.lineTo(gx1 + fs * .5, gy1); ctx.stroke();
+    ctx.font = font(fs * .85); ctx.fillStyle = '#a9b4d8'; ctx.textBaseline = 'middle';
+    [0, 100, 200].forEach(n => { ctx.textAlign = 'right'; ctx.fillText(n, gx0 - 6, Yv(n)); ctx.strokeStyle = 'rgba(169,180,216,.18)'; ctx.beginPath(); ctx.moveTo(gx0, Yv(n)); ctx.lineTo(gx1, Yv(n)); ctx.stroke(); });
+    [1990, 2000, 2010, 2020].forEach(y => { ctx.textAlign = 'center'; ctx.fillText(y + '년', X(y), gy1 + fs * .9); ctx.strokeStyle = '#a9b4d8'; ctx.beginPath(); ctx.moveTo(X(y), gy1); ctx.lineTo(X(y), gy1 + 5); ctx.stroke(); });
+    ctx.save(); ctx.translate(gx0 - fs * 2.9, (gy0 + gy1) / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.fillText('흑점 수(개)', 0, 0); ctx.restore();
+    ctx.strokeStyle = '#ffcf5a'; ctx.lineWidth = 3; ctx.beginPath(); for (let y = Y0; y <= Y1 + .01; y += .1) { const x = X(y), v = Yv(spotN(y)); y === Y0 ? ctx.moveTo(x, v) : ctx.lineTo(x, v); } ctx.stroke();
+    EXTS.forEach(([y, k]) => {
+      if (Math.abs(S.year - y) < .7 && !S.found[y]) { S.found[y] = 1; mark(k); }
+      if (!(S.ext || S.found[y])) return;
+      // 극대기는 꼭대기 위, 극소기는 연도 눈금 아래에 붙여요
+      const up = k === 'max', yy = up ? Yv(spotN(y)) - fs * 1.3 : gy1 + fs * 2.2;
+      pill(up ? '극대기' : '극소기', X(y), yy, { c: up ? '#ff8a8a' : '#7cc4ff', s: fs * .8 });
+    });
+    if (S.marks) [[2001.6, 'A'], [2008.8, 'B']].forEach(([y, t]) => {
+      const x = X(y), v = Yv(spotN(y)); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, v, 5, 0, 7); ctx.fill();
+      // A는 점 오른쪽, B는 점 왼쪽 위에 써서 극대기·극소기 이름표와 겹치지 않게
+      ctx.font = font(fs * 1.1, 1); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x + (t === 'A' ? fs * 1.1 : -fs * 1.1), v - (t === 'A' ? 0 : fs * 1.2));
+    });
+    if (S.period) [[1990.6, 2001.6], [2008.8, 2019.9]].forEach(([a, b], i) => {
+      const yy = i ? gy1 - fs * .9 : Yv(210) - fs * 2.8; ctx.strokeStyle = ctx.fillStyle = '#5fe0a0'; ctx.lineWidth = 2;
+      ctx.setLineDash([3, 3]); [a, b].forEach(y => { ctx.beginPath(); ctx.moveTo(X(y), yy); ctx.lineTo(X(y), Yv(spotN(y))); ctx.stroke(); }); ctx.setLineDash([]);
+      arrow(X(a) + (X(b) - X(a)) / 2, yy, X(a) + 3, yy, '#5fe0a0', 2); arrow(X(a) + (X(b) - X(a)) / 2, yy, X(b) - 3, yy, '#5fe0a0', 2);
+      pill('약 11년', (X(a) + X(b)) / 2, yy - fs * 1.1, { c: '#5fe0a0', s: fs * .8 });
+    });
+    const n = spotN(S.year), cx0 = X(S.year);
+    ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(cx0, gy0 - fs * .5); ctx.lineTo(cx0, gy1); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(cx0, Yv(n), 6, 0, 7); ctx.fill();
+    const phase = EXTS.find(([y]) => Math.abs(S.year - y) < .7), act = n / 210, st = phase ? (phase[1] === 'max' ? '극대기 · 태양 활동이 활발해요' : '극소기 · 태양 활동이 조용해요') : (spotN(S.year + .2) > n ? '흑점 수가 늘어나는 중' : '흑점 수가 줄어드는 중');
+    if (inset) { // 그 해의 태양 모습
+      const R = Math.min(H * .17, W * .1), sx = W * .835, sy = H * .32;
+      ctx.fillStyle = '#03050d'; rr(W * .69, fs * .6, W * .3, H - fs * 1.2, 14); ctx.fill();
+      glow(sx, sy, R * .9, R * (1.25 + act * .9), 'rgba(255,190,90,A)', .25 + act * .4);
+      // 실제 사진: 흑점이 적을 때(2019년 12월) ↔ 많을 때(2014년 2월)를 흑점 수에 따라 겹쳐 보여 줘요
+      if (S.photo && diskPhoto('act-min', sx, sy, R)) { diskPhoto('act-max', sx, sy, R, clamp((act - .1) / .75, 0, 1)); credit('실제 사진: NASA SDO (2014년·2019년)', W * .69, H - fs * .6, W * .3); }
+      else { ctx.drawImage(sunSprite(R), sx - R, sy - R, 2 * R, 2 * R); drawSpots(spotsAt(sx, sy, R, Math.round(clamp(act, 0, 1) * SPOTS.length), 3)); }
+      const ty = sy + R + fs * 1.4;
+      ctx.font = font(fs * 1.15); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(`${Math.floor(S.year)}년`, sx, ty);
+      ctx.font = font(fs * .9); ctx.fillStyle = '#ffcf5a'; ctx.fillText(`흑점 약 ${Math.round(n / 10) * 10}개`, sx, ty + fs * 1.4);
+      ctx.fillStyle = phase ? (phase[1] === 'max' ? '#ff8a8a' : '#7cc4ff') : '#a9b4d8'; wrap(st, W * .27).forEach((l, i) => ctx.fillText(l, sx, ty + fs * 2.7 + i * fs * 1.2));
+    }
+    return `📈 흑점 수 변화 · ${Math.floor(S.year)}년 · ${st}${S.playing ? '' : ' · 👆 그래프를 끌어서 연도를 바꿔요'}`;
+  }
+
+  /* ── ⑤ 태양 활동이 지구에 미치는 영향 ── */
+  const FX = {
+    storm: ['🧲 자기 폭풍', '태양풍에 의해 지구 자기장이 일시적으로 불규칙하게 변해요.'],
+    aurora: ['🌌 오로라', '태양에서 온 전기를 띤 입자가 공기 입자와 충돌하여 빛을 내요. 평소보다 더 자주, 더 넓은 지역에서 강하게 생겨요.'],
+    radio: ['📡 무선 통신 장애', '전파 신호가 방해를 받아 무선 통신에 장애가 생겨요. (델린저 현상)'],
+    sat: ['🛰 인공위성 성능 저하', '인공위성의 다양한 센서가 고장 나거나 성능이 떨어져요.'],
+    power: ['⚡ 정전·화재', '전력 장비가 손상되어 정전이나 화재가 생길 수 있어요.'],
+    air: ['✈ 항공 분야 피해', '태양풍이 강할 때는 비행기가 북극 부근을 운항할 수 없어 다른 길로 돌아가요.']
+  };
+  const P = Array.from({ length: 200 }, (_, i) => ({ x: Math.random(), y0: Math.random() * 2 - 1, v: .8 + Math.random() * .4, k: i }));
+  function drawEarth(t, dt) {
+    // 🌌 오로라를 누르면 실제 사진 (국제 우주 정거장에서 찍은 오로라, NASA)
+    const auImg = S.photo && S.fx === 'aurora' && photo('aurora');
+    if (auImg) {
+      cover(auImg, 0, 0, W, H);
+      const w = Math.min(W * .55, fs * 26); card(FX.aurora[0], FX.aurora[1], W - w - fs * .6, fs * (W < 640 ? 5.2 : 3.2), w, '#5fe0a0');
+      credit('실제 사진: 국제 우주 정거장에서 본 오로라 · NASA');
+      return '📷 실제 사진 · 오로라 (태양 활동이 활발할 때 더 자주, 더 넓은 지역에서 생겨요)';
+    }
+    ctx.fillStyle = '#03050d'; ctx.fillRect(0, 0, W, H); stars(.8);
+    const sR = H * .46, sx = -sR * .55, sy = H * .56, eR = clamp(Math.min(W, H) * .065, 16, 46), ex = W * .68, ey = H * .6, A = S.act;
+    const bx = ex - 3.4 * eR, kk = 3.8 * eR / Math.sqrt(3.4 * eR), x0 = sx + sR * .7;
+    const nP = A ? 190 : 70, sp = (A ? 1.8 : 1) * W * .16 * SPF[S.speed];
+    ctx.fillStyle = A ? 'rgba(255,214,120,.95)' : 'rgba(255,214,120,.6)';
+    for (let i = 0; i < nP; i++) {
+      const p = P[i], x = x0 + p.x * (W - x0);
+      p.x += dt * sp * p.v / (W - x0); if (p.x > 1) { p.x = 0; p.y0 = Math.random() * 2 - 1; }
+      const y0 = p.y0 * H * .62, d = x < bx ? 0 : kk * Math.sqrt(x - bx), s = y0 < 0 ? -1 : 1, y = ey + s * Math.sqrt(y0 * y0 + d * d);
+      if (y < -5 || y > H + 5) continue;
+      ctx.beginPath(); ctx.arc(x, y, A ? 2.2 : 1.6, 0, 7); ctx.fill();
+    }
+    glow(sx, sy, sR * .9, sR * (A ? 1.7 : 1.3), 'rgba(255,200,120,A)', A ? .55 : .35);
+    ctx.drawImage(sunSprite(sR), sx - sR, sy - sR, 2 * sR, 2 * sR);
+    if (A) drawSpots(spotsAt(sx, sy, sR, SPOTS.length, 4));
+    // 지구 자기장 (태양 쪽은 눌리고 반대쪽은 길게 늘어나요). 자기 폭풍 때는 크게 흔들려요
+    ctx.lineWidth = 1.6;
+    [1.9, 2.7, 3.7, 4.9].forEach((Lk, li) => {
+      const wob = A ? 1 + .07 * Math.sin(t * 5 + li * 1.7) : 1;
+      ctx.strokeStyle = `rgba(110,200,255,${A ? .75 : .55})`;
+      [-1, 1].forEach(side => { ctx.beginPath(); for (let la = -88; la <= 88; la += 4) { const c = Math.cos(la * D2R), r = Lk * eR * c * c * wob, f = side < 0 ? .72 : 1 + (Lk / 4.9) * 1.3; const x = ex + side * r * c * f, y = ey - r * Math.sin(la * D2R); la === -88 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke(); });
+    });
+    const au = A ? 1 : .35, fl = A ? .75 + .25 * Math.sin(t * 7) : 1;
+    [-1, 1].forEach(k => { ctx.strokeStyle = `rgba(90,255,160,${.85 * au * fl})`; ctx.lineWidth = A ? 5 : 3; ctx.beginPath(); ctx.ellipse(ex, ey + k * eR * .93, eR * (A ? .62 : .34), eR * (A ? .16 : .09), 0, 0, 7); ctx.stroke(); });
+    const eg = ctx.createRadialGradient(ex - eR * .5, ey - eR * .2, eR * .1, ex, ey, eR); eg.addColorStop(0, '#5fb0ff'); eg.addColorStop(.7, '#1f5fae'); eg.addColorStop(1, '#0a2046');
+    ctx.fillStyle = eg; ctx.beginPath(); ctx.arc(ex, ey, eR, 0, 7); ctx.fill();
+    ctx.fillStyle = '#4f9a55'; ctx.beginPath(); ctx.ellipse(ex - eR * .25, ey - eR * .2, eR * .35, eR * .28, .4, 0, 7); ctx.fill(); ctx.beginPath(); ctx.ellipse(ex + eR * .35, ey + eR * .3, eR * .22, eR * .3, -.3, 0, 7); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,20,.45)'; ctx.beginPath(); ctx.arc(ex, ey, eR, -Math.PI / 2, Math.PI / 2); ctx.fill();
+    // 지구 이름표는 왼쪽 적도 옆에 (아래·위에는 영향 아이콘이 있어서)
+    const be = pill('지구', ex - eR - fs * 2.2, ey, { c: '#7cc4ff', s: fs * .85 }); ptr(be, ex - eR * .9, ey, '#7cc4ff');
+    const bm = pill('지구 자기장', ex - eR * 3.9, ey + eR * 2.6, { c: '#7cc4ff', s: fs * .8 }); ptr(bm, ex - eR * 3.1, ey + eR * .9, '#7cc4ff');
+    const bw = pill(A ? '태양풍이 강해졌어요!' : '태양풍 (전기를 띤 입자의 흐름)', (x0 + bx) / 2 + fs * 2, ey + H * .3, { c: '#ffd27a', s: fs * .85 });
+    ptr(bw, (x0 + bx) / 2 + fs * 2, ey + H * .17, '#ffd27a');
+    const ic = { sat: [2.3, -2.2], radio: [2.9, 1.3], power: [1.5, 2.3], air: [-.6, -2.3] };
+    ctx.font = `${fs * 1.3}px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    Object.entries(ic).forEach(([k, [dx, dy]]) => {
+      const x = ex + dx * eR, y = ey + dy * eR;
+      if (A) { ctx.strokeStyle = `rgba(255,90,90,${.5 + .5 * Math.sin(t * 6 + dx)})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, fs * 1.1, 0, 7); ctx.stroke(); }
+      if (S.fx === k) { ctx.strokeStyle = '#ffcf5a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, fs * 1.3, 0, 7); ctx.stroke(); }
+      ctx.fillStyle = '#fff'; ctx.fillText(FX[k][0].split(' ')[0], x, y + 1);
+    });
+    if (S.fx) {
+      // 설명 카드는 태양과 지구 사이 위쪽 빈 곳에 (지구·영향 그림을 가리지 않게)
+      const [tt, tx] = FX[S.fx], wide = W >= 640, w = wide ? W * .42 : Math.min(W * .5, 420);
+      card(tt, A ? tx : '평소에는 지구 자기장이 태양풍을 막아 줘서 큰 피해가 없어요. 태양 활동을 "활발할 때"로 바꿔 보세요.', wide ? W * .2 : W - w - fs * .6, fs * (wide ? 2.9 : 5.2), w, A ? '#ffcf5a' : '#a9b4d8');
+    }
+    return A ? '🔥 태양 활동이 활발할 때 · 태양풍이 강해져 지구에 피해가 생겨요' : '😴 평소 · 지구 자기장이 태양풍의 피해를 막아 줘요';
+  }
+
+  /* ── 움직임 ── */
+  let last = performance.now(), hold = 0, hudLast = '';
+  function frame(now) {
+    const dt = Math.min(.05, (now - last) / 1000), t = now / 1000; last = now;
+    const k = SPF[S.speed];
+    if (S.playing) {
+      if (S.view === 'surface') { S.day += dt * 1.4 * k; if (S.day >= 8) { S.day = 8; if (S.loop) S.day = 0; else { S.playing = false; mark('rot'); changed(); } } }
+      else if (S.view === 'eclipse') { if (S.cover < 1) S.cover = Math.min(1, S.cover + dt * .16 * k); else if (S.loop) { hold += dt; if (hold > 3) { hold = 0; S.cover = 0; } } else { S.playing = false; changed(); } }
+      else if (S.view === 'cycle') { S.year += dt * 3.2 * k; if (S.year >= Y1) { S.year = Y1; S.playing = false; changed(); } }
+    }
+    if (el.isConnected && W > 1) {
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      // 수업 모드(TV)에서는 교실 뒤에서도 읽히게 이름표 글씨를 크게
+      fs = S.big ? clamp(Math.min(W, H) / 17, 20, 38) : clamp(Math.min(W, H) / 30, 13, 21);
+      const fn = { hero: drawHero, surface: drawSurface, eclipse: drawEclipse, events: drawEvents, cycle: drawCycle, earth: drawEarth }[S.view];
+      const h = fn(t, dt) || '';
+      if (h !== hudLast) { hudEl.textContent = h; hudLast = h; }
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  /* ── 누르기: 온도 재기 · 그래프 끌기 ── */
+  let drag = false;
+  function pt(e) { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+  cv.addEventListener('pointerdown', e => {
+    const [x, y] = pt(e);
+    if (S.view === 'surface' && !S.cut && (S.zoom || !S.rotv)) {
+      let kind = null;
+      if (S.zoom && L.zph) { // 확대 사진: 흑점 사진 속 흑점 자리를 눌렀는지
+        const z = L.zph;
+        kind = x < z.w && y < z.h && PH_SPOT.some(([ix, iy, rx, ry]) => { const [sx, sy] = z.m1(ix, iy), [ex] = z.m1(ix + rx, iy), ey = z.m1(ix, iy + ry)[1]; return ((x - sx) / (ex - sx)) ** 2 + ((y - sy) / (ey - sy)) ** 2 <= 1; }) ? 'spot' : 'photo';
+      }
+      else if (S.zoom) kind = Math.hypot(x - L.zcx, (y - L.zcy) / .85) < L.sR * .95 ? 'spot' : 'photo';
+      else if (Math.hypot(x - L.cx, y - L.cy) < L.R) {
+        if (L.ph) { const p = AR(S.day); kind = S.act && p.f > .05 && Math.hypot(x - (L.cx + L.R * p.x), y - (L.cy + L.R * p.y)) < L.R * .11 ? 'spot' : 'photo'; }
+        else kind = spotsAt(L.cx, L.cy, L.R, S.act ? SPOTS.length : 2, S.day).some(p => ((x - p.x) / Math.max(p.rx, 6)) ** 2 + ((y - p.y) / Math.max(p.ry, 6)) ** 2 <= 1.3) ? 'spot' : 'photo';
+      }
+      if (kind) { S.probe = { x, y, kind }; mark('temp-' + kind); }
+    } else if (S.view === 'cycle' && x >= L.gx0 - 10 && x <= L.gx1 + 10) {
+      drag = true; S.playing = false; S.year = clamp(L.inv(x), Y0, Y1); cv.setPointerCapture(e.pointerId);
+    }
+  });
+  cv.addEventListener('pointermove', e => { if (drag) S.year = clamp(L.inv(pt(e)[0]), Y0, Y1); });
+  const up = () => { if (drag) { drag = false; changed(); } };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+
+  function set(o) {
+    const pv = S.view; Object.assign(S, o);
+    if ('day' in o || 'zoom' in o || 'act' in o || S.view !== pv) S.probe = null;
+    if ('zoom' in o) S.playing = false;
+    if (S.view === 'earth' && S.act) mark('active');
+  }
+  function play() {
+    if (S.playing) { S.playing = false; return; }
+    if (S.view === 'surface' && S.day >= 8) S.day = 0;
+    if (S.view === 'eclipse' && S.cover >= 1) S.cover = 0;
+    if (S.view === 'cycle' && S.year >= Y1 - .05) S.year = Y0;
+    S.probe = null; S.playing = true;
+  }
+  // ask: 학생이 직접 눌렀을 때만 관찰 기록으로 쳐요 (화면을 바꿀 때 저절로 솟는 것은 빼고)
+  function prom(ask) { EV.prom = 0; EV.promAsk = ask !== false; }
+  function flare() { EV.flare = 0; EV.flareAsk = true; }
+  function fx(k) { S.fx = k; if (S.act) { S.fxSeen[k] = 1; if (Object.keys(S.fxSeen).length >= 4) mark('fx'); } }
+  return { el, S, hooks, set, play, prom, flare, fx, FX, EV };
+})();
+
+/* ───────── 수업 모드 (학습지 5~7쪽 빈칸) ───────── */
+const TABS = [
+  { name: '① 태양과 광구', title: '☀ 태양과 태양의 표면(광구)', setup: { view: 'surface', act: 1 },
+    lines: ['태양: 스스로 [빛]을 내는 천체로, 지구에 많은 영향을 미쳐요.', '[광구]: 스스로 빛을 내는 천체의 표면, 밝고 둥글게 보이는 태양의 표면', '광구의 평균 온도: 약 [6000]℃', '광구(태양의 표면)에는 [흑점]과 [쌀알무늬]가 나타나요.'],
+    ask: '<b>재 봐요</b> 태양을 눌러 온도를 재 보세요. 밝은 곳과 검은 점은 온도가 어떻게 다를까요?<br><b>한자로 기억해요</b> 광구 = 빛 광(光) + 공 구(球)' },
+  { name: '② 쌀알무늬', title: '🍚 쌀알무늬', setup: { view: 'surface', zoom: true, cut: false },
+    lines: ['쌀알무늬: 광구에 나타나는 쌀알 모양의 무늬', '광구 아래에서 일어나는 [대류] 현상으로 생겨요.', '[고온]의 기체가 상승하는 곳 → [밝다]', '[저온]의 기체가 하강하는 곳 → [어둡다]'],
+    ask: '<b>관찰해요</b> 확대한 광구에서 밝은 알갱이와 어두운 경계를 찾아보세요. (📷 실제 사진을 누르면 망원경으로 찍은 쌀알무늬가 보여요)<br><b>찾아봐요</b> ✂ 단면을 눌러 보세요. 빨간 화살표(상승)와 파란 화살표(하강) 위쪽의 광구는 각각 밝은가요, 어두운가요?' },
+  { name: '③ 흑점', title: '⚫ 흑점', setup: { view: 'surface', grid: true, ghost: true, day: 0, playing: true, act: 1 },
+    lines: ['흑점: 광구에 나타나는 불규칙한 모양의 [어두운] 부분', '주변보다 온도가 약 [2000]℃ [낮아] 어둡게 보여요. → 흑점의 온도 약 [4000]℃', '흑점은 모양과 크기가 변하며, 어떤 흑점은 행성보다 크기도 해요.', '지구에서 관측하면 흑점의 위치가 변해요. → 태양이 [자전]하기 때문', '지구에서 보면 흑점은 [동쪽]에서 [서쪽]으로 움직여요.', '태양 활동이 활발하면 흑점 수가 [많아]져요.'],
+    ask: '<b>관찰해요</b> ▶ 8일 동안 관측을 눌러 보세요. 흑점은 어느 쪽에서 어느 쪽으로 움직이나요? 흑점이 움직이는 것으로 무엇을 알 수 있을까요?<br><b>헷갈리지 않게</b> 화면의 동쪽·서쪽은 지구에서 태양을 바라볼 때의 방향이에요. 🧭 자전 방향을 누르면 태양도 지구처럼 시계 반대 방향으로 자전하는 모습을 볼 수 있어요.<br><b>재 봐요</b> 🔍 확대에서 흑점을 눌러 온도를 재 보세요.' },
+  { name: '④ 태양의 대기', title: '🌑 태양의 대기 (채층과 코로나)', setup: { view: 'eclipse', cover: 0, playing: true, act: 1 },
+    lines: ['태양의 대기는 [채층]과 [코로나]로 구분해요.', '평소에는 광구가 밝아서 보기 어렵고, 광구가 완전히 가려지는 [개기 일식] 때 볼 수 있어요.', '채층: 광구 바로 위를 얇게 둘러싼 [붉은]색의 대기층', '코로나: 채층 위로 넓게 뻗어 있는 [진주]색의 희박한 대기층. 온도가 매우 높아요. (100만 ℃ 이상)', '태양의 활동이 활발할수록(흑점 수가 많을수록) 코로나는 매우 [크고] 밝게 나타나요.'],
+    ask: '<b>비교해요</b> 개기 일식이 되면 태양 활동을 😴 조용할 때와 🔥 활발할 때로 바꿔 보세요. 코로나의 크기가 어떻게 달라지나요?<br><b>확대해 봐요</b> 🔍 채층 확대·🔍 코로나 확대를 누르면 일식 사진과 위성 사진으로 가까이에서 볼 수 있어요.<br><b>생각해요</b> 왜 평소에는 태양의 대기가 보이지 않을까요?' },
+  { name: '⑤ 홍염과 플레어', title: '🔥 태양의 대기에서 나타나는 현상', setup: { view: 'events', act: 1, pshape: 'loop' },
+    lines: ['태양의 대기에서는 [홍염]과 [플레어]가 나타나기도 해요.', '홍염: 채층 위로 거대하게 분출되는 가스. [불꽃] 덩어리 기둥이나 고리 모양으로, 코로나층까지 솟아오르기도 해요.', '플레어: 채층에서 일어나는 폭발 현상. [흑점] 부근에서 [폭발]이 일어나 채층의 일부가 매우 밝아지고, 많은 양의 에너지가 일시적으로 방출돼요.', '태양 활동이 활발해지는 시기에 홍염과 플레어가 [자주] 나타나요.'],
+    ask: '<b>해 봐요</b> 🔥 홍염 솟아오르기, 💥 플레어 일으키기를 눌러 보세요. 홍염 모양을 고리·불꽃으로 바꿔 볼 수도 있어요.<br><b>구분해요</b> 흑점·쌀알무늬(표면) / 채층·코로나(대기) / 홍염·플레어(대기에서 나타나는 현상)' },
+  { name: '⑥ 태양 활동의 변화', title: '📈 태양 활동의 변화 (흑점 수)', setup: { view: 'cycle', marks: true, ext: true, period: true, year: 1986, playing: true },
+    lines: ['태양 활동은 약 [11]년을 주기로 변하며, [흑점 수]의 변화로 알 수 있어요.', '극대기: 흑점 수가 가장 [많은] 시기 → 태양 활동 활발', '극소기: 흑점 수가 가장 [적은] 시기', '그래프의 A와 B의 태양 활동 정도 비교: A [>] B', '태양 활동이 활발할 때: 흑점 수가 [많아]지고, 홍염과 [플레어]가 자주 발생하고, 코로나의 크기가 [커]지고, 태양풍이 [강]해져요.'],
+    ask: '<b>끌어 봐요</b> 그래프를 손가락으로 끌어 연도를 바꿔 보세요. 흑점 수가 많을 때 오른쪽 태양은 어떻게 보이나요?<br><b>예측해요</b> 2013년 초에 "올해는 태양풍이 강해 무선 통신이 원활하지 않을 수 있다"는 예보가 있었어요. 이런 상황이 다시 생길 것으로 예상되는 때는 언제일까요?' },
+  { name: '⑦ 지구에 미치는 영향', title: '🌍 태양 활동이 지구에 미치는 영향', setup: { view: 'earth', act: 0, fx: null },
+    lines: ['코로나가 커지면 태양에서 오는 전기를 띤 입자의 흐름인 [태양풍]이 강해져요.', '[자기 폭풍]: 지구 자기장이 불규칙하게 변해요.', '[오로라]가 더 자주, 더 넓은 지역에서 생겨요.', '전파 신호가 방해를 받아 무선 통신 장애가 생겨요. ([델린저] 현상)', '인공위성 성능 저하, 항공 분야 피해, 전력 장비 손상으로 [정전]이나 화재가 생길 수 있어요.', '국가기상위성센터에서는 태양 활동을 관측하여 [우주 기상]을 예보해 피해를 줄이려고 노력해요.'],
+    ask: '<b>비교해요</b> 평소에는 무엇이 태양풍의 피해를 막아 줄까요? 태양 활동을 🔥 활발할 때로 바꾸고 아래 영향 버튼을 하나씩 눌러 보세요.<br><b>실제 피해</b> 1989년 캐나다 퀘벡 주 발전소 정전 · 2008년 우리나라 인공위성(무궁화 호) 통신 서비스 중단 · 2017년 북미 출발 국제선 북극 항로 우회 운항<br>※ 오로라: 태양에서 방출된 전기를 띤 입자가 공기 입자와 충돌하여 빛을 내는 현상' }
+];
+
+/* ───────── 탐사 모드 문제 (모든 학생이 같은 문제) ───────── */
+const M1Q = [
+  { s: '밝고 둥글게 보이는 태양의 표면을 ___(이)라고 해요.', o: ['광구', '채층', '코로나', '흑점'], a: 0, h: '빛 광(光) + 공 구(球)', ex: '광구는 스스로 빛을 내는 천체의 표면이에요.' },
+  { s: '온도계로 재 보니 광구의 평균 온도는 약 ___℃였어요.', o: ['2000', '4000', '6000'], a: 2, h: '흑점이 아닌 밝은 곳을 눌러 보세요.' },
+  { s: '흑점이 검게 보이는 까닭은 ___ 때문이에요.', o: ['주변보다 온도가 낮기', '주변보다 온도가 높기', '달의 그림자가 비치기'], a: 0, h: '흑점과 광구의 온도를 각각 재서 비교해 보세요.', ex: '흑점은 약 4000℃로, 주변(약 6000℃)보다 약 2000℃ 낮아서 어둡게 보여요.' },
+  { s: '쌀알무늬는 광구 아래에서 일어나는 ___ 현상 때문에 생겨요.', o: ['대류', '자전', '폭발', '일식'], a: 0, h: '✂ 단면에서 기체가 오르내리는 모습을 보세요.' },
+  { s: '쌀알무늬에서 밝은 부분은 ___ 곳이에요.', o: ['고온의 기체가 상승하는', '저온의 기체가 하강하는'], a: 0, h: '빨간 화살표 위쪽이 밝았나요, 어두웠나요?', ex: '고온의 기체가 올라오는 곳은 밝고, 식어서 저온이 된 기체가 내려가는 곳은 어두워요.' },
+  { s: '며칠 동안 관측하니 흑점의 위치가 동쪽에서 서쪽으로 바뀌었어요. 그 까닭은 ___ 때문이에요.', o: ['태양이 자전하기', '지구가 공전하기', '흑점이 사라졌다 생기기'], a: 0, h: '🌐 경선·위선을 켜고 다시 관측해 보세요. 선도 함께 움직이나요?', ex: '흑점이 태양 표면에 붙어서 태양과 함께 돌기 때문에 위치가 변해요.' },
+  { s: '흑점과 쌀알무늬는 태양의 ___에서 볼 수 있어요.', o: ['표면(광구)', '대기'], a: 0 }
+];
+const M2P = { s: '달이 광구를 완전히 가리는 개기 일식 때, 평소에는 보기 어려운 무엇을 볼 수 있을까요?', o: ['흑점과 쌀알무늬', '태양의 대기 (채층과 코로나)', '아무것도 보이지 않는다'], a: 1,
+  ex: '평소에는 광구가 너무 밝아서 태양의 대기가 보이지 않아요. 광구가 완전히 가려지면 채층과 코로나를 볼 수 있어요.' };
+const CATS = ['태양의 표면 (광구)', '태양의 대기', '대기에서 나타나는 현상'];
+const SORT = [['코로나', 1, 'corona'], ['흑점', 0, 'spot'], ['홍염', 2, 'prom'], ['채층', 1, 'chrom'], ['플레어', 2, 'flare'], ['쌀알무늬', 0, 'gran']];
+const M2Q = [
+  { s: '평소에 태양의 대기를 보기 어려운 까닭은 ___ 때문이에요.', o: ['광구가 너무 밝기', '태양에 대기가 없기', '태양의 대기가 밤에만 생기기'], a: 0, h: '일식이 진행될 때 하늘과 태양 주변이 어떻게 바뀌었나요?' },
+  { s: '광구 바로 위를 얇게 둘러싼 ___색의 대기층은 채층이에요.', o: ['붉은', '푸른', '진주'], a: 0 },
+  { s: '채층 위로 넓게 뻗어 있는 진주색의 희박한 대기층은 ___예요.', o: ['코로나', '채층', '홍염', '광구'], a: 0 },
+  { s: '고온의 가스가 채층 위로 불꽃이나 고리 모양으로 솟아오르는 현상은 ___이에요.', o: ['홍염', '플레어', '흑점', '쌀알무늬'], a: 0 },
+  { s: '흑점 부근에서 폭발이 일어나 채층의 일부가 매우 밝아지는 현상은 ___예요.', o: ['플레어', '홍염', '코로나', '오로라'], a: 0, ex: '플레어가 일어나면 많은 양의 에너지가 일시적으로 방출돼요.' },
+  { s: '채층과 코로나 중 온도가 더 높은 것은 ___예요.', o: ['채층', '코로나'], a: 1, h: '코로나는 온도가 매우 높은 대기층이에요.' },
+  { s: '태양 활동이 활발해지는 시기에 홍염과 플레어는 ___ 나타나요.', o: ['자주', '드물게', '전혀 안'], a: 0, h: '🔥 활발할 때와 😴 조용할 때를 바꿔 가며 비교해 보세요.' }
+];
+const M3P = { s: '흑점 수가 많아져 태양 활동이 활발해지면, 태양에서 지구로 오는 태양풍은 어떻게 될까요?', o: ['강해진다', '약해진다', '변화 없다'], a: 0,
+  ex: '태양 활동이 활발해지면 코로나가 커지고, 전기를 띤 입자의 흐름인 태양풍이 강해져서 지구에 영향을 미쳐요.' };
+const M3Q = [
+  { s: '흑점 수 그래프에서 극대기에서 다음 극대기까지는 약 ___년이에요.', o: ['1', '5', '11', '30'], a: 2, h: '📏 주기 재기를 켜 보세요.', ex: '태양 활동은 약 11년을 주기로 변해요. 극소기에서 다음 극소기까지도 약 11년이에요.' },
+  { s: '그래프의 A와 B 중 태양 활동이 더 활발한 때는 ___예요.', o: ['A', 'B', '같다'], a: 0, fig: 'graphAB', ex: 'A는 흑점 수가 가장 많은 극대기, B는 가장 적은 극소기예요. 그래서 A > B예요.' },
+  { s: '태양 활동이 활발할 때 태양에서 일어나는 변화로 옳지 않은 것은?', o: ['흑점 수가 많아진다.', '홍염과 플레어가 자주 발생한다.', '코로나의 크기가 작아진다.', '태양풍이 강해진다.'], a: 2, ex: '태양 활동이 활발할 때 코로나의 크기는 커져요.' },
+  { s: '태양에서 오는 전기를 띤 입자의 흐름을 ___(이)라고 해요.', o: ['태양풍', '오로라', '코로나', '자기 폭풍'], a: 0 },
+  { s: '지구 자기장이 짧은 시간 동안 불규칙하게 변하는 현상은 ___이에요.', o: ['자기 폭풍', '델린저 현상', '오로라', '플레어'], a: 0 },
+  { s: '전파 신호가 방해를 받아 장거리 무선 통신에 장애가 생기는 현상을 ___ 현상이라고 해요.', o: ['델린저', '대류', '자기 폭풍'], a: 0 },
+  { s: '태양 활동이 활발할 때 오로라는 ___.', o: ['더 자주, 더 넓은 지역에서 생긴다', '생기지 않는다', '태양 활동과 관계없이 늘 같다'], a: 0, ex: '오로라는 태양에서 온 전기를 띤 입자가 공기 입자와 충돌하여 빛을 내는 현상으로, 태양 활동이 활발하면 더 넓은 지역에서 강하게 생겨요.' },
+  { s: '2013년 초에 "올해는 태양풍이 강하여 전 세계에서 무선 전파 통신이 원활하지 않을 수 있습니다."라는 예보가 있었어요. 이런 상황이 다시 생길 것으로 예상되는 때는 ___년경이에요.', o: ['2014', '2018', '2024', '2035'], a: 2, h: '태양 활동의 주기를 떠올려 보세요.', ex: '태양 활동 주기는 흑점 수 주기인 약 11년과 같아서 2013 + 11 = 2024년경이에요.' }
+];
+const QUIZ = [
+  { s: '사진은 태양 표면을 확대한 것이에요. A(검은 부분)의 이름은?', fig: 'spotAB', o: ['쌀알무늬', '흑점', '홍염', '채층'], a: 1, ex: '흑점은 주변보다 온도가 낮아 어둡게 보이는 부분이에요.' },
+  { s: '위 사진에서 B(쌀알무늬)가 생기는 까닭은?', fig: 'spotAB', o: ['태양의 자전', '흑점의 폭발', '광구 아래의 대류', '달의 그림자'], a: 2, ex: '고온의 기체가 상승하는 곳은 밝고, 저온의 기체가 하강하는 곳은 어두워요.' },
+  { s: '광구의 온도는 약 6000℃예요. 흑점의 온도는?', o: ['약 2000℃', '약 4000℃', '약 6000℃'], a: 1, ex: '흑점은 주변보다 약 2000℃ 낮아서 어둡게 보여요.' },
+  { s: '같은 흑점 무리를 4일 간격으로 찍었어요. 흑점의 위치가 바뀐 까닭은?', fig: 'pRot', o: ['태양이 자전해서', '지구가 자전해서', '흑점이 사라졌다 다시 생겨서', '달이 태양 앞을 지나가서'], a: 0, ex: '지구에서 보면 흑점이 동쪽에서 서쪽으로 옮겨 가요. (2014년 10월, NASA SDO)' },
+  { s: '평소에는 보이지 않는 태양의 대기를 볼 수 있는 때는?', o: ['보름달이 뜰 때', '해가 질 때', '흑점이 많을 때', '개기 일식 때'], a: 3, ex: '광구가 너무 밝아서 평소에는 대기가 보이지 않아요. 달이 광구를 완전히 가리면 볼 수 있어요.' },
+  { s: '사진의 A, B, C를 옳게 짝 지은 것은?', fig: 'atmo3', o: ['A 코로나 · B 홍염 · C 채층', 'A 채층 · B 플레어 · C 코로나', 'A 채층 · B 홍염 · C 코로나', 'A 홍염 · B 채층 · C 코로나'], a: 2, ex: 'A는 광구 바로 위의 붉은 채층, B는 채층 위로 솟은 홍염, C는 넓게 뻗은 진주색 코로나예요.' },
+  { s: '채층과 코로나 중 온도가 더 높은 것은?', o: ['채층', '코로나', '같다'], a: 1, ex: '코로나는 채층보다 온도가 매우 높아요.' },
+  { s: '흑점 부근에서 폭발이 일어나 채층의 일부가 매우 밝아진 이 현상은?', fig: 'pFlare', o: ['홍염', '흑점', '쌀알무늬', '플레어'], a: 3, ex: '플레어가 일어나면 많은 양의 에너지가 일시적으로 방출돼요. (위성이 자외선으로 찍고 색을 입힌 사진)' },
+  { s: '채층 위로 거대하게 분출되는 불꽃·고리 모양의 가스는?', o: ['홍염', '플레어', '코로나', '오로라'], a: 0, ex: '홍염은 코로나층까지 솟아오르기도 해요.' },
+  { s: '<보기> 사진 중 태양의 표면에서 볼 수 있는 것을 모두 고른 것은?', fig: 'five', o: ['ㄱ, ㄴ', 'ㄷ, ㄹ', 'ㄴ, ㅁ', 'ㄱ, ㄷ'], a: 1, ex: 'ㄱ 홍염, ㄴ 코로나, ㄷ 쌀알무늬, ㄹ 흑점, ㅁ 채층. 표면에서는 쌀알무늬와 흑점을 볼 수 있어요.' },
+  { s: '그래프의 A처럼 흑점 수가 가장 많은 시기의 이름과 그때의 태양 활동은?', fig: 'graphA', o: ['극소기, 활발하다', '극대기, 조용하다', '극소기, 조용하다', '극대기, 활발하다'], a: 3, ex: '흑점 수는 약 11년을 주기로 변해요. 흑점 수가 많을수록 태양 활동이 활발해요.' },
+  { s: '두 개기 일식 사진 중 태양 활동이 더 활발할 때 찍은 것과 그 까닭은?', fig: 'corona2', o: ['(나), 코로나가 커서', '(가), 코로나가 작아서', '(가), 달이 더 커서', '(나), 달이 더 작아서'], a: 0, ex: '태양 활동이 활발할수록 코로나가 크고 밝게 나타나요.' },
+  { s: '사진은 우주 정거장에서 찍은 오로라예요. 태양 활동이 활발할 때 일어나는 일이 아닌 것은?', fig: 'pAurora', o: ['오로라가 더 자주, 더 넓은 지역에서 생긴다.', '무선 통신 장애(델린저 현상)가 생긴다.', '태양풍이 약해진다.', '인공위성의 성능이 떨어진다.'], a: 2, ex: '태양 활동이 활발하면 코로나가 커져 태양풍이 강해져요.' }
+];
+/* 정답 자리 옮기기: 정답이 첫 번째에 몰리지 않게 정해진 차례(ROT_A)대로 정답을 다른 자리와 바꿔요.
+   모든 학생이 같은 순서로 받아요. 숫자·연도·ㄱㄴㄷ 조합처럼 차례가 있는 보기는 그대로 두고,
+   해설에 ①②를 쓰는 확인 퀴즈(QUIZ)는 정답 자리를 직접 정해 두었어요 */
+(() => {
+  const ROT_A = [2, 0, 3, 1, 2, 1, 3, 0, 1, 2, 0, 3];
+  const fixed = q => q.o.every(o => /^[\d\sㄱ-ㅎ,]+$/.test(o));
+  let k = 0;
+  [M2P, M3P].concat(M1Q, M2Q, M3Q).forEach(q => {
+    if (fixed(q)) return;
+    const t = ROT_A[k++ % ROT_A.length] % q.o.length;
+    if (t !== q.a) { [q.o[q.a], q.o[t]] = [q.o[t], q.o[q.a]]; q.a = t; }
+  });
+})();
+
+/* ───────── 그림 (문제·분류 카드) ───────── */
+let gid = 0;
+function ico(kind, opt) {
+  const id = 'g' + (++gid), R1 = rng(kind.length * 7 + 3);
+  // 쌀알무늬: 고르게 흩어진 밝은 알갱이 사이로 어두운 경계가 보이게
+  const gran = (bg, fg, gap, r) => { let s = `<rect width="100" height="100" fill="${bg}"/>`; for (let y = 0; y < 104; y += gap) for (let x = (y / gap % 2) * gap / 2; x < 104; x += gap) s += `<ellipse cx="${(x + (R1() - .5) * gap * .35).toFixed(1)}" cy="${(y + (R1() - .5) * gap * .35).toFixed(1)}" rx="${(r * (.8 + R1() * .35)).toFixed(1)}" ry="${(r * (.8 + R1() * .35)).toFixed(1)}" fill="${fg}"/>`; return s; };
+  if (kind === 'spot') return gran('#8a4a12', '#f0b04a', 8.5, 3.6) + `<ellipse cx="50" cy="50" rx="25" ry="20" fill="#6a300a" opacity=".9"/>` + Array.from({ length: 40 }, (_, i) => { const a = i * 9 * D2R, r = 21 + R1() * 7; return `<line x1="${50 + Math.cos(a) * 10}" y1="${50 + Math.sin(a) * 8}" x2="${(50 + Math.cos(a) * r).toFixed(1)}" y2="${(50 + Math.sin(a) * r * .8).toFixed(1)}" stroke="#3a1806" stroke-width="1.4"/>`; }).join('') + `<path d="M40 46 Q46 36 56 42 Q64 48 58 56 Q50 62 42 56 Q36 52 40 46Z" fill="#1e0d04"/><circle cx="24" cy="30" r="3" fill="#2a1205"/><circle cx="78" cy="66" r="2.5" fill="#2a1205"/>`;
+  if (kind === 'gran') return gran('#7a3e0e', '#f4bd55', 9.5, 4.1);
+  if (kind === 'chrom') return `<rect width="100" height="100" fill="#000"/><circle cx="50" cy="56" r="38" fill="#000" stroke="#ff304866" stroke-width="7"/><circle cx="50" cy="56" r="38" fill="none" stroke="#ff3b5c" stroke-width="2.2"/><path d="M22 30 q-4 -8 2 -10" stroke="#ff3b5c" stroke-width="2" fill="none"/>`;
+  if (kind === 'corona') { const big = !opt || opt.big; return `<defs><radialGradient id="${id}"><stop offset="${big ? .38 : .5}" stop-color="#fffdf5"/><stop offset="${big ? .62 : .66}" stop-color="#e6e2ff" stop-opacity=".55"/><stop offset="1" stop-color="#e6e2ff" stop-opacity="0"/></radialGradient></defs><rect width="100" height="100" fill="#000"/><circle cx="50" cy="50" r="${big ? 50 : 40}" fill="url(#${id})"/>${big ? Array.from({ length: 14 }, (_, i) => { const a = (i * 360 / 14 + R1() * 10) * D2R; return `<line x1="50" y1="50" x2="${(50 + Math.cos(a) * 50).toFixed(1)}" y2="${(50 + Math.sin(a) * 50).toFixed(1)}" stroke="#fff" stroke-opacity=".35" stroke-width="3"/>`; }).join('') : ''}<circle cx="50" cy="50" r="${big ? 22 : 25}" fill="#05060a"/>`; }
+  if (kind === 'prom') return `<defs><radialGradient id="${id}" cx="0" cy="1" r="1.2"><stop offset=".5" stop-color="#ffb23a"/><stop offset="1" stop-color="#d4500e"/></radialGradient></defs><rect width="100" height="100" fill="#140300"/><circle cx="-10" cy="120" r="95" fill="url(#${id})"/><path d="M38 40 Q55 -8 78 52" stroke="#ff5a2a" stroke-opacity=".45" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M38 40 Q55 -8 78 52" stroke="#ffa070" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+  if (kind === 'flare') return `<defs><radialGradient id="${id}"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#fff3b0"/><stop offset="1" stop-color="#ffd060" stop-opacity="0"/></radialGradient></defs>` + gran('#b04a0c', '#ec8a2a', 9, 3.8) + `<circle cx="56" cy="48" r="34" fill="url(#${id})"/>` + Array.from({ length: 10 }, (_, i) => { const a = i * 36 * D2R; return `<line x1="56" y1="48" x2="${(56 + Math.cos(a) * 40).toFixed(1)}" y2="${(48 + Math.sin(a) * 40).toFixed(1)}" stroke="#fff" stroke-opacity=".6" stroke-width="2"/>`; }).join('');
+  return '';
+}
+const icoSVG = (k, o) => `<svg viewBox="0 0 100 100" aria-hidden="true">${ico(k, o)}</svg>`;
+const svgText = (x, y, t, o) => `<text x="${x}" y="${y}" fill="${(o && o.c) || '#eef2ff'}" font-size="${(o && o.s) || 15}" font-family="Do Hyeon, Noto Sans KR, sans-serif" text-anchor="${(o && o.a) || 'middle'}">${t}</text>`;
+const nest = (k, x, y, s, o) => `<svg x="${x}" y="${y}" width="${s}" height="${s}" viewBox="0 0 100 100">${ico(k, o)}</svg>`;
+function figGraph(labels) {
+  const gx0 = 40, gx1 = 305, gy0 = 18, gy1 = 160, X = y => gx0 + (y - Y0) / (Y1 - Y0) * (gx1 - gx0), Yv = n => gy1 - n / 250 * (gy1 - gy0);
+  let d = ''; for (let y = Y0; y <= Y1 + .01; y += .25) d += (y === Y0 ? 'M' : 'L') + X(y).toFixed(1) + ' ' + Yv(spotN(y)).toFixed(1);
+  return `<svg class="fig" viewBox="0 0 320 190"><path d="M${gx0} ${gy0 - 6} V${gy1} H${gx1 + 4}" stroke="#a9b4d8" fill="none"/>${[100, 200].map(n => svgText(gx0 - 5, Yv(n) + 4, n, { s: 11, a: 'end', c: '#a9b4d8' })).join('')}${[1990, 2000, 2010, 2020].map(y => svgText(X(y), gy1 + 15, y, { s: 11, c: '#a9b4d8' })).join('')}${svgText(10, 12, '흑점 수(개)', { s: 11, a: 'start', c: '#a9b4d8' })}${svgText(gx1 + 4, 186, '연도(년)', { s: 11, a: 'end', c: '#a9b4d8' })}<path d="${d}" stroke="#ffcf5a" stroke-width="2.5" fill="none"/>
+${labels.map(([y, t]) => `<circle cx="${X(y)}" cy="${Yv(spotN(y))}" r="4" fill="#fff"/>${svgText(X(y), Yv(spotN(y)) - (t === 'B' ? 22 : 9), t, { s: 15 })}${t === 'B' ? `<line x1="${X(y)}" y1="${Yv(spotN(y)) - 18}" x2="${X(y)}" y2="${Yv(spotN(y)) - 5}" stroke="#fff"/>` : ''}`).join('')}</svg>`;
+}
+/* 실제 사진 문제 그림: 사진을 정사각형 칸에 가운데 맞춰 꽉 채워요 (images 폴더)
+   표시 자리(%)는 사진 속 흑점·채층·홍염·코로나 위치를 계산해서 정했어요 */
+const pic = (n, x, y, s, h) => `<rect x="${x}" y="${y}" width="${s}" height="${h || s}" fill="#000"/><image href="images/${n}.jpg" x="${x}" y="${y}" width="${s}" height="${h || s}" preserveAspectRatio="xMidYMid slice"/>`;
+// 일식 사진은 달이 가운데 오게 잘라요: [사진 폭, 높이, 달 가운데 x, y, 반지름]
+const eclPic = (n, x, y, s, [iw, ih, cx, cy, r], k) => `<rect x="${x}" y="${y}" width="${s}" height="${s}" fill="#000"/><svg x="${x}" y="${y}" width="${s}" height="${s}" viewBox="${cx - r * k} ${cy - r * k} ${2 * r * k} ${2 * r * k}"><image href="images/${n}.jpg" width="${iw}" height="${ih}"/></svg>`;
+const tag = (t, tx, ty, px, py) => `<line x1="${tx}" y1="${ty}" x2="${px}" y2="${py}" stroke="#fff" stroke-width="1.6"/><circle cx="${px}" cy="${py}" r="2.2" fill="#fff"/><circle cx="${tx}" cy="${ty}" r="9" fill="#000c" stroke="#fff"/>${svgText(tx, ty + 5, t, { s: 13 })}`;
+const PCR = '<text x="99%" y="99%" text-anchor="end" font-size="7" fill="#a9b4d8">실제 사진: NASA SDO · NSO · Luc Viatour</text>';
+const FIGS = {
+  // A: 흑점 무리 사진의 큰 흑점, B: 쌀알무늬 사진
+  spotAB: () => `<svg class="fig ph" viewBox="0 0 250 132">${pic('spot', 8, 6, 115)}${pic('granulation', 128, 6, 115)}${tag('A', 22, 20, 52, 72)}${tag('B', 230, 24, 196, 52)}${svgText(65, 129, '태양 표면 확대 (1)', { s: 9, c: '#a9b4d8' })}${svgText(185, 129, '태양 표면 확대 (2)', { s: 9, c: '#a9b4d8' })}</svg>`,
+  // A: 채층 (일식 때 달 가장자리 붉은 층), B: 홍염, C: 코로나
+  atmo3: () => `<svg class="fig ph" viewBox="0 0 330 112">${pic('zoom-chrom', 5, 5, 100)}${pic('prom', 115, 5, 100)}${pic('zoom-corona', 225, 5, 100)}${tag('A', 18, 18, 41, 40)}${tag('B', 192, 20, 140, 74)}${tag('C', 312, 18, 302, 45)}${PCR}</svg>`,
+  graphA: () => figGraph([[2001.6, 'A']]),
+  graphAB: () => figGraph([[2001.6, 'A'], [2008.8, 'B']]),
+  // (가) 2017년 개기 일식(태양 활동이 조용할 때), (나) 1999년 개기 일식(활발할 때) — 달 크기를 같게 맞췄어요
+  corona2: () => `<svg class="fig ph" viewBox="0 0 240 136">${eclPic('eclipse-2017', 10, 5, 108, [1000, 666, 519, 324, 126], 2.2)}${eclPic('eclipse-1999', 122, 5, 108, [900, 886, 448, 448, 204], 2.2)}${svgText(64, 128, '(가)', { s: 13 })}${svgText(176, 128, '(나)', { s: 13 })}</svg>`,
+  five: () => `<svg class="fig ph" viewBox="0 0 340 90">${[['prom', 'ㄱ'], ['zoom-corona', 'ㄴ'], ['granulation', 'ㄷ'], ['spot', 'ㄹ'], ['zoom-chrom', 'ㅁ']].map(([k, t], i) => pic(k, 6 + i * 67, 4, 62) + svgText(37 + i * 67, 84, t, { s: 13 })).join('')}</svg>`,
+  pFlare: () => `<svg class="fig ph" viewBox="0 0 200 150">${pic('flare', 0, 0, 200, 150)}${svgText(197, 146, 'NASA SDO · 2017년 9월 6일', { s: 7, a: 'end', c: '#d8def5' })}</svg>`,
+  pRot: () => `<svg class="fig ph" viewBox="0 0 240 130">${pic('disk-1019', 8, 5, 110)}${pic('disk-1023', 122, 5, 110)}${svgText(63, 126, '10월 19일', { s: 11 })}${svgText(177, 126, '10월 23일', { s: 11 })}</svg>`,
+  pAct: () => `<svg class="fig ph" viewBox="0 0 240 130">${pic('disk-quiet', 8, 5, 110)}${pic('disk-1023', 122, 5, 110)}${svgText(63, 126, '(가)', { s: 12 })}${svgText(177, 126, '(나)', { s: 12 })}</svg>`,
+  pAurora: () => `<svg class="fig ph" viewBox="0 0 240 150">${pic('aurora', 0, 0, 240, 150)}${svgText(236, 146, 'NASA · 국제 우주 정거장', { s: 8, a: 'end', c: '#d8def5' })}</svg>`
+};
+
+/* ───────── 저장 ───────── */
+const KEY = 'sun-activity-v2'; // 보기 순서를 바꿔서 v2 (예전 기록은 쓰지 않아요)
+const fresh = () => ({ view: 'intro', num: '', name: '', code: '', m1: { seen: {}, q: {} }, m2: { seen: {}, q: {}, pred: null, s: {} }, m3: { seen: {}, q: {}, pred: null }, m4: { q: {} }, game: { best: 0, plays: 0, last: 0, clear: 0, rate: null }, sentSig: '', sent: false });
+let state = fresh();
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.m1) state = Object.assign(fresh(), s, { view: 'intro' }); } catch (e) {}
+const ui = { tab: 0, rev: {}, fb: {}, server: null, teacher: null, submitMsg: '' };
+let syncTimer = null;
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} clearTimeout(syncTimer); syncTimer = setTimeout(sync, 1500); }
+
+const QS = { m1: [M1Q, () => state.m1.q], m2: [M2Q, () => state.m2.q], m3: [M3Q, () => state.m3.q], m4: [QUIZ, () => state.m4.q] };
+const PREDS = { m2: M2P, m3: M3P };
+const qDone = (qs, rec) => qs.every((q, i) => rec[i] && rec[i].ok);
+const okCount = (qs, rec) => qs.filter((q, i) => rec[i] && rec[i].ok).length;
+const firstOk = (qs, rec) => qs.filter((q, i) => rec[i] && rec[i].ok && !rec[i].no.length).length;
+const CHECK = {
+  m1: [['temp-photo', '🌡 광구의 온도 재기 (밝은 곳 누르기)'], ['temp-spot', '🌡 흑점의 온도 재기 (검은 점 누르기)'], ['rot', '📅 8일 동안 흑점의 이동 끝까지 관측하기'], ['cut', '🔍 확대 → ✂ 단면으로 쌀알무늬가 생기는 까닭 보기']],
+  m2: [['total', '🌑 개기 일식 만들기 (달이 광구를 완전히 가리게)'], ['prom', '🔥 홍염 솟아오르기'], ['flare', '💥 플레어 일으키기']],
+  m3: [['max', '📈 그래프에서 극대기 찾기 (끌어서 꼭대기로)'], ['min', '📉 그래프에서 극소기 찾기 (끌어서 바닥으로)'], ['active', '🌍 지구에 미치는 영향에서 태양 활동을 🔥 활발할 때로 바꾸기'], ['fx', '📡 지구에 미치는 영향에서 영향 버튼 4개 이상 눌러 보기 (활발할 때)']]
+};
+const predOk = m => !PREDS[m] || !!(state[m].pred && state[m].pred.ok);
+const seenAll = m => CHECK[m].every(([k]) => state[m].seen[k]);
+const sortOk = i => !!(state.m2.s[i] && state.m2.s[i].ok);
+const sortDone = () => SORT.every((x, i) => sortOk(i));
+const sortFirst = () => SORT.filter((x, i) => sortOk(i) && !state.m2.s[i].no.length).length;
+const MISSIONS = [
+  { v: 'm1', t: '임무 1. 태양의 표면', d: '광구의 온도를 재고, 흑점이 움직이는 까닭과 쌀알무늬가 생기는 까닭을 찾아요.', done: () => qDone(M1Q, state.m1.q) },
+  { v: 'm2', t: '임무 2. 태양의 대기', d: '개기 일식을 만들어 채층과 코로나를 보고, 홍염과 플레어를 관측해 표면·대기·대기 현상으로 분류해요.', done: () => predOk('m2') && sortDone() && qDone(M2Q, state.m2.q) },
+  { v: 'm3', t: '임무 3. 태양 활동과 지구', d: '흑점 수 그래프에서 태양 활동의 주기를 찾고, 태양 활동이 활발할 때 지구가 받는 영향을 알아봐요.', done: () => predOk('m3') && qDone(M3Q, state.m3.q) },
+  { v: 'm4', t: '임무 4. 확인 퀴즈', d: `형성평가 유형 ${QUIZ.length}문제로 배운 내용을 정리해요.`, done: () => qDone(QUIZ, state.m4.q) }
+];
+const unlocked = i => i === 0 || MISSIONS[i - 1].done();
+
+/* ───────── 화면 조각 ───────── */
+const on = c => c ? ' on' : '';
+function grp(label, act, items, cur, cls) {
+  return `<span class="group${cls ? ' ' + cls : ''}"><span class="lbl">${label}</span>${items.map(([v, t]) => `<button class="chip${on(cur(v))}" data-act="${act}" data-v="${v}">${t}</button>`).join('')}</span>`;
+}
+function ctrls() {
+  const S = Stage.S, v = S.view, cls = state.view === 'class';
+  const sw = { m2: [['eclipse', '🌑 개기 일식 (대기)'], ['events', '🔥 홍염·플레어']], m3: [['cycle', '📈 흑점 수 변화'], ['earth', '🌍 지구에 미치는 영향']] }[state.view];
+  let h = sw ? `<div class="ctrl">${grp('보기', 'sview', sw, x => v === x)}</div>` : '';
+  const spd = grp('빠르기', 'spd', [[0, '🐢 느리게'], [1, '보통'], [2, '빠르게']], x => S.speed === x);
+  const act = grp('태양 활동', 'act', [[0, '😴 조용할 때'], [1, '🔥 활발할 때']], x => S.act === x);
+  const play = lbl => `<button class="chip big${S.playing ? '' : ' play'}" data-act="play">${S.playing ? '⏸ 멈춤' : lbl}</button>`;
+  if (v === 'surface') {
+    if (!S.zoom && !S.rotv) h += `<div class="ctrl">${play('▶ 8일 동안 관측')}${grp('날짜', 'day', [[0, '처음'], [4, '4일 후'], [8, '8일 후']], x => !S.playing && Math.round(S.day) === x)}${spd}</div>`;
+    const togs = S.rotv && !S.zoom ? [['rotv', '🧭 자전 방향']]
+      : (S.cut ? [] : [['photo', '📷 실제 사진']]).concat(S.zoom ? [['zoom', '🔍 확대 (쌀알무늬·흑점)'], ['cut', '✂ 단면 (대류)']] : [['zoom', '🔍 확대 (쌀알무늬·흑점)'], ['grid', '🌐 경선·위선'], ['ghost', '👣 처음 위치'], ['rotv', '🧭 자전 방향']]);
+    h += `<div class="ctrl">${S.rotv && !S.zoom ? '<button class="chip big play" data-act="tog" data-v="rotv">↩ 태양 관측으로 돌아가기</button>' : ''}${grp('보기', 'tog', togs, k => S[k])}${S.zoom ? (S.cut ? spd : '') : S.rotv ? '' : act}</div>`;
+  } else if (v === 'eclipse') {
+    const ez = grp('확대 사진', 'ez', [['chrom', '🔍 채층 확대'], ['corona', '🔍 코로나 확대']], k => S.ez === k);
+    h += S.ez ? `<div class="ctrl"><button class="chip big play" data-act="ez" data-v="">↩ 개기 일식으로 돌아가기</button>${ez}</div>`
+      : `<div class="ctrl">${play(S.cover >= 1 ? '↺ 다시 일식 진행' : '▶ 일식 진행')}<span class="group"><span class="lbl">달 위치</span><input class="rng" type="range" min="0" max="1" step="0.002" value="${S.cover}" data-rng="cover" aria-label="달 위치"></span>${spd}</div><div class="ctrl">${act}${grp('보기', 'tog', [['photo', '📷 개기 일식 때 실제 사진']], k => S[k])}${ez}</div>`;
+  } else if (v === 'events') {
+    h += `<div class="ctrl"><button class="chip big play" data-act="prom">🔥 홍염 솟아오르기</button><button class="chip big hot" data-act="flare">💥 플레어 일으키기</button>${grp('홍염 모양', 'pshape', [['loop', '고리'], ['flame', '불꽃']], x => S.pshape === x)}</div><div class="ctrl">${grp('보기', 'tog', [['photo', '📷 실제 사진']], k => S[k])}${act}${spd}</div>`;
+  } else if (v === 'cycle') {
+    h += `<div class="ctrl">${play(S.year >= Y1 - .05 ? '↺ 1986년부터 재생' : '▶ 재생')}<span class="group"><span class="lbl">연도</span><input class="rng" type="range" min="${Y0}" max="${Y1}" step="0.1" value="${S.year}" data-rng="year" aria-label="연도"></span>${spd}</div>
+<div class="ctrl">${grp('보기', 'tog', [['photo', '📷 실제 사진'], ['marks', 'A·B 표시'], ['period', '📏 주기 재기']].concat(cls ? [['ext', '극대기·극소기 모두']] : []), k => S[k])}</div>`;
+  } else if (v === 'earth') {
+    h += `<div class="ctrl">${act}${grp('보기', 'tog', [['photo', '📷 오로라 실제 사진']], k => S[k])}</div><div class="ctrl">${grp('영향', 'fx', Object.entries(Stage.FX).map(([k, [t]]) => [k, t]), k => S.fx === k)}</div>`;
+  }
+  return h;
+}
+function fill(str, key) {
+  let n = 0;
+  return str.replace(/\[(.+?)\]/g, (m, w) => { const k = key + '-' + (n++), show = ui.rev[k]; return `<button class="blank${show ? ' show' : ''}" data-act="reveal" data-k="${k}">${w}</button>`; });
+}
+function qList(m, locked) {
+  const [qs, recf] = QS[m], rec = recf();
+  return qs.map((q, i) => {
+    const r = rec[i] || { no: [] }, f = ui.fb[m + i];
+    const s = esc(q.s).replace('___', `<span class="blank${r.ok ? ' ok' : ''}">${r.ok ? esc(q.o[q.a]) : '?'}</span>`);
+    return `<div class="q${locked ? ' locked' : ''}">${q.fig ? FIGS[q.fig]() : ''}<div class="s">${i + 1}. ${s}</div>${q.box ? `<div class="bogi"><b>보기</b><br>${q.box.map(esc).join('<br>')}</div>` : ''}
+<div class="opts">${q.o.map((o, j) => `<button class="opt${r.no.includes(j) ? ' no' : ''}${r.ok && j === q.a ? ' sel' : ''}" data-act="ans" data-m="${m}" data-i="${i}" data-j="${j}"${locked || r.ok ? ' disabled' : ''}>${q.o.length > 3 && !q.s.includes('___') ? '①②③④⑤'[j] + ' ' : ''}${esc(o)}</button>`).join('')}</div>
+${f && !r.ok ? `<div class="fb bad">${f}</div>` : ''}${r.ok ? `<div class="fb ok">${r.no.length ? '✔ 맞아요!' : '🎯 한 번에 정답!'}</div>${q.ex ? `<div class="fb ex">💡 ${esc(q.ex)}</div>` : ''}` : ''}</div>`;
+  }).join('');
+}
+function checklist(m) {
+  return `<ul class="check">${CHECK[m].map(([k, t]) => { const ok = state[m].seen[k]; return `<li class="${ok ? 'ok' : ''}">${ok ? '✅' : '⬜'} ${t}</li>`; }).join('')}</ul>`;
+}
+function predBox(m) {
+  const P = PREDS[m], p = state[m].pred || { no: [] }, f = ui.fb.pred;
+  return `<div class="boxq"><b>🔮 먼저 예측!</b> ${esc(P.s)}
+<div class="opts">${P.o.map((o, j) => `<button class="opt${p.no.includes(j) ? ' no' : ''}${p.ok && j === P.a ? ' sel' : ''}" data-act="pred" data-j="${j}"${p.ok ? ' disabled' : ''}>${esc(o)}</button>`).join('')}</div>
+${f ? `<div class="fb ${f.ok ? 'ok' : 'bad'}">${f.msg}</div>` : ''}${p.ok ? `<div class="fb ex">💡 ${esc(P.ex)}</div>` : ''}</div>`;
+}
+function doneBox(i) {
+  const next = MISSIONS[i + 1];
+  return `<div class="done"><b>🏅 ${MISSIONS[i].t} 완료!</b>${next ? `<button class="btn small" data-act="enter" data-v="${next.v}">다음 임무 →</button>` : `<button class="btn small" data-act="enter" data-v="game">🎮 마지막 도전 게임 →</button><button class="btn ghost small" data-act="enter" data-v="cert">결과 보기</button>`}</div>`;
+}
+function mTop(title) {
+  return `<div class="top"><button class="btn ghost small" data-act="enter" data-v="map">← 임무 목록</button><span class="title" style="font-size:24px">${title}</span><span class="grow"></span><span class="pill">🧑‍🚀 <b>${esc(state.num)} ${esc(state.name)}</b></span></div>`;
+}
+// 문제 풀 때 펼쳐 보는 한눈에 정리
+function tipBox() {
+  return `<details class="tip"${ui.tipOpen ? ' open' : ''}><summary>💡 태양 한눈에 정리 (눌러서 펼치기)</summary>
+<table class="ttable"><tr><th>태양의 표면 (광구)</th><td><b>흑점</b>: 주변보다 온도가 낮아 어두운 부분(약 4000℃), 태양의 자전으로 위치가 변함 · <b>쌀알무늬</b>: 광구 아래의 대류로 생김 (상승 밝음, 하강 어두움) · 광구 평균 약 6000℃</td></tr>
+<tr><th>태양의 대기</th><td>개기 일식 때 관측 · <b>채층</b>: 광구 바로 위 얇은 붉은색 · <b>코로나</b>: 채층 위로 넓게 뻗은 진주색, 온도가 매우 높음(100만 ℃ 이상)</td></tr>
+<tr><th>대기에서 나타나는 현상</th><td><b>홍염</b>: 채층 위로 분출되는 가스 (불꽃·고리 모양, 코로나층까지 솟기도 함) · <b>플레어</b>: 채층에서 일어나는 폭발, 흑점 부근에서 채층 일부가 매우 밝아짐</td></tr>
+<tr><th>태양 활동 활발 (흑점 수 많음, 약 11년 주기)</th><td>흑점 수↑ · 홍염·플레어 자주 · 코로나 크기↑ · 태양풍 강해짐 → 지구: 자기 폭풍, 오로라 자주·넓게, 무선 통신 장애(델린저 현상), 인공위성 성능 저하, 항공 분야 피해, 정전·화재 · 국가기상위성센터가 우주 기상을 예보해요</td></tr></table></details>`;
+}
+
+/* ───────── 화면 ───────── */
+function viewIntro() {
+  const form = state.num
+    ? `<p><b>${esc(state.num)} ${esc(state.name)}</b> 대원, 이어서 할까요?</p><div class="row"><button class="btn" data-act="enter" data-v="map">이어서 하기</button><button class="btn ghost small" data-act="wipe">다른 사람으로 시작</button></div>`
+    : `<label for="num">학번</label><input id="num" inputmode="numeric" maxlength="6" placeholder="예: 10312" autocomplete="off">
+<label for="name">이름</label><input id="name" maxlength="12" placeholder="이름" autocomplete="off">
+${CONFIG.SUBMIT_URL ? '<label for="ccode">수업 코드</label><input id="ccode" maxlength="30" placeholder="선생님이 알려 준 코드" autocomplete="off">' : ''}
+<div class="row" style="margin-top:12px"><button class="btn" data-act="start">탐사 시작</button></div><p id="introMsg" class="fb bad"></p>`;
+  return `<section class="intro"><div><div class="stage-slot"></div><p class="note">흑점이 지나가는 태양의 표면, 코로나와 홍염이 있는 태양의 대기, 그리고 지구까지 날아오는 태양풍과 오로라를 관측해 봐요.</p></div>
+<div class="intro-r"><p class="kicker">Ⅶ. 태양계 · 1. 태양계의 구성 · 태양과 태양 활동</p><h1>☀ 태양 관측소</h1>
+<p class="lead">태양의 <b>표면</b>과 <b>대기</b>에서 일어나는 현상을 관측하고, <b>태양 활동</b>이 지구에 미치는 영향을 찾아요.</p>
+<div class="panel"><h3>👩‍🏫 수업 모드</h3><p class="muted">선생님과 함께 큰 화면으로 살펴봐요.</p><button class="btn" data-act="enter" data-v="class">수업 모드 열기</button></div>
+<div class="panel"><h3>🧑‍🚀 탐사 모드</h3><p class="muted">혼자서 관측하고 예측하는 임무 4개예요.</p>${form}</div>
+${CONFIG.SUBMIT_URL ? '<div style="text-align:right"><button class="btn ghost small" data-act="teacher">👩‍🏫 교사용</button></div>' : ''}</div></section>`;
+}
+function viewClass() {
+  const T = TABS[ui.tab];
+  return `<div class="top"><span class="title" style="font-size:26px">👩‍🏫 수업 모드</span><div class="tabs">${TABS.map((t, i) => `<button class="tab${on(i === ui.tab)}" data-act="tab" data-i="${i}">${t.name}</button>`).join('')}</div><span class="grow"></span><button class="btn ghost small" data-act="enter" data-v="intro">← 처음 화면</button></div>
+<div class="cl-stage"><div class="stage-slot"></div>${ctrls()}</div>
+<section class="panel concept big"><div class="row"><h3 style="flex:1">${T.title}</h3><button class="btn ghost small" data-act="revall">빈칸 모두 보기 / 가리기</button></div>
+<ol>${T.lines.map((l, i) => `<li>${fill(l, ui.tab + '-' + i)}</li>`).join('')}</ol>
+<div class="ask">💬 ${T.ask}</div><p class="note">빈칸을 누르면 하나씩 답이 보여요. (학습지 5~7쪽, 교과서 232~237쪽)</p></section>`;
+}
+function viewMap() {
+  const n = MISSIONS.filter(m => m.done()).length;
+  return `<div class="top"><span class="title" style="font-size:26px">🧑‍🚀 탐사 임무</span><span class="pill">진행 <b>${n}/4</b></span><span class="grow"></span><span class="pill">🧑‍🚀 <b>${esc(state.num)} ${esc(state.name)}</b></span><button class="btn ghost small" data-act="enter" data-v="cert">📋 결과</button><button class="btn ghost small" data-act="enter" data-v="intro">← 처음 화면</button></div>
+<div class="mcards">${MISSIONS.map((m, i) => { const ok = unlocked(i), d = m.done(); return `<section class="panel mcard${ok ? '' : ' lock'}"><span class="n">${d ? '<span class="st-done">✔ 완료</span>' : ok ? '도전 가능' : '🔒 앞 임무를 먼저 마쳐요'}</span><h3>${m.t}</h3><p class="muted">${m.d}</p><div class="row"><button class="btn${d ? ' ghost' : ''} small" data-act="enter" data-v="${m.v}"${ok ? '' : ' disabled'}>${d ? '다시 보기' : '시작'}</button></div></section>`; }).join('')}</div>
+${MISSIONS.every(m => m.done()) ? '<div class="done"><b>🎉 모든 임무를 마쳤어요!</b><button class="btn small" data-act="enter" data-v="cert">결과 보기 →</button></div>' : ''}
+${(() => { const ok = MISSIONS[3].done(), g = state.game; return `<section class="panel mcard${ok ? '' : ' lock'}" style="margin-top:14px"><span class="n">${ok ? (g.plays ? `🏆 내 최고 ${g.best}점 · ${g.plays}번 도전` : '도전 가능') : '🔒 임무 4를 마치면 열려요'}</span><h3>🎮 마지막 도전 · 태양 탐정</h3><p class="muted">① 이게 뭘까? → ② 우주 기상 상황실. 목숨 3개, 연속으로 맞히면 보너스! 할 때마다 순서가 바뀌고, 게임 점수는 임무 성적과 따로 기록돼요.</p><div class="row"><button class="btn small" data-act="enter" data-v="game"${ok ? '' : ' disabled'}>${g.plays ? '다시 도전' : '시작'}</button></div></section>`; })()}`;
+}
+function missionPage(i, title, side) {
+  return mTop(title) + `<div class="lesson"><div><div class="stage-slot"></div>${ctrls()}</div><aside class="panel">${side}${MISSIONS[i].done() ? doneBox(i) : ''}</aside></div>`;
+}
+function viewM1() {
+  const ok = seenAll('m1');
+  return missionPage(0, '☀ 임무 1. 태양의 표면', `<h3>🔭 관측하기</h3><p class="muted">태양을 눌러 온도를 재고, ▶ 8일 동안 관측으로 흑점이 움직이는 모습을 보세요. 🔍 확대를 누르면 광구를 가까이에서 볼 수 있어요.</p>${checklist('m1')}
+<div class="boxq"><b>💡 관측 요령</b><ul style="margin:6px 0 0 18px;padding:0"><li>🌐 경선·위선을 켜면 태양 표면에 그린 선도 흑점과 함께 움직여요.</li><li>👣 처음 위치를 켜면 처음에 흑점이 있던 자리가 점선으로 남아요.</li><li>🧭 화면의 동쪽·서쪽은 지구에서 태양을 바라볼 때의 방향이에요. 지구는 서 → 동으로 자전하는데 흑점은 왜 동 → 서로 움직일까요? 🧭 자전 방향을 눌러 보세요.</li><li>🔍 확대에서 흑점(가운데 검은 곳)과 그 주변을 각각 눌러 보세요.</li></ul></div>
+<h3>📝 탐사 보고서</h3>${ok ? '' : '<p class="fb bad">관측을 먼저 마치면 문제를 풀 수 있어요.</p>'}${qList('m1', !ok)}`);
+}
+function viewM2() {
+  const po = predOk('m2'), ok = po && seenAll('m2'), sd = sortDone();
+  const cards = `<div class="sort">${SORT.map(([nm, c, k], i) => { const r = state.m2.s[i] || { no: [] }; return `<div class="scard${r.ok ? ' ok' : ''}">${icoSVG(k)}<span class="nm">${nm}</span><div class="opts">${CATS.map((t, j) => `<button class="opt${r.no.includes(j) ? ' no' : ''}${r.ok && j === c ? ' sel' : ''}" data-act="sort" data-i="${i}" data-j="${j}"${!ok || r.ok ? ' disabled' : ''}>${t}</button>`).join('')}</div></div>`; }).join('')}</div>${ui.fb.sort ? `<div class="fb bad">${ui.fb.sort}</div>` : ''}`;
+  return missionPage(1, '🌑 임무 2. 태양의 대기', `<h3>🔭 관측하기</h3>${predBox('m2')}
+${po ? checklist('m2') + '<p class="muted">화면 아래 <b>보기</b>에서 🌑 개기 일식과 🔥 홍염·플레어를 바꿔 볼 수 있어요. 태양 활동을 바꿔 코로나 크기도 비교해 보세요.</p>' : ''}
+<h3>🗂 분류하기</h3>${ok ? '<p class="muted">각 카드가 어디에 속하는지 골라요.</p>' : '<p class="fb bad">예측하고 관측을 모두 마치면 분류할 수 있어요.</p>'}${cards}
+<h3>📝 탐사 보고서</h3>${ok && sd ? '' : '<p class="fb bad">분류를 모두 마치면 문제를 풀 수 있어요.</p>'}${qList('m2', !(ok && sd))}`);
+}
+function viewM3() {
+  const po = predOk('m3'), ok = po && seenAll('m3');
+  return missionPage(2, '🌍 임무 3. 태양 활동과 지구', `<h3>🔭 관측하기</h3>${predBox('m3')}
+${po ? checklist('m3') + '<p class="muted">화면 아래 <b>보기</b>에서 📈 흑점 수 변화와 🌍 지구에 미치는 영향을 바꿔 볼 수 있어요.</p>' : ''}
+<h3>📝 탐사 보고서</h3>${ok ? '' : '<p class="fb bad">예측하고 관측을 모두 마치면 문제를 풀 수 있어요.</p>'}${qList('m3', !ok)}`);
+}
+function viewM4() {
+  const [qs, recf] = QS.m4, rec = recf();
+  return mTop('📝 임무 4. 확인 퀴즈') + `<p class="muted">모두 ${qs.length}문제예요. 틀리면 힌트를 보고 다시 골라요. 처음 고른 답이 정답인 문제 수가 기록돼요. (지금 ${okCount(qs, rec)}/${qs.length})</p>${tipBox()}
+<div class="quiz">${qList('m4', false).split('<div class="q').slice(1).map(x => `<section class="panel"><div class="q${x}</section>`).join('')}</div>${MISSIONS[3].done() ? doneBox(3) : ''}`;
+}
+function scoreRows() {
+  return [
+    ['임무 1. 태양의 표면', MISSIONS[0].done() ? `완료 · 한 번에 맞힘 ${firstOk(M1Q, state.m1.q)}/${M1Q.length}` : '진행 중'],
+    ['임무 2. 태양의 대기', MISSIONS[1].done() ? `완료 · 예측 ${state.m2.pred && !state.m2.pred.no.length ? '성공' : '다시 고름'}, 분류 한 번에 ${sortFirst()}/${SORT.length}, 문제 ${firstOk(M2Q, state.m2.q)}/${M2Q.length}` : '진행 중'],
+    ['임무 3. 태양 활동과 지구', MISSIONS[2].done() ? `완료 · 예측 ${state.m3.pred && !state.m3.pred.no.length ? '성공' : '다시 고름'}, 한 번에 맞힘 ${firstOk(M3Q, state.m3.q)}/${M3Q.length}` : '진행 중'],
+    ['임무 4. 확인 퀴즈', MISSIONS[3].done() ? `완료 · 한 번에 맞힘 ${firstOk(QUIZ, state.m4.q)}/${QUIZ.length}` : '진행 중'],
+    ['🎮 태양 탐정 게임 (따로 기록)', state.game.plays ? `최고 ${state.game.best}점 · 도전 ${state.game.plays}번` : MISSIONS[3].done() ? '아직 안 함' : '임무 4를 마치면 열려요']
+  ];
+}
+function viewCert() {
+  return `<div class="top"><button class="btn ghost small" data-act="enter" data-v="map">← 임무 목록</button><span class="title" style="font-size:26px">📋 탐사 결과</span></div>
+<section class="panel" style="max-width:640px"><h3>🧑‍🚀 ${esc(state.num)} ${esc(state.name)}</h3>
+<dl class="score">${scoreRows().map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>
+${CONFIG.SUBMIT_URL ? `<p class="muted">진행 상황은 임무를 풀 때마다 선생님께 자동으로 보내져요.</p><div class="row"><button class="btn" data-act="submit">📤 지금 선생님께 보내기</button></div>${ui.submitMsg ? `<p class="fb">${ui.submitMsg}</p>` : ''}` : '<p class="muted">이 화면을 캡처해서 제출하세요.</p>'}
+<p class="note">여러 학생이 함께 쓰는 기기라면, 다 마친 뒤 기록을 지워 주세요. <button class="btn ghost small" data-act="wipe">🗑 이 기기에서 내 기록 지우기</button></p></section>`;
+}
+
+/* ───────── 마지막 게임: 태양 탐정 (임무 4를 마치면 열려요) ─────────
+   1단계 이게 뭘까?(사진 일부가 점점 넓어져요 + 지금은 안 보이는 것 고르기) → 2단계 우주 기상 상황실(실시간)
+   목숨 3개, 연속 정답 보너스, 할 때마다 문제·보기 순서가 바뀌어요. 점수는 임무 성적과 따로 '태양 게임 현황' 탭에 기록해요.
+   내용은 교과서 232~237쪽·학습지 1-2에 있는 것만 써요. */
+const GSZ = { spot: [800, 600], granulation: [800, 800], prom: [800, 600], flare: [800, 600], 'zoom-chrom': [1000, 751], 'zoom-corona': [1000, 750], 'eclipse-1999': [900, 886], 'eclipse-2017': [1000, 666], aurora: [1100, 732] };
+const gsz = n => GSZ[n] || [512, 512];
+const shuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+// 1단계: f = 처음에 크게 보여 줄 사진 속 자리(사진 픽셀), z = 처음 확대 배율. 보기에는 헷갈리는 짝(홍염·플레어, 채층·코로나)을 꼭 넣어요
+const G1 = [
+  { n: 'spot', f: [330, 345], z: 5, a: '흑점', o: ['흑점', '쌀알무늬', '플레어', '홍염'], ex: '광구에 나타나는 어두운 부분이에요. 주변보다 온도가 약 2000℃ 낮아서 어둡게 보여요.' },
+  { n: 'granulation', f: [400, 400], z: 5, a: '쌀알무늬', o: ['쌀알무늬', '흑점', '채층', '코로나'], ex: '광구 아래의 대류로 생긴 무늬예요. 밝은 곳은 고온의 기체가 상승하는 곳, 어두운 곳은 저온의 기체가 하강하는 곳이에요.' },
+  { n: 'prom', f: [250, 415], z: 4, a: '홍염', o: ['홍염', '플레어', '코로나', '흑점'], ex: '홍염은 채층 위로 거대하게 분출되는 가스예요. 플레어는 흑점 부근의 폭발로 채층 일부가 매우 밝아지는 현상이에요.' },
+  { n: 'flare', f: [392, 300], z: 4, a: '플레어', o: ['플레어', '홍염', '흑점', '쌀알무늬'], ex: '흑점 부근에서 폭발이 일어나 채층의 일부가 매우 밝아졌어요. 홍염은 채층 위로 솟아오르는 가스예요. (위성이 자외선으로 찍고 색을 입힌 사진)' },
+  { n: 'zoom-chrom', f: [394, 263], z: 5, a: '채층', o: ['채층', '코로나', '홍염', '광구'], ex: '개기 일식 때 광구 바로 위에 얇게 보이는 붉은색 대기층이 채층이에요. 코로나는 그 위로 넓게 퍼진 진주색 대기층이에요.' },
+  { n: 'zoom-corona', f: [706, 298], z: 4, a: '코로나', o: ['코로나', '채층', '홍염', '광구'], ex: '채층 위로 넓게 뻗어 있는 진주색의 희박한 대기층이 코로나예요. 채층은 광구 바로 위의 얇은 붉은색 층이에요.' },
+  { n: 'disk-quiet', f: [256, 256], z: 7, a: '광구', o: ['광구', '코로나', '채층', '흑점'], ex: '밝고 둥글게 보이는 태양의 표면이 광구예요. 평균 온도는 약 6000℃예요.' }
+];
+/* 2단계 우주 기상 상황실 (실시간)
+   흑점 수 그래프가 2008년(극소기) → 2014년(극대기) → 2019년(극소기)로 75초 동안 흘러가요.
+   흑점이 많을수록 플레어가 자주 터지고, 태양풍이 지구로 날아와요. 경보 내용(교과서 그림 5의 피해)을 읽고
+   피해를 입을 시설에 🛡 대비를 켜면 막아요. 경보가 없는 곳에 켜면 헛 대비라 점수가 줄어요.
+   할 때마다 달라지는 것: 시설 버튼 순서,
+   대비가 필요 없는 📡 관측 소식, 중간 질문(오로라 여행사·과학 기자·방송국)과 보기 순서 */
+// 교과서 그림 5의 피해 (표현은 교과서 그대로, 버튼 순서만 할 때마다 섞어요)
+const CAT3 = [
+  { k: 'radio', e: '📻', nm: '무선 통신', warn: '전파 신호 방해, 델린저 현상 주의!', hurt: '무선 통신 장애!' },
+  { k: 'sat', e: '🛰', nm: '인공위성', warn: '센서 고장·성능 저하 주의!', hurt: '인공위성 고장!' },
+  { k: 'power', e: '⚡', nm: '발전소', warn: '전력 장비 손상, 정전·화재 주의!', hurt: '정전!' },
+  { k: 'air', e: '✈', nm: '북극 항로', warn: '북극 부근 운항 위험!', hurt: '항공 피해!' },
+  { k: 'mag', e: '🧭', nm: '지구 자기장', warn: '지구 자기장이 불규칙하게 변해요, 자기 폭풍 주의!', hurt: '자기 폭풍!' }
+];
+// 대비가 필요 없는 관측 소식 (누르면 헛 대비)
+const INFO3 = { low: ['😴 흑점이 거의 없어요. 우주 날씨 맑음!', '🔭 태양 표면이 조용해요.'], any: ['☀ 흑점 무리가 새로 보여요. 아직 폭발은 없어요.', '🌙 개기 일식 때 코로나 사진을 찍었어요.', '🔥 태양 가장자리에서 홍염이 솟았어요.'] };
+// 중간 질문: 답은 그때의 흑점 수(그래프)를 보고 정해요
+const ASK3 = {
+  aur: { h: '🌌 <b>오로라 여행사</b> “지금 북쪽으로 오로라 보러 떠날까요?”', o: ['지금 떠나요', '다음에 가요'], no: ['🌌 흑점이 많아 오로라가 자주 생길 때예요', '🌌 흑점이 적어 오로라가 드물 때예요'], clear: true },
+  cor: { h: '📰 <b>과학 기자</b> “이번 개기 일식 때 코로나는 어떻게 보일까요?”', o: ['크고 밝게 보여요', '작게 보여요'], no: ['📰 흑점이 많을 때는 코로나가 크고 밝아요', '📰 흑점이 적을 때는 코로나가 작아요'], clear: true },
+  trend: { h: '📺 <b>방송국</b> “요즘 흑점 수는 어떻게 변하고 있나요?”', o: ['늘어나는 중이에요', '줄어드는 중이에요'], no: ['📺 그래프를 보면 흑점 수가 늘어나는 중이에요', '📺 그래프를 보면 흑점 수가 줄어드는 중이에요'] }
+};
+const ASK_Y = [2009.6, 2011.2, 2012.8, 2015.5, 2017.0, 2018.6];
+const SIM = { y0: 2008.8, y1: 2019.9, T: 75, cost: 40, life: 5 };
+const simAct = y => spotN(y) / 110;
+const simYear = s => SIM.y0 + (SIM.y1 - SIM.y0) * Math.min(1, s.t / SIM.T);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const askAns = (type, y) => type === 'trend' ? (spotN(y + .3) > spotN(y) ? 0 : 1) : (simAct(y) > .5 ? 0 : 1);
+let gRaf = 0;
+function simNew() {
+  // 질문 3개: 연도 3개를 고르고, 오로라·코로나 질문은 흑점 수가 뚜렷이 많거나 적을 때만
+  let qs = null;
+  for (let n = 0; n < 200 && !qs; n++) {
+    const ys = shuf(ASK_Y).slice(0, 3).sort((a, b) => a - b), ts = shuf(Object.keys(ASK3));
+    if (ys.every((y, i) => !ASK3[ts[i]].clear || Math.abs(simAct(y) - .5) > .2)) qs = ys.map((y, i) => ({ y, type: ts[i], done: false }));
+  }
+  const fac = shuf(CAT3);
+  return { t: 0, last: 0, fac, th: [], info: [], sh: {}, saved: 0, hurt: 0, waste: 0, qOk: 0, qN: 0, qs: qs || [], cur: null, qDrawn: null, fl: [], flash: {}, sunFlash: -9, id: 0 };
+}
+function simStart() { const s = G.sim; s.last = performance.now(); cancelAnimationFrame(gRaf); gRaf = requestAnimationFrame(simTick); }
+const simFloat = (s, txt, cls) => s.fl.push({ txt, cls, t: s.t });
+function simTick(now) {
+  const s = G && G.sim; if (!s || G.phase !== 'q' || G.stage !== 1) return;
+  const dt = Math.min(.1, (now - s.last) / 1000); s.last = now; s.t += dt;
+  const y = simYear(s), act = simAct(y), run = s.t < SIM.T;
+  // 플레어: 흑점이 많을수록 자주 (한 번에 두 곳까지), 경보 문구는 그때그때 달라요
+  if (run && s.th.length < 2 && Math.random() < (.04 + .45 * act * act) * dt) {
+    const f = pick(s.fac.filter(f => !s.th.some(h => h.k === f.k)));
+    s.th.push({ id: ++s.id, k: f.k, warn: f.warn, t0: s.t, D: 4.2 - 1.2 * act, at: null }); s.sunFlash = s.t; BGM.sfx('flare');
+  }
+  // 대비가 필요 없는 관측 소식
+  if (run && !s.info.length && Math.random() < .06 * dt) s.info.push({ txt: pick(act < .35 ? INFO3.low.concat(INFO3.any) : INFO3.any), t0: s.t });
+  s.info = s.info.filter(i => s.t - i.t0 < 3.2);
+  // 태양풍이 지구에 닿으면: 대비했으면 막고, 아니면 피해
+  s.th = s.th.filter(h => {
+    if (s.t - h.t0 < h.D) return true;
+    const f = s.fac.find(x => x.k === h.k);
+    if (s.sh[h.k] > s.t) {
+      G.streak++; G.maxStreak = Math.max(G.maxStreak, G.streak);
+      const pts = 100 + Math.round(50 * clamp(1 - ((h.at == null ? s.t : h.at) - h.t0) / h.D, 0, 1)) + Math.min(5, G.streak - 1) * 20;
+      G.score += pts; s.saved++; s.sh[h.k] = 0; BGM.sfx('ok'); simFloat(s, `🛡 ${f.e} 막았어요! +${pts}`, 'ok');
+    } else { G.streak = 0; s.hurt++; s.flash[h.k] = s.t; BGM.sfx('bad'); simFloat(s, `💥 ${f.e} ${f.hurt}`, 'bad'); }
+    return false;
+  });
+  // 중간 질문 (7초 안에 대답, 보기 순서는 섞어요)
+  if (!s.cur) { const q = s.qs.find(q => !q.done && y >= q.y); if (q) { q.done = true; s.qN++; s.cur = { type: q.type, ans: askAns(q.type, q.y), order: shuf([0, 1]), t0: s.t }; } }
+  else if (s.t - s.cur.t0 > 7) { simFloat(s, '⏰ 대답을 기다리다 연락이 끊겼어요', 'bad'); s.cur = null; }
+  s.fl = s.fl.filter(f => s.t - f.t < 1.8);
+  simDraw(s, y, act);
+  if (!run && !s.th.length && !s.cur) return simFinish(s);
+  gRaf = requestAnimationFrame(simTick);
+}
+function simShield(k) {
+  const s = G && G.sim; if (!s || G.phase !== 'q' || s.sh[k] > s.t) return;
+  const hs = s.th.filter(h => h.k === k); s.sh[k] = s.t + SIM.life;
+  if (hs.length) { hs.forEach(h => { if (h.at == null) h.at = s.t; }); BGM.sfx('shield'); }
+  else { s.waste++; BGM.sfx('bad'); G.score = Math.max(0, G.score - SIM.cost); simFloat(s, `🙅 헛 대비 −${SIM.cost}`, 'bad'); }
+}
+function simAur(v) {
+  const s = G && G.sim; if (!s || !s.cur) return;
+  const c = s.cur, ok = +v === c.ans;
+  BGM.sfx(ok ? 'ok' : 'bad');
+  if (ok) { G.score += 80; s.qOk++; simFloat(s, '⭕ 알맞은 대답이에요! +80', 'ok'); }
+  else simFloat(s, ASK3[c.type].no[c.ans], 'bad');
+  s.cur = null;
+}
+function simFinish(s) {
+  const tot = s.saved + s.hurt; G.rate = tot ? Math.round(s.saved / tot * 100) : 100;
+  G.res = { sim: true, tot }; G.phase = 'fb'; render();
+}
+const $id = id => document.getElementById(id);
+function simDraw(s, y, act) {
+  BGM.level(act);
+  const n = spotN(y), set = (id, v) => { const e = $id(id); if (e && e.textContent !== String(v)) e.textContent = v; };
+  set('simYear', Math.floor(y) + '년'); set('simN', Math.round(n)); set('simAct', act > .6 ? '🔥 활발' : act > .3 ? '🌤 보통' : '😴 조용');
+  set('simLeft', Math.max(0, Math.ceil(SIM.T - s.t))); set('simSaved', s.saved); set('simHurt', s.hurt); set('gScore', G.score);
+  const dot = $id('simDot'); if (dot) { dot.setAttribute('cx', ((y - SIM.y0) / (SIM.y1 - SIM.y0) * 300).toFixed(1)); dot.setAttribute('cy', (56 - n / 110 * 48).toFixed(1)); }
+  const sun = $id('simSun');
+  if (sun) { sun.style.setProperty('--c', act.toFixed(2)); sun.classList.toggle('fl', s.t - s.sunFlash < .45); [...sun.children].forEach((sp, i) => { sp.style.display = i < Math.round(act * 10) ? '' : 'none'; }); }
+  const dyn = $id('simDyn');
+  if (dyn) dyn.innerHTML = s.th.map(h => `<div class="wind" style="left:${(16 + 66 * Math.min(1, (s.t - h.t0) / h.D)).toFixed(1)}%"></div>`).join('');
+  const al = $id('simAlerts');
+  if (al) al.innerHTML = s.th.map(h => `<div class="simalert"><b>💥 플레어!</b>${h.warn}<i style="width:${(100 - 100 * Math.min(1, (s.t - h.t0) / h.D)).toFixed(0)}%"></i></div>`).join('')
+    + s.info.map(i => `<div class="simalert info"><b>📡 관측 소식</b>${i.txt}</div>`).join('');
+  const msg = $id('simMsg'); if (msg) msg.innerHTML = s.fl.map(f => `<span class="${f.cls}">${f.txt}</span>`).join('');
+  s.fac.forEach(f => { const b = $id('fac-' + f.k); if (b) { b.classList.toggle('on', s.sh[f.k] > s.t); b.classList.toggle('hurt', s.t - (s.flash[f.k] || -9) < 1); } });
+  // 질문 칸은 질문이 바뀔 때만 다시 그려요 (누르는 중에 버튼이 바뀌지 않게)
+  const ar = $id('simAur'), key = s.cur ? 'q' + s.qN : 'none';
+  if (ar && s.qDrawn !== key) {
+    s.qDrawn = key; ar.classList.toggle('live', !!s.cur);
+    const A = s.cur && ASK3[s.cur.type];
+    ar.innerHTML = s.cur ? `<span>${A.h}</span><span class="grow"></span>${s.cur.order.map(j => `<button class="btn small" data-act="gaur" data-v="${j}">${A.o[j]}</button>`).join('')}`
+      : '<span class="muted">📞 여행사·기자·방송국에서 연락이 오면 여기에 떠요. 흑점 수 그래프를 보고 대답해요.</span>';
+  }
+}
+function simView() {
+  let d = ''; for (let y = SIM.y0; y <= SIM.y1 + .01; y += .1) d += (d ? 'L' : 'M') + ((y - SIM.y0) / (SIM.y1 - SIM.y0) * 300).toFixed(1) + ' ' + (56 - spotN(y) / 110 * 48).toFixed(1);
+  const spots = [[30, 40], [58, 35], [45, 60], [65, 58], [36, 52], [52, 46], [28, 62], [70, 44], [42, 30], [60, 68]].map(([x, y]) => `<i style="left:${x}%;top:${y}%"></i>`).join('');
+  return `<div class="sim">
+<div class="simtop"><svg class="simgraph" viewBox="-8 0 316 62" preserveAspectRatio="none" aria-label="흑점 수 그래프"><path d="${d}" stroke="#ffcf5a" stroke-width="2" fill="none" vector-effect="non-scaling-stroke"/><circle id="simDot" r="5" fill="#fff" cx="0" cy="56"/></svg>
+<div class="simstat"><b id="simYear">2008년</b> · 흑점 수 <b id="simN">3</b>개 · <b id="simAct">😴 조용</b><br><span class="muted">⏱ 남은 시간 <b id="simLeft">${SIM.T}</b>초</span></div></div>
+<div class="simfield"><div class="simsun" id="simSun">${spots}</div><div class="simearth">🌏</div><div id="simDyn"></div><div id="simAlerts"></div><div class="simmsg" id="simMsg"></div></div>
+<div class="simfac">${G.sim.fac.map(f => `<button id="fac-${f.k}" data-act="gfac" data-v="${f.k}"><span class="ico">${f.e}</span>${f.nm}<small>🛡 대비</small></button>`).join('')}</div>
+<div class="simscore">🛡 막음 <b id="simSaved">0</b> · 💥 피해 <b id="simHurt">0</b></div>
+<div class="simaur" id="simAur"></div></div>`;
+}
+// 1단계 "안 보여요" 문제: 개기 일식 때는 광구가 가려지고, 평소에는 광구가 밝아서 대기가 안 보여요
+const G1H = {
+  eclipse: () => { const a = pick(['흑점', '쌀알무늬']); return { n: 'eclipse-1999', hide: true, q: '🌑 개기 일식 때 이 모습에서 볼 수 <u>없는</u> 것은?', a, o: shuf([a, '코로나', '채층', '홍염']), ex: '달이 광구를 완전히 가려서 광구에 있는 흑점·쌀알무늬는 볼 수 없어요. 대신 태양의 대기(채층·코로나)와 홍염이 보여요.' }; },
+  normal: () => { const a = pick(['코로나', '채층']); return { n: pick(['disk-1023', 'disk-1021']), hide: true, q: '☀ 평소에 태양을 이렇게 볼 때 볼 수 <u>없는</u> 것은?', a, o: shuf([a, '흑점', '광구']), ex: '평소에는 광구가 너무 밝아서 태양의 대기(채층·코로나)가 보이지 않아요. 개기 일식 때 광구가 가려지면 볼 수 있어요.' }; }
+};
+const g1Items = () => shuf(shuf(G1).slice(0, GST[0].n - 2).map(q => Object.assign({}, q, { o: shuf(q.o) })).concat([G1H.eclipse(), G1H.normal()]));
+const GST = [
+  { t: '1단계 · 이게 뭘까?', d: '사진의 일부가 점점 넓어져요. 무엇인지 빨리 맞힐수록 점수가 커요. 중간에 “지금은 볼 수 없는 것”을 고르는 문제도 섞여 있어요. (10초)', n: 6, sec: 10 },
+  { t: '2단계 · 우주 기상 상황실', d: `여러분은 국가기상위성센터의 우주 기상 예보관이에요. ${SIM.T}초 동안 2008년부터 2019년까지 태양 활동이 흘러가요. 플레어 경보가 뜨면 피해를 입을 시설에 🛡 대비를 켜서 지구를 지켜요!`, n: 1, sec: 0 }
+];
+const GCOLS = ['최고 점수', '도전 횟수', '마지막 점수', '끝까지 통과', '최고 방어율'];
+let G = null, gTimer = null;
+function gNew() {
+  G = { stage: 0, i: 0, phase: 'intro', lives: 3, score: 0, streak: 0, maxStreak: 0, res: null, tap: null, rate: null, sim: null,
+    items: [g1Items(), [{ k: 'sim' }]] };
+}
+const gItem = () => G.items[G.stage][G.i];
+function gStop() { clearInterval(gTimer); gTimer = null; cancelAnimationFrame(gRaf); }
+function gQ() { G.phase = 'q'; G.res = null; G.tap = null; G.mounted = false; if (G.stage === 1) G.sim = simNew(); render(); }
+// 화면을 그린 뒤: 1단계 사진을 넓히기 시작하고 시간을 재요
+function gMount() {
+  if (!G || G.phase !== 'q' || G.mounted) return;
+  G.mounted = true; G.t0 = performance.now();
+  const st = GST[G.stage], wrap = app.querySelector('.gwrap'), side = wrap && wrap.querySelector('.panel');
+  // 보기 버튼이 화면 아래로 잘리면 사진부터 보이게 내려 줘요
+  if (side && side.getBoundingClientRect().bottom > innerHeight) wrap.scrollIntoView({ block: 'start' });
+  if (G.stage === 0) { const img = app.querySelector('.gpic img'); if (img) requestAnimationFrame(() => requestAnimationFrame(() => { img.style.transition = `transform ${st.sec - 1}s linear`; img.style.transform = 'scale(1)'; })); }
+  gStop();
+  if (G.stage === 1) { const sim = app.querySelector('.sim'); if (sim && sim.getBoundingClientRect().bottom > innerHeight) sim.scrollIntoView({ block: 'start' }); return simStart(); }
+  if (st.sec) gTimer = setInterval(() => {
+    const f = ((performance.now() - G.t0) / 1000) / st.sec, bar = app.querySelector('.gbar i');
+    if (bar) bar.style.width = Math.max(0, 100 - f * 100) + '%';
+    if (f >= 1) gAnswer(false, '⏰ 시간이 다 됐어요.');
+  }, 100);
+}
+// 정답이면 점수 + 연속 보너스(2연속부터 20점씩, 최대 100점), 틀리면 목숨 하나
+function gAnswer(ok, msg, pts) {
+  gStop(); if (G.phase !== 'q') return;
+  if (ok) { G.streak++; G.maxStreak = Math.max(G.maxStreak, G.streak); const bonus = Math.min(5, G.streak - 1) * 20; G.score += pts + bonus; G.res = { ok, msg, pts, bonus }; }
+  else { G.streak = 0; G.lives--; G.res = { ok, msg }; }
+  BGM.sfx(ok ? 'ok' : 'bad');
+  G.phase = 'fb'; render();
+}
+const gSec = () => (performance.now() - G.t0) / 1000;
+function gNext() {
+  if (G.lives <= 0) return gEnd(false);
+  G.i++;
+  if (G.i >= G.items[G.stage].length) { G.stage++; G.i = 0; if (G.stage >= GST.length) return gEnd(true); G.phase = 'intro'; render(); return; }
+  gQ();
+}
+function gEnd(win) {
+  gStop(); G.phase = win ? 'win' : 'over';
+  const g = state.game; g.plays++; g.last = G.score; G.newBest = G.score > g.best; g.best = Math.max(g.best, G.score); if (win) g.clear++;
+  if (G.rate != null) g.rate = Math.max(g.rate == null ? 0 : g.rate, G.rate); // 2단계(상황실)까지 간 학생만 방어율이 생겨요
+  save(); syncGame(); render();
+}
+function gPic(n, o) {
+  o = o || {}; const [iw, ih] = gsz(n), P = (x, y) => `left:${(x / iw * 100).toFixed(2)}%;top:${(y / ih * 100).toFixed(2)}%`;
+  const zoom = o.f ? `transform-origin:${(o.f[0] / iw * 100).toFixed(1)}% ${(o.f[1] / ih * 100).toFixed(1)}%;transform:scale(${o.z})` : '';
+  const marks = (o.marks || []).map(([x, y, r]) => `<span class="gmark" style="${P(x, y)};width:${(2 * r / iw * 100).toFixed(2)}%"></span>`).join('') + (o.dot ? `<span class="gdot${o.dot[2] ? ' ok' : ''}" style="${P(o.dot[0], o.dot[1])}"></span>` : '');
+  return `<div class="gpic${o.tap ? ' tap' : ''}"${o.tap ? ' data-act="gtap"' : ''} style="aspect-ratio:${iw}/${ih};--ar:${(iw / ih).toFixed(3)}"><img src="images/${n}.jpg" alt="" draggable="false" style="${zoom}">${marks}</div>`;
+}
+function viewGame() {
+  if (!G) gNew();
+  const hud = `<div class="ghud"><span class="pill hearts" aria-label="목숨 ${G.lives}개">${'❤️'.repeat(Math.max(0, G.lives))}${'🤍'.repeat(3 - Math.max(0, G.lives))}</span><span class="pill">점수 <b id="gScore">${G.score}</b></span>${G.streak > 1 && G.stage < 1 ? `<span class="pill">🔥 <b>${G.streak}연속</b></span>` : ''}${G.stage < 3 && G.phase !== 'over' && G.phase !== 'win' ? `<span class="pill">${GST[G.stage].t}${GST[G.stage].n > 1 ? ` · <b>${Math.min(G.i + 1, GST[G.stage].n)}/${GST[G.stage].n}</b>` : ''}</span>` : ''}<span class="pill">🏆 내 최고 <b>${state.game.best}</b></span></div>`;
+  const top = mTop('🎮 마지막 도전 · 태양 탐정') + hud;
+  if (G.phase === 'intro') {
+    const s = GST[G.stage];
+    return top + `<section class="panel" style="max-width:720px"><p class="kicker">${G.stage + 1} / ${GST.length}단계</p><h2 class="gq">${s.t}</h2><p class="lead">${s.d}</p>
+${G.stage === 0 ? '<ul class="glegend"><li>❤️ 목숨은 3개예요. 틀리거나 시간이 지나면 하나씩 줄어요.</li><li>🔥 연속으로 맞히면 보너스 점수가 붙어요.</li><li>🔀 할 때마다 문제와 보기 순서가 바뀌어요.</li><li>📋 게임 점수는 임무 성적과 따로 기록돼요.</li></ul>' : ''}
+${G.stage === 1 ? `<ul class="glegend"><li>📈 위쪽 그래프의 흰 점이 지금 연도예요. <b>흑점 수가 많을수록</b> 플레어가 자주 터져요.</li><li>💥 플레어 경보를 읽고 피해를 입을 시설(📻 무선 통신 · 🛰 인공위성 · ⚡ 발전소 · ✈ 북극 항로 · 🧭 지구 자기장, 버튼 순서는 할 때마다 바뀌어요)의 <b>🛡 대비</b>를 눌러요. 빨리 누를수록 점수가 커요.</li><li>📡 파란 관측 소식은 대비가 필요 없어요. 잘 읽고 판단해요!</li><li>🙅 경보가 없는 곳에 대비를 켜면 헛 대비라 ${SIM.cost}점이 줄어요.</li><li>📞 오로라 여행사·과학 기자·방송국의 질문에는 그래프의 흑점 수를 보고 대답해요.</li><li>🛡 막은 비율이 <b>방어율</b>이에요. 내 최고 방어율이 우리 반 방어율에 들어가요. (이 단계에서는 목숨이 줄지 않아요)</li></ul>` : ''}
+<div class="row" style="margin-top:12px"><button class="btn" data-act="gq">${G.stage ? '다음 단계 시작 ▶' : '시작 ▶'}</button></div></section>`;
+  }
+  if (G.phase === 'over' || G.phase === 'win') {
+    return top + `<section class="panel" style="max-width:720px;text-align:center"><h2 class="gq">${G.phase === 'win' ? '🏆 모든 단계를 통과했어요!' : '💔 목숨을 모두 썼어요'}</h2><div class="gbig">${G.score}점</div>
+<p class="lead">${G.newBest ? '🎉 내 최고 기록이에요!' : `내 최고 기록: <b>${state.game.best}점</b>`} · 최대 ${G.maxStreak}연속 정답</p>${G.rate != null ? `<p class="lead">🛡 우주 기상 상황실 방어율 <b>${G.rate}%</b> (내 최고 ${state.game.rate}%)</p>` : ''}
+<div class="row" style="justify-content:center;margin-top:12px"><button class="btn" data-act="gstart">🔁 다시 도전 (순서가 바뀌어요)</button><button class="btn ghost" data-act="enter" data-v="map">← 임무 목록</button></div>
+<p class="note">${CONFIG.SUBMIT_URL && state.code ? '최고 점수와 최고 방어율은 선생님 화면의 반별 순위·반 대항 방어율에 올라가요.' : ''}</p></section>`;
+  }
+  // 2단계: 우주 기상 상황실
+  if (G.stage === 1) {
+    if (G.phase === 'q') return top + simView();
+    const s = G.sim;
+    return top + `<section class="panel" style="max-width:760px"><p class="kicker">상황 종료</p><h2 class="gq">🛡 방어율 ${G.rate}%</h2><div class="gbig">${G.score}점</div>
+<p class="lead">태양풍 ${G.res.tot}번 중 <b>${s.saved}번</b> 막았어요 · 헛 대비 ${s.waste}번 · 질문 대답 ${s.qOk}/${s.qN}</p>
+<div class="fb ex">💡 흑점 수가 많은 극대기(2014년경)에는 플레어가 자주 일어나 태양풍이 강해졌고, 흑점이 적은 극소기(2008년·2019년경)에는 조용했어요. 국가기상위성센터에서도 이렇게 태양 활동을 관측하여 우주 기상을 예보해 피해를 줄이려고 노력해요.</div>
+<div class="row" style="margin-top:12px"><button class="btn" data-act="gnext">결과 보기 →</button></div></section>`;
+  }
+  const q = gItem(), fb = G.phase === 'fb', R = G.res;
+  const res = fb ? `<div class="gres ${R.ok ? 'ok' : 'bad'}"><b>${R.ok ? `⭕ 정답! +${R.pts}${R.bonus ? ` 🔥 연속 보너스 +${R.bonus}` : ''}` : '❌ ' + (R.msg || '아쉬워요')}</b>${R.ok && R.msg ? R.msg : ''}</div>` : '';
+  const next = fb ? `<div class="row"><button class="btn" data-act="gnext">${G.lives <= 0 ? '결과 보기' : '다음 →'}</button></div>` : '';
+  const bar = !fb && GST[G.stage].sec ? '<div class="gbar"><i></i></div>' : '';
+  let pic, side;
+  if (G.stage === 0) {
+    pic = gPic(q.n, fb ? {} : { f: q.f, z: q.z });
+    side = `<h2 class="gq">${q.q || '이게 뭘까?'}</h2>${bar}<div class="gopts">${q.o.map(o => `<button class="opt${fb && o === q.a ? ' sel' : ''}" data-act="g1" data-v="${esc(o)}"${fb ? ' disabled' : ''}>${esc(o)}</button>`).join('')}</div>${res}${fb ? `<div class="fb ex">💡 정답은 <b>${q.a}</b> · ${esc(q.ex)}</div>` : ''}${next}`;
+  }
+  return top + `<div class="gwrap"><div>${pic}</div><section class="panel">${side}</section></div>`;
+}
+// 게임 점수 보내기: 임무 성적과 따로 '태양 게임 현황' 탭에 한 줄
+async function syncGame() {
+  if (!CONFIG.SUBMIT_URL || !state.code || !state.num) return;
+  const g = state.game;
+  try { if (await hello()) await post({ lesson: CONFIG.LESSON + ' 게임', action: 'save', code: state.code, num: state.num, name: state.name, cols: GCOLS, vals: [g.best, g.plays, g.last, g.clear, g.rate == null ? '' : g.rate] }); } catch (err) {}
+}
+// 교사 화면: 반별 게임 최고 점수
+function gameBox(T, cls, clsName) {
+  const D = T.game;
+  if (!D || !D.rows.length) return '<section class="panel" style="margin-top:14px"><h3>🎮 태양 탐정 게임</h3><p class="muted">아직 게임 기록이 없어요. (임무 4를 마친 학생에게 열려요)</p></section>';
+  const h = D.headers, iN = h.indexOf('학번'), iM = h.indexOf('이름'), iB = h.indexOf('최고 점수'), iP = h.indexOf('도전 횟수'), iC = h.indexOf('끝까지 통과'), iR = h.indexOf('최고 방어율');
+  const rows = D.rows.map(r => ({ c: cls(r, iN), num: r[iN], name: r[iM], best: +r[iB] || 0, plays: +r[iP] || 0, clear: +r[iC] || 0, rate: iR >= 0 && r[iR] !== '' && r[iR] != null && !isNaN(+r[iR]) ? +r[iR] : null }));
+  const by = {}; rows.forEach(r => { if (r.c) (by[r.c] = by[r.c] || []).push(r); });
+  const ks = Object.keys(by).sort((a, b) => a.localeCompare(b, 'ko', { numeric: true }));
+  const pct = v => v == null ? '<span class="muted">–</span>' : v + '%';
+  // 반 대항 방어율: 2단계(우주 기상 상황실)까지 간 학생들의 '최고 방어율' 평균
+  const def = ks.map(c => { const L = by[c].filter(r => r.rate != null); return { c, n: L.length, all: by[c].length, v: L.length ? Math.round(L.reduce((s, r) => s + r.rate, 0) / L.length) : null }; })
+    .sort((a, b) => (b.v == null ? -1 : b.v) - (a.v == null ? -1 : a.v));
+  const medal = i => ['🥇', '🥈', '🥉'][i] || `${i + 1}위`;
+  const bars = def.map((d, i) => `<div class="dbar"><span class="dn">${d.v == null ? '' : medal(i)} ${esc(clsName(d.c))}</span><span class="dt"><i style="width:${d.v || 0}%"></i></span><b>${pct(d.v)}</b><small class="muted">${d.n}/${d.all}명</small></div>`).join('');
+  const tops = ks.map(c => { const L = by[c].slice().sort((a, b) => b.best - a.best), b = L[0]; return `<tr><td>${esc(clsName(c))}</td><td class="tok">${b.best}점</td><td>${L.filter(r => r.best === b.best).map(r => esc(r.num + ' ' + r.name)).join(', ')}</td><td>${L.length}명</td><td>${Math.round(L.reduce((s, r) => s + r.best, 0) / L.length)}점</td></tr>`; }).join('');
+  const sel = T.cls && by[T.cls] ? `<h3 style="margin-top:14px">${esc(clsName(T.cls))} 순위</h3><table class="ttbl"><thead><tr><th>순위</th><th>학생</th><th>최고 점수</th><th>최고 방어율</th><th>도전</th><th>끝까지 통과</th></tr></thead><tbody>${by[T.cls].slice().sort((a, b) => b.best - a.best).map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.num + ' ' + r.name)}</td><td>${r.best}점</td><td>${pct(r.rate)}</td><td>${r.plays}번</td><td>${r.clear}번</td></tr>`).join('')}</tbody></table>` : '';
+  return `<section class="panel" style="margin-top:14px"><h3>🛡 반 대항 · 지구 방어율</h3><p class="muted">2단계 우주 기상 상황실까지 간 학생들의 최고 방어율 평균이에요. (명 수 = 2단계까지 간 학생 / 게임한 학생)</p><div class="dbars">${bars}</div></section>
+<section class="panel" style="margin-top:14px"><h3>🎮 태양 탐정 게임 · 반별 최고 점수</h3><div class="tbl-wrap"><table class="ttbl"><thead><tr><th>반</th><th>최고 점수</th><th>학생</th><th>참여</th><th>반 평균(각자 최고)</th></tr></thead><tbody>${tops}</tbody></table>${sel}</div><p class="note">게임 점수는 임무 성적과 따로 시트의 '태양 게임 현황' 탭에 모여요. 반을 누르면 그 반 순위가 보여요.</p></section>`;
+}
+/* ───────── 교사 화면 (교사 코드는 Apps Script에서만 확인) ───────── */
+function viewTeacher() {
+  const T = ui.teacher || (ui.teacher = { data: null, code: '', msg: '', cls: '' });
+  const head = `<div class="top"><span class="title" style="font-size:24px">👩‍🏫 교사 화면 · 태양</span><span class="grow"></span>${T.data ? '<button class="btn ghost small" data-act="tload">🔄 새로고침</button>' : ''}<button class="btn ghost small" data-act="enter" data-v="intro">← 처음 화면</button></div>`;
+  if (!T.data) return head + `<section class="panel" style="max-width:440px"><h3>교사 코드 입력</h3>
+<div class="row"><input id="tcode" type="password" maxlength="30" placeholder="교사 코드" autocomplete="off" style="flex:1;min-width:160px"><button class="btn" data-act="tload">결과 보기</button></div>
+${T.msg ? `<p class="fb ${T.msg.startsWith('불러') ? '' : 'bad'}">${T.msg}</p>` : ''}</section>`;
+  const { headers, rows } = T.data;
+  const iNum = headers.indexOf('학번'), iTime = headers.indexOf('마지막 활동');
+  const cls = r => { const n = String(r[iNum] || ''); return n.length > 2 ? n.slice(0, -2) : ''; };
+  const clsName = c => c.length === 3 ? `${c[0]}학년 ${+c.slice(1)}반` : c;
+  const classes = [...new Set(rows.map(cls))].filter(Boolean).sort((a, b) => a.localeCompare(b, 'ko', { numeric: true }));
+  const list = rows.filter(r => !T.cls || cls(r) === T.cls).sort((a, b) => String(a[iNum]).localeCompare(String(b[iNum]), 'ko', { numeric: true }));
+  const order = headers.map((h, i) => i).filter(i => i !== iTime).concat(iTime >= 0 ? [iTime] : []);
+  const mi = headers.map((h, i) => h.startsWith('임무') ? i : -1).filter(i => i >= 0);
+  const cell = v => v === '완료' ? '<span class="tok">✔ 완료</span>' : v === '-' || v === '' ? '<span class="muted">–</span>' : esc(v);
+  return head + `<div class="row"><button class="btn small${T.cls ? ' ghost' : ''}" data-act="tcls" data-c="">전체</button>${classes.map(c => `<button class="btn small${T.cls === c ? '' : ' ghost'}" data-act="tcls" data-c="${esc(c)}">${clsName(c)}</button>`).join('')}</div>
+<div class="tstats"><div>참여 학생<b>${list.length}명</b></div>${mi.map(i => `<div>${esc(headers[i])} 완료<b>${list.filter(r => r[i] === '완료').length}명</b></div>`).join('')}</div>
+<section class="panel"><div class="tbl-wrap"><table class="ttbl"><thead><tr>${order.map(i => `<th>${esc(headers[i])}</th>`).join('')}</tr></thead><tbody>
+${list.length ? list.map(r => `<tr>${order.map(i => `<td>${i === iTime ? `<small>${esc(r[i])}</small>` : cell(r[i])}</td>`).join('')}</tr>`).join('') : `<tr><td colspan="${order.length}" class="muted" style="text-align:center">아직 참여한 학생이 없어요.</td></tr>`}
+</tbody></table></div><p class="note">"한 번에"는 처음 고른 답이 정답이었던 문제 수예요. 학번 앞 3자리로 반을 나눠요. (예: 10312 → 1학년 3반)</p></section>${gameBox(T, (r, i) => { const n = String(r[i] || ''); return n.length > 2 ? n.slice(0, -2) : ''; }, clsName)}`;
+}
+async function teacherLoad() {
+  const T = ui.teacher, inp = document.getElementById('tcode');
+  if (inp) T.code = inp.value.trim();
+  if (!T.code) { T.msg = '교사 코드를 입력해 주세요.'; render(); return; }
+  T.msg = '불러오는 중…'; render();
+  try {
+    if (!(await hello())) { T.msg = 'Apps Script가 아직 예전 버전이에요. 일주운동 폴더의 apps-script.gs로 바꾸고 새 버전으로 배포해 주세요.'; render(); return; }
+    const out = await post({ lesson: CONFIG.LESSON, action: 'list', teacher: T.code });
+    if (out.ok) {
+      T.data = { headers: out.headers || [], rows: out.rows || [] }; T.msg = '';
+      try { const g = await post({ lesson: CONFIG.LESSON + ' 게임', action: 'list', teacher: T.code }); T.game = g.ok ? { headers: g.headers || [], rows: g.rows || [] } : null; } catch (err) { T.game = null; }
+    }
+    else T.msg = out.error === 'teacher' ? '교사 코드가 맞지 않아요.' : '결과를 불러오지 못했어요.';
+  } catch (err) { T.msg = '인터넷 연결을 확인해 주세요.'; }
+  render();
+}
+
+/* ───────── 배경음악·효과음 ─────────
+   음악 파일 없이 브라우저(Web Audio)가 직접 연주해요. (저작권 걱정 없음, 인터넷이 없어도 돼요)
+   calm: 처음·수업·임무 화면의 잔잔한 우주 음악 / game: 게임 1단계의 경쾌한 곡
+   sim: 우주 기상 상황실의 긴장감 있는 곡 (흑점이 많아질수록 빨라지고 촘촘해져요)
+   오른쪽 아래 🎵 버튼으로 켜고 끄며, 설정은 이 기기에 기억해요. 브라우저 규칙상 화면을 한 번 누른 뒤에 소리가 나요. */
+const BGM = (() => {
+  const SKEY = 'sun-activity-sound';
+  let on = true; try { on = localStorage.getItem(SKEY) !== 'off'; } catch (e) {}
+  let ac = null, master = null, verb = null, nbuf = null, mode = null, want = 'calm', timer = null, step = 0, next = 0, lvl = 0, btn = null;
+  const N = m => 440 * Math.pow(2, (m - 69) / 12);
+  const VOL = { calm: .5, game: .5, sim: .55 };
+  const SONG = {
+    calm: { bpm: 64, ch: [[57, 60, 64, 67], [53, 57, 60, 64], [48, 52, 55, 62], [55, 59, 62, 66]] },
+    game: { bpm: 116, ch: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]] },
+    sim: { bpm: 104, ch: [[50, 53, 57], [46, 50, 53], [48, 52, 55], [45, 49, 52]] }
+  };
+  function init() {
+    if (ac) return true;
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
+    ac = new AC(); master = ac.createGain(); master.gain.value = 0; master.connect(ac.destination);
+    verb = ac.createConvolver(); const len = ac.sampleRate * 2.6, b = ac.createBuffer(2, len, ac.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+    verb.buffer = b; const vg = ac.createGain(); vg.gain.value = .45; verb.connect(vg); vg.connect(master);
+    nbuf = ac.createBuffer(1, ac.sampleRate * .5, ac.sampleRate); const nd = nbuf.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    return true;
+  }
+  function tone(t, f, dur, o) {
+    const os = ac.createOscillator(), g = ac.createGain(); os.type = o.type || 'sine'; os.frequency.setValueAtTime(f, t); if (o.det) os.detune.value = o.det;
+    if (o.slide) os.frequency.exponentialRampToValueAtTime(o.slide, t + dur);
+    let nd = os; if (o.cut) { const fl = ac.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = o.cut; os.connect(fl); nd = fl; }
+    nd.connect(g); g.connect(o.out || master); if (o.verb) g.connect(verb);
+    const v = o.vol || .1, a = o.att || .005, r = Math.min(o.rel || .08, dur);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + a); g.gain.setValueAtTime(v, t + Math.max(a, dur - r)); g.gain.linearRampToValueAtTime(0, t + dur);
+    os.start(t); os.stop(t + dur + .05);
+  }
+  function hit(t, dur, vol, hp, out) {
+    const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain(); s.buffer = nbuf; f.type = 'highpass'; f.frequency.value = hp;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur); s.connect(f); f.connect(g); g.connect(out || master); s.start(t); s.stop(t + dur + .02);
+  }
+  const kick = (t, v) => tone(t, 150, .22, { vol: v, slide: 42, rel: .15 });
+  // 16분음표 한 칸마다 불러요
+  function play(m, i, t) {
+    const S = SONG[m], bar = Math.floor(i / 16) % 4, s = i % 16, ch = S.ch[bar], spb = 60 / bpm(m);
+    if (m === 'calm') {
+      if (s === 0) { ch.forEach((n, j) => { tone(t, N(n), spb * 4.2, { type: 'triangle', vol: .035, att: 1.4, rel: 1.6, cut: 1300, verb: true, det: j % 2 ? 6 : -6 }); }); tone(t, N(ch[0] - 12), spb * 4, { vol: .05, att: .8, rel: 1.2 }); }
+      if (s % 2 === 0 && Math.random() < .3) tone(t, N(ch[Math.floor(Math.random() * ch.length)] + (Math.random() < .5 ? 12 : 24)), 1.8, { vol: .035, rel: 1.6, verb: true });
+    } else if (m === 'game') {
+      if (s % 4 === 0) kick(t, .22);
+      if (s === 4 || s === 12) hit(t, .12, .09, 1500);
+      if (s % 4 === 2) hit(t, .04, .05, 7000);
+      const bp = [0, 0, 12, 0, 7, 0, 12, 7][Math.floor(s / 2)]; if (s % 2 === 0) tone(t, N(ch[0] - 24 + bp), spb / 2 * .9, { type: 'square', vol: .045, cut: 700 });
+      if ([0, 3, 6, 8, 11, 14].includes(s)) tone(t, N(ch[s % 3] + 12 + (s > 7 ? 12 : 0)), spb / 4 * 1.6, { type: 'square', vol: .02, cut: 2600, verb: true });
+    } else {
+      const L = lvl;
+      if (s % 8 === 0 || (L > .5 && s % 4 === 0)) kick(t, .22);
+      if (s % 2 === 0 || L > .4) hit(t, .035, .03 + L * .03, 8000);
+      if (s === 4 || s === 12) hit(t, .1, .06, 1800);
+      tone(t, N(ch[0] - 24), spb / 4 * .8, { type: 'sawtooth', vol: .035, cut: 350 + L * 1100 });
+      if (s === 0) ch.forEach(n => tone(t, N(n), spb * 4, { type: 'triangle', vol: .02, att: .3, rel: .5, verb: true }));
+      if (L > .55 && s % 2 === 1) tone(t, N(ch[(s >> 1) % 3] + 24), spb / 4, { type: 'square', vol: .012 + L * .01, cut: 3000 });
+      if (s === 0 && bar === 3) tone(t, N(81), .35, { type: 'square', vol: .02, cut: 2000, slide: N(76) }); // 짧은 경보음
+    }
+  }
+  const bpm = m => m === 'sim' ? SONG.sim.bpm + lvl * 44 : SONG[m].bpm;
+  function tick() {
+    if (!ac || !mode) return;
+    while (next < ac.currentTime + .15) { play(mode, step++, next); next += 60 / bpm(mode) / 4; }
+  }
+  function apply() {
+    if (!ac) return;
+    if (!on) { master.gain.setTargetAtTime(0, ac.currentTime, .15); return; }
+    if (mode !== want) {
+      master.gain.setTargetAtTime(0, ac.currentTime, .12);
+      const m = want; setTimeout(() => { if (want !== m || !on) return; mode = m; step = 0; next = ac.currentTime + .05; master.gain.setTargetAtTime(VOL[m], ac.currentTime, .4); }, mode ? 450 : 0);
+    } else master.gain.setTargetAtTime(VOL[mode], ac.currentTime, .3);
+    if (!timer) timer = setInterval(tick, 30);
+  }
+  function start() { if (!on || !init()) return; if (ac.state === 'suspended') ac.resume(); apply(); }
+  function draw() { if (btn) { btn.textContent = on ? '🎵' : '🔇'; btn.classList.toggle('off', !on); btn.title = on ? '배경음악 끄기' : '배경음악 켜기'; btn.setAttribute('aria-label', btn.title); } }
+  function toggle() { on = !on; try { localStorage.setItem(SKEY, on ? 'on' : 'off'); } catch (e) {} draw(); if (on) start(); else apply(); }
+  function sfx(k) {
+    if (!on || !ac || ac.state !== 'running') return; const t = ac.currentTime + .01;
+    if (k === 'ok') { tone(t, N(84), .1, { type: 'triangle', vol: .12 }); tone(t + .08, N(91), .18, { type: 'triangle', vol: .12, verb: true }); }
+    else if (k === 'bad') tone(t, 220, .28, { type: 'square', vol: .06, cut: 900, slide: 130 });
+    else if (k === 'flare') { hit(t, .45, .12, 900); tone(t, 320, .4, { type: 'sawtooth', vol: .03, cut: 1600, slide: 900 }); }
+    else if (k === 'shield') tone(t, N(76), .15, { type: 'sine', vol: .08, slide: N(88) });
+  }
+  // 첫 누르기에서 소리를 켜요 (브라우저 규칙)
+  document.addEventListener('pointerdown', () => start(), { capture: true });
+  btn = document.createElement('button'); btn.className = 'sndbtn'; btn.type = 'button'; btn.addEventListener('click', e => { e.stopPropagation(); toggle(); });
+  document.body.appendChild(btn); draw();
+  return { mode: m => { if (m === want) return; want = m; if (ac && on) apply(); }, level: v => { lvl = v; }, sfx, toggle };
+})();
+
+/* ───────── 그리기 ───────── */
+const app = document.getElementById('app');
+const VIEWS = { intro: viewIntro, class: viewClass, map: viewMap, m1: viewM1, m2: viewM2, m3: viewM3, m4: viewM4, game: viewGame, cert: viewCert, teacher: viewTeacher };
+function render() {
+  app.innerHTML = (VIEWS[state.view] || viewIntro)();
+  const slot = app.querySelector('.stage-slot'); if (slot) slot.replaceWith(Stage.el);
+  if (state.view === 'game') gMount();
+  BGM.mode(state.view === 'game' ? (G && G.stage === 1 && G.phase === 'q' ? 'sim' : 'game') : 'calm');
+}
+// 화면을 바꿀 때마다 새로 시작하는 값 (찾은 극대기·누른 영향 기록도 새로)
+// 처음에는 직접 그린 그림을 보여 주고, 📷 실제 사진은 누를 때만 보여요
+const BASE = () => ({ playing: false, loop: false, speed: 1, act: 1, day: 0, zoom: false, cut: false, grid: false, ghost: false, cover: 0, year: Y0, marks: false, ext: false, period: false, found: {}, pshape: 'loop', fx: null, fxSeen: {}, photo: false, big: false, ez: null, rotv: false });
+function tabSetup() { Stage.set(Object.assign(BASE(), { big: true }, TABS[ui.tab].setup)); if (TABS[ui.tab].setup.view === 'events') Stage.prom(false); }
+function enter(v) {
+  if (['map', 'm1', 'm2', 'm3', 'm4', 'game', 'cert'].includes(v) && !state.num) v = 'intro';
+  if (v === 'game' && !MISSIONS[3].done()) v = 'map';
+  gStop(); if (v === 'game') gNew();
+  const i = MISSIONS.findIndex(m => m.v === v);
+  if (i > 0 && !unlocked(i)) v = 'map';
+  state.view = v; ui.fb = {}; ui.submitMsg = '';
+  if (v === 'intro') Stage.set(Object.assign(BASE(), { view: 'hero' }));
+  if (v === 'class') tabSetup();
+  if (v === 'm1') Stage.set(Object.assign(BASE(), { view: 'surface' }));
+  if (v === 'm2') Stage.set(Object.assign(BASE(), { view: 'eclipse' }));
+  if (v === 'm3') Stage.set(Object.assign(BASE(), { view: 'cycle' }));
+  save(); render(); window.scrollTo(0, 0);
+}
+Stage.hooks.watch = k => {
+  const m = state.view;
+  if (!CHECK[m] || !CHECK[m].some(([kk]) => kk === k) || !predOk(m) || state[m].seen[k]) return;
+  state[m].seen[k] = true; save(); render();
+};
+Stage.hooks.change = () => { if (Stage.el.isConnected) render(); };
+// 답을 고를 때마다 화면을 다시 그리므로, 정리 상자를 펼친 상태를 기억해 둬요
+app.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('tip')) ui.tipOpen = e.target.open; }, true);
+// 슬라이더: 끄는 동안에는 그림만 바꾸고, 손을 떼면 버튼 상태를 다시 그려요
+app.addEventListener('input', e => { const k = e.target.dataset && e.target.dataset.rng; if (k) Stage.set({ [k]: +e.target.value, playing: false }); });
+app.addEventListener('change', e => { if (e.target.dataset && e.target.dataset.rng) render(); });
+
+/* ───────── 동작 ───────── */
+app.addEventListener('click', async e => {
+  const t = e.target.closest('[data-act]'); if (!t || t.disabled) return;
+  const a = t.dataset.act, v = t.dataset.v, S = Stage.S;
+  if (a === 'enter') enter(v);
+  else if (a === 'tab') { ui.tab = +t.dataset.i; tabSetup(); render(); }
+  else if (a === 'reveal') { ui.rev[t.dataset.k] = !ui.rev[t.dataset.k]; render(); }
+  else if (a === 'revall') {
+    const T = TABS[ui.tab], keys = [];
+    T.lines.forEach((l, i) => { let n = 0; l.replace(/\[(.+?)\]/g, () => keys.push(ui.tab + '-' + i + '-' + (n++))); });
+    const show = !keys.every(k => ui.rev[k]); keys.forEach(k => { ui.rev[k] = show; }); render();
+  }
+  else if (a === 'play') { Stage.play(); render(); }
+  else if (a === 'spd') { Stage.set({ speed: +v }); render(); }
+  else if (a === 'act') { Stage.set({ act: +v }); render(); }
+  else if (a === 'day') { Stage.set({ day: +v, playing: false }); render(); }
+  else if (a === 'tog') {
+    Stage.set({ [v]: !S[v] }); if (v === 'zoom' && !S.zoom) Stage.set({ cut: false }); if (v === 'zoom' || (v === 'rotv' && S.rotv)) Stage.set({ rotv: v === 'rotv', playing: false }); if (S.zoom && S.cut) Stage.hooks.watch('cut');
+    // 수업 모드: ① 광구에서 🔍 확대를 누르면 ② 쌀알무늬 정리로, ②에서 확대를 끄면 ①로 넘어가요
+    if (state.view === 'class' && v === 'zoom') { if (S.zoom && ui.tab === 0) ui.tab = 1; else if (!S.zoom && ui.tab === 1) ui.tab = 0; }
+    render();
+  }
+  else if (a === 'sview') { Stage.set({ view: v, playing: false }); if (v === 'events') Stage.prom(false); render(); }
+  // 홍염·플레어 버튼은 움직이는 그림으로 보여 줘요 (사진 보기였으면 그림으로 바꿔요)
+  else if (a === 'prom' || a === 'flare') { const ph = S.photo; Stage.set({ photo: false }); a === 'prom' ? Stage.prom() : Stage.flare(); if (ph) render(); }
+  else if (a === 'pshape') { Stage.set({ pshape: v, photo: false }); Stage.prom(); render(); }
+  else if (a === 'fx') { Stage.fx(v); render(); }
+  else if (a === 'ez') { Stage.set({ ez: v && S.ez !== v ? v : null, playing: false }); render(); }
+  else if (a === 'start') startMission(t);
+  // 게임
+  else if (a === 'gstart') { gNew(); render(); }
+  else if (a === 'gq') gQ();
+  else if (a === 'gnext') gNext();
+  else if (a === 'g1' && G && G.phase === 'q') { const q = gItem(); gAnswer(v === q.a, v === q.a ? '' : q.hide ? `'${v}'은(는) 이 사진에서 보여요.` : `'${v}'이(가) 아니에요.`, 100 + Math.round(100 * clamp(1 - gSec() / 9, 0, 1))); }
+  else if (a === 'gfac') simShield(v);
+  else if (a === 'gaur') simAur(v);
+  else if (a === 'wipe') {
+    if (confirm('이 기기에 저장된 탐사 기록을 모두 지울까요? (선생님께 보낸 결과는 지워지지 않아요)')) {
+      state = fresh(); try { localStorage.removeItem(KEY); } catch (err) {} enter('intro');
+    }
+  }
+  else if (a === 'ans') {
+    const m = t.dataset.m, i = +t.dataset.i, j = +t.dataset.j, [qs, recf] = QS[m], rec = recf(), q = qs[i];
+    if (m === 'm1' && !seenAll('m1')) return;
+    if (m === 'm2' && !(predOk('m2') && seenAll('m2') && sortDone())) return;
+    if (m === 'm3' && !(predOk('m3') && seenAll('m3'))) return;
+    const r = rec[i] || (rec[i] = { no: [] }); if (r.ok) return;
+    if (j === q.a) { r.ok = true; ui.fb[m + i] = ''; }
+    else { if (!r.no.includes(j)) r.no.push(j); ui.fb[m + i] = `🔎 다시 생각해 봐요.${q.h ? ' ' + esc(q.h) : ''}`; }
+    save(); render();
+  }
+  else if (a === 'sort') {
+    const i = +t.dataset.i, j = +t.dataset.j, r = state.m2.s[i] || (state.m2.s[i] = { no: [] }); if (r.ok) return;
+    if (j === SORT[i][1]) { r.ok = true; ui.fb.sort = ''; }
+    else { if (!r.no.includes(j)) r.no.push(j); ui.fb.sort = `🔎 ${SORT[i][0]}: 다시 생각해 봐요. 평소에도 보이면 표면, 개기 일식 때 보이는 층이면 대기, 대기에서 솟아오르거나 폭발하는 것이면 대기에서 나타나는 현상이에요.`; }
+    save(); render();
+  }
+  else if (a === 'pred') {
+    const m = state.view, P = PREDS[m], p = state[m].pred || (state[m].pred = { no: [] }), j = +t.dataset.j; if (p.ok) return;
+    if (j === P.a) { p.ok = true; ui.fb.pred = { ok: true, msg: p.no.length ? '✔ 맞아요! 화면에서 직접 확인해 보세요.' : '🎯 예측 성공! 화면에서 확인해 보세요.' }; }
+    else { if (!p.no.includes(j)) p.no.push(j); ui.fb.pred = { ok: false, msg: '🤔 화면을 보며 다시 생각해 보세요.' }; }
+    if (m === 'm2') { Stage.set({ view: 'eclipse', cover: 0 }); Stage.play(); }
+    // 임무 3은 예측한 뒤에도 📈 흑점 수 그래프를 그대로 보여 줘요 (관측 체크가 그래프부터라서)
+    save(); render();
+  }
+  else if (a === 'teacher') { ui.teacher = null; state.view = 'teacher'; render(); }
+  else if (a === 'tload') teacherLoad();
+  else if (a === 'tcls') { ui.teacher.cls = t.dataset.c; render(); }
+  else if (a === 'submit') submit();
+});
+async function startMission(btn) {
+  const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const num = val('num'), name = val('name'), msg = document.getElementById('introMsg');
+  if (!num || !name) { msg.textContent = '학번과 이름을 모두 입력해 주세요.'; return; }
+  if (CONFIG.SUBMIT_URL) {
+    const code = val('ccode');
+    if (!code) { msg.textContent = '수업 코드도 입력해 주세요.'; return; }
+    msg.textContent = '수업 코드를 확인하는 중…'; btn.disabled = true;
+    try {
+      const out = await post({ lesson: CONFIG.LESSON, action: 'check', code });
+      if (!out.ok) { msg.textContent = '수업 코드가 맞지 않아요. 다시 확인해 주세요.'; btn.disabled = false; return; }
+    } catch (err) { /* 인터넷이 잠시 안 되면 일단 시작하고, 나중에 다시 보내요 */ }
+    state.code = code;
+  }
+  state.num = num; state.name = name;
+  // 선생님 시험용: 학번 00000으로 들어오면 바로 결과(보내기) 화면으로
+  if (num === '00000') { enter('cert'); ui.submitMsg = '🧪 선생님 시험 모드예요. 보내기를 눌러 구글 시트에 줄이 생기는지 확인하세요.'; render(); return; }
+  enter('map');
+}
+
+/* ───────── 선생님께 진행 상황 보내기 (시트 '태양 현황' 탭, 학생 한 명당 한 줄) ───────── */
+async function post(body) {
+  const res = await fetch(CONFIG.SUBMIT_URL, { method: 'POST', body: JSON.stringify(body) });
+  return res.json();
+}
+async function hello() {
+  if (ui.server != null) return ui.server;
+  const out = await post({ action: 'hello' });
+  ui.server = !!(out && out.lessons);
+  return ui.server;
+}
+const COLS = ['임무 1 태양의 표면', '임무 2 태양의 대기', '임무 3 태양 활동과 지구', '임무 4 확인 퀴즈', '표면 문제 (한 번에)', '대기 분류·문제 (한 번에)', '활동·지구 문제 (한 번에)', '확인 퀴즈 (한 번에)', '틀린 답'];
+function progressVals() {
+  const stat = (done, a, b) => done ? '완료' : a ? `진행 ${a}/${b}` : '-';
+  const sortCnt = SORT.filter((x, i) => sortOk(i)).length, wrong = [];
+  SORT.forEach(([n], i) => { const r = state.m2.s[i]; if (r && r.no.length) wrong.push(`${n}: ${r.no.map(j => CATS[j]).join(', ')}`); });
+  ['m2', 'm3'].forEach(m => { const p = state[m].pred; if (p && p.no.length) wrong.push(`${m === 'm2' ? '일식 예측' : '태양풍 예측'}: ${p.no.map(j => PREDS[m].o[j]).join(', ')}`); });
+  return [
+    stat(MISSIONS[0].done(), okCount(M1Q, state.m1.q), M1Q.length), stat(MISSIONS[1].done(), sortCnt + okCount(M2Q, state.m2.q), SORT.length + M2Q.length),
+    stat(MISSIONS[2].done(), okCount(M3Q, state.m3.q), M3Q.length), stat(MISSIONS[3].done(), okCount(QUIZ, state.m4.q), QUIZ.length),
+    `${firstOk(M1Q, state.m1.q)}/${M1Q.length}`, `${sortFirst() + firstOk(M2Q, state.m2.q)}/${SORT.length + M2Q.length}`, `${firstOk(M3Q, state.m3.q)}/${M3Q.length}`, `${firstOk(QUIZ, state.m4.q)}/${QUIZ.length}`, wrong.join(' / ')
+  ];
+}
+async function sync(force) {
+  if (!CONFIG.SUBMIT_URL || !state.code || !state.num) return null;
+  const vals = progressVals(), sig = [state.num, state.name].concat(vals).join('|');
+  if (!force && sig === state.sentSig) return null;
+  try {
+    if (!(await hello())) return { ok: false, error: 'server' };
+    const out = await post({ lesson: CONFIG.LESSON, action: 'save', code: state.code, num: state.num, name: state.name, cols: COLS, vals });
+    if (out.ok) { state.sentSig = sig; state.sent = true; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+    return out;
+  } catch (err) { return { ok: false, error: 'net' }; }
+}
+async function submit() {
+  if (!state.code) { ui.submitMsg = '수업 코드 없이 시작해서 보낼 수 없어요. 처음 화면에서 다시 시작해 주세요.'; render(); return; }
+  ui.submitMsg = '보내는 중…'; render();
+  const out = await sync(true);
+  ui.submitMsg = out && out.ok ? '✔ 선생님께 보냈어요.' : out && out.error === 'code' ? '수업 코드가 맞지 않아요.' : out && out.error === 'server' ? '아직 결과를 받을 준비가 안 됐어요. 선생님께 알려 주세요. (이 화면을 캡처해서 내도 돼요)' : '인터넷 연결을 확인해 주세요. 계속 안 되면 이 화면을 캡처해서 내세요.';
+  render();
+}
+
+enter('intro');
+</script>
+</body>
+</html>
