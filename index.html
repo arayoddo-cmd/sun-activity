@@ -1188,7 +1188,10 @@ const MISSIONS = [
   { v: 'm3', t: '임무 3. 태양 활동과 지구', d: '흑점 수 그래프에서 태양 활동의 주기를 찾고, 태양 활동이 활발할 때 지구가 받는 영향을 알아봐요.', done: () => predOk('m3') && qDone(M3Q, state.m3.q) },
   { v: 'm4', t: '임무 4. 확인 퀴즈', d: `형성평가 유형 ${QUIZ.length}문제로 배운 내용을 정리해요.`, done: () => qDone(QUIZ, state.m4.q) }
 ];
-const unlocked = i => i === 0 || MISSIONS[i - 1].done();
+// 선생님 시험 모드: 학번 00000이면 모든 임무와 게임이 처음부터 열려 있어요
+const tester = () => state.num === '00000';
+const gameOpen = () => tester() || MISSIONS[3].done();
+const unlocked = i => i === 0 || tester() || MISSIONS[i - 1].done();
 
 /* ───────── 화면 조각 ───────── */
 const on = c => c ? ' on' : '';
@@ -1286,9 +1289,9 @@ function viewClass() {
 function viewMap() {
   const n = MISSIONS.filter(m => m.done()).length;
   return `<div class="top"><span class="title" style="font-size:26px">🧑‍🚀 탐사 임무</span><span class="pill">진행 <b>${n}/4</b></span><span class="grow"></span><span class="pill">🧑‍🚀 <b>${esc(state.num)} ${esc(state.name)}</b></span><button class="btn ghost small" data-act="enter" data-v="cert">📋 결과</button><button class="btn ghost small" data-act="enter" data-v="intro">← 처음 화면</button></div>
-<div class="mcards">${MISSIONS.map((m, i) => { const ok = unlocked(i), d = m.done(); return `<section class="panel mcard${ok ? '' : ' lock'}"><span class="n">${d ? '<span class="st-done">✔ 완료</span>' : ok ? '도전 가능' : '🔒 앞 임무를 먼저 마쳐요'}</span><h3>${m.t}</h3><p class="muted">${m.d}</p><div class="row"><button class="btn${d ? ' ghost' : ''} small" data-act="enter" data-v="${m.v}"${ok ? '' : ' disabled'}>${d ? '다시 보기' : '시작'}</button></div></section>`; }).join('')}</div>
+${tester() ? '<div class="done" style="margin:0 0 14px"><b>🧪 선생님 시험 모드 (학번 00000) · 모든 임무와 게임이 열려 있어요.</b><span class="muted">시트 보내기 시험은 📋 결과에서</span></div>' : ''}<div class="mcards">${MISSIONS.map((m, i) => { const ok = unlocked(i), d = m.done(); return `<section class="panel mcard${ok ? '' : ' lock'}"><span class="n">${d ? '<span class="st-done">✔ 완료</span>' : ok ? '도전 가능' : '🔒 앞 임무를 먼저 마쳐요'}</span><h3>${m.t}</h3><p class="muted">${m.d}</p><div class="row"><button class="btn${d ? ' ghost' : ''} small" data-act="enter" data-v="${m.v}"${ok ? '' : ' disabled'}>${d ? '다시 보기' : '시작'}</button></div></section>`; }).join('')}</div>
 ${MISSIONS.every(m => m.done()) ? '<div class="done"><b>🎉 모든 임무를 마쳤어요!</b><button class="btn small" data-act="enter" data-v="cert">결과 보기 →</button></div>' : ''}
-${(() => { const ok = MISSIONS[3].done(), g = state.game; return `<section class="panel mcard${ok ? '' : ' lock'}" style="margin-top:14px"><span class="n">${ok ? (g.plays ? `🏆 내 최고 ${g.best}점 · ${g.plays}번 도전` : '도전 가능') : '🔒 임무 4를 마치면 열려요'}</span><h3>🎮 마지막 도전 · 태양 탐정</h3><p class="muted">① 이게 뭘까? → ② 우주 기상 상황실. 목숨 3개, 연속으로 맞히면 보너스! 할 때마다 순서가 바뀌고, 게임 점수는 임무 성적과 따로 기록돼요.</p><div class="row"><button class="btn small" data-act="enter" data-v="game"${ok ? '' : ' disabled'}>${g.plays ? '다시 도전' : '시작'}</button></div></section>`; })()}`;
+${(() => { const ok = gameOpen(), g = state.game; return `<section class="panel mcard${ok ? '' : ' lock'}" style="margin-top:14px"><span class="n">${ok ? (g.plays ? `🏆 내 최고 ${g.best}점 · ${g.plays}번 도전` : '도전 가능') : '🔒 임무 4를 마치면 열려요'}</span><h3>🎮 마지막 도전 · 태양 탐정</h3><p class="muted">① 이게 뭘까? → ② 우주 기상 상황실. 목숨 3개, 연속으로 맞히면 보너스! 할 때마다 순서가 바뀌고, 게임 점수는 임무 성적과 따로 기록돼요.</p><div class="row"><button class="btn small" data-act="enter" data-v="game"${ok ? '' : ' disabled'}>${g.plays ? '다시 도전' : '시작'}</button></div></section>`; })()}`;
 }
 function missionPage(i, title, side) {
   return mTop(title) + `<div class="lesson"><div><div class="stage-slot"></div>${ctrls()}</div><aside class="panel">${side}${MISSIONS[i].done() ? doneBox(i) : ''}</aside></div>`;
@@ -1375,7 +1378,7 @@ const ASK3 = {
   trend: { h: '📺 <b>방송국</b> “요즘 흑점 수는 어떻게 변하고 있나요?”', o: ['늘어나는 중이에요', '줄어드는 중이에요'], no: ['📺 그래프를 보면 흑점 수가 늘어나는 중이에요', '📺 그래프를 보면 흑점 수가 줄어드는 중이에요'] }
 };
 const ASK_Y = [2009.6, 2011.2, 2012.8, 2015.5, 2017.0, 2018.6];
-const SIM = { y0: 2008.8, y1: 2019.9, T: 75, cost: 40, life: 5 };
+const SIM = { y0: 2008.8, y1: 2019.9, T: 75, cost: 40, life: 8 }; // life: 대비를 켜 두는 시간(경보 시간보다 길어야 일찍 눌러도 막아요)
 const simAct = y => spotN(y) / 110;
 const simYear = s => SIM.y0 + (SIM.y1 - SIM.y0) * Math.min(1, s.t / SIM.T);
 const pick = a => a[Math.floor(Math.random() * a.length)];
@@ -1400,7 +1403,7 @@ function simTick(now) {
   // 플레어: 흑점이 많을수록 자주 (한 번에 두 곳까지), 경보 문구는 그때그때 달라요
   if (run && s.th.length < 2 && Math.random() < (.04 + .45 * act * act) * dt) {
     const f = pick(s.fac.filter(f => !s.th.some(h => h.k === f.k)));
-    s.th.push({ id: ++s.id, k: f.k, warn: f.warn, t0: s.t, D: 4.2 - 1.2 * act, at: null }); s.sunFlash = s.t; BGM.sfx('flare');
+    s.th.push({ id: ++s.id, k: f.k, warn: f.warn, t0: s.t, D: 7.2 - 1.2 * act, at: null }); // 경보 뒤 태양풍이 닿기까지 6~7.2초 s.sunFlash = s.t; BGM.sfx('flare');
   }
   // 대비가 필요 없는 관측 소식
   if (run && !s.info.length && Math.random() < .06 * dt) s.info.push({ txt: pick(act < .35 ? INFO3.low.concat(INFO3.any) : INFO3.any), t0: s.t });
@@ -1426,7 +1429,7 @@ function simTick(now) {
 }
 function simShield(k) {
   const s = G && G.sim; if (!s || G.phase !== 'q' || s.sh[k] > s.t) return;
-  const hs = s.th.filter(h => h.k === k); s.sh[k] = s.t + SIM.life;
+  const hs = s.th.filter(h => h.k === k); s.sh[k] = s.t + (hs.length ? SIM.life : 5); // 헛 대비는 예전처럼 5초만 켜져요
   if (hs.length) { hs.forEach(h => { if (h.at == null) h.at = s.t; }); BGM.sfx('shield'); }
   else { s.waste++; BGM.sfx('bad'); G.score = Math.max(0, G.score - SIM.cost); simFloat(s, `🙅 헛 대비 −${SIM.cost}`, 'bad'); }
 }
@@ -1549,7 +1552,8 @@ function viewGame() {
     return top + `<section class="panel" style="max-width:720px"><p class="kicker">${G.stage + 1} / ${GST.length}단계</p><h2 class="gq">${s.t}</h2><p class="lead">${s.d}</p>
 ${G.stage === 0 ? '<ul class="glegend"><li>❤️ 목숨은 3개예요. 틀리거나 시간이 지나면 하나씩 줄어요.</li><li>🔥 연속으로 맞히면 보너스 점수가 붙어요.</li><li>🔀 할 때마다 문제와 보기 순서가 바뀌어요.</li><li>📋 게임 점수는 임무 성적과 따로 기록돼요.</li></ul>' : ''}
 ${G.stage === 1 ? `<ul class="glegend"><li>📈 위쪽 그래프의 흰 점이 지금 연도예요. <b>흑점 수가 많을수록</b> 플레어가 자주 터져요.</li><li>💥 플레어 경보를 읽고 피해를 입을 시설(📻 무선 통신 · 🛰 인공위성 · ⚡ 발전소 · ✈ 북극 항로 · 🧭 지구 자기장, 버튼 순서는 할 때마다 바뀌어요)의 <b>🛡 대비</b>를 눌러요. 빨리 누를수록 점수가 커요.</li><li>📡 파란 관측 소식은 대비가 필요 없어요. 잘 읽고 판단해요!</li><li>🙅 경보가 없는 곳에 대비를 켜면 헛 대비라 ${SIM.cost}점이 줄어요.</li><li>📞 오로라 여행사·과학 기자·방송국의 질문에는 그래프의 흑점 수를 보고 대답해요.</li><li>🛡 막은 비율이 <b>방어율</b>이에요. 내 최고 방어율이 우리 반 방어율에 들어가요. (이 단계에서는 목숨이 줄지 않아요)</li></ul>` : ''}
-<div class="row" style="margin-top:12px"><button class="btn" data-act="gq">${G.stage ? '다음 단계 시작 ▶' : '시작 ▶'}</button></div></section>`;
+<div class="row" style="margin-top:12px"><button class="btn" data-act="gq">${G.stage ? '다음 단계 시작 ▶' : '시작 ▶'}</button></div>
+${tester() ? `<div class="row" style="margin-top:14px;padding-top:12px;border-top:1px dashed #8886;align-items:center"><span class="muted">🔧 선생님 확인용 · 바로 가기</span>${GST.map((x, i) => `<button class="btn ghost" data-act="gjump" data-v="${i}"${i === G.stage ? ' disabled' : ''}>${i + 1}단계</button>`).join('')}</div>` : ''}</section>`;
   }
   if (G.phase === 'over' || G.phase === 'win') {
     return top + `<section class="panel" style="max-width:720px;text-align:center"><h2 class="gq">${G.phase === 'win' ? '🏆 모든 단계를 통과했어요!' : '💔 목숨을 모두 썼어요'}</h2><div class="gbig">${G.score}점</div>
@@ -1750,7 +1754,7 @@ const BASE = () => ({ playing: false, loop: false, speed: 1, act: 1, day: 0, zoo
 function tabSetup() { Stage.set(Object.assign(BASE(), { big: true }, TABS[ui.tab].setup)); if (TABS[ui.tab].setup.view === 'events') Stage.prom(false); }
 function enter(v) {
   if (['map', 'm1', 'm2', 'm3', 'm4', 'game', 'cert'].includes(v) && !state.num) v = 'intro';
-  if (v === 'game' && !MISSIONS[3].done()) v = 'map';
+  if (v === 'game' && !gameOpen()) v = 'map';
   gStop(); if (v === 'game') gNew();
   const i = MISSIONS.findIndex(m => m.v === v);
   if (i > 0 && !unlocked(i)) v = 'map';
@@ -1807,6 +1811,7 @@ app.addEventListener('click', async e => {
   else if (a === 'gstart') { gNew(); render(); }
   else if (a === 'gq') gQ();
   else if (a === 'gnext') gNext();
+  else if (a === 'gjump' && tester()) { gStop(); gNew(); G.stage = +v; render(); }
   else if (a === 'g1' && G && G.phase === 'q') { const q = gItem(); gAnswer(v === q.a, v === q.a ? '' : q.hide ? `'${v}'은(는) 이 사진에서 보여요.` : `'${v}'이(가) 아니에요.`, 100 + Math.round(100 * clamp(1 - gSec() / 9, 0, 1))); }
   else if (a === 'gfac') simShield(v);
   else if (a === 'gaur') simAur(v);
@@ -1859,8 +1864,7 @@ async function startMission(btn) {
     state.code = code;
   }
   state.num = num; state.name = name;
-  // 선생님 시험용: 학번 00000으로 들어오면 바로 결과(보내기) 화면으로
-  if (num === '00000') { enter('cert'); ui.submitMsg = '🧪 선생님 시험 모드예요. 보내기를 눌러 구글 시트에 줄이 생기는지 확인하세요.'; render(); return; }
+  // 선생님 시험용: 학번 00000이면 모든 임무·게임이 열린 임무 목록으로 (시트 보내기 시험은 📋 결과에서)
   enter('map');
 }
 
