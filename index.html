@@ -236,6 +236,13 @@ details.tip summary{cursor:pointer;font-weight:700;color:var(--accent);font-size
 .sndbtn{position:fixed;right:14px;bottom:14px;z-index:60;width:50px;height:50px;border-radius:50%;background:rgba(17,25,52,.92);border:1px solid var(--line);color:#fff;font-size:24px;line-height:1;cursor:pointer;box-shadow:0 4px 16px #0009}
 .sndbtn:hover{border-color:var(--accent)}.sndbtn.off{opacity:.65}
 .gbig{font-family:"Do Hyeon";font-size:clamp(48px,8vw,80px);color:var(--accent);line-height:1.1}
+.grank{margin:16px auto 4px;max-width:440px;text-align:left;background:#141f48;border:1px solid #ffcf5a55;border-radius:14px;padding:12px 16px}
+.grank h3{margin:0 0 8px;font-size:18px;text-align:center}.grank h3 small{font-size:13px;color:var(--muted);font-weight:400}
+.grank ol{list-style:none;margin:0;padding:0}
+.grank li{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:10px;font-size:17px}
+.grank li span{width:34px;text-align:center;font-size:22px}.grank li b{flex:1}.grank li em{font-style:normal;color:var(--accent);font-weight:700}
+.grank li.me{background:#ffcf5a22;outline:1px solid #ffcf5a88}
+.grank p{margin:10px 0 0;text-align:center;font-size:17px}.grank .rk{color:var(--accent);font-size:24px}
 </style>
 </head>
 <body>
@@ -1403,7 +1410,7 @@ function simTick(now) {
   // 플레어: 흑점이 많을수록 자주 (한 번에 두 곳까지), 경보 문구는 그때그때 달라요
   if (run && s.th.length < 2 && Math.random() < (.04 + .45 * act * act) * dt) {
     const f = pick(s.fac.filter(f => !s.th.some(h => h.k === f.k)));
-    s.th.push({ id: ++s.id, k: f.k, warn: f.warn, t0: s.t, D: 7.2 - 1.2 * act, at: null }); // 경보 뒤 태양풍이 닿기까지 6~7.2초 s.sunFlash = s.t; BGM.sfx('flare');
+    s.th.push({ id: ++s.id, k: f.k, warn: f.warn, t0: s.t, D: 5.5 - 1.0 * act, at: null }); // 경보 뒤 태양풍이 닿기까지 약 5초 (조용할 때 5.5초 → 극대기 4.5초) s.sunFlash = s.t; BGM.sfx('flare');
   }
   // 대비가 필요 없는 관측 소식
   if (run && !s.info.length && Math.random() < .06 * dt) s.info.push({ txt: pick(act < .35 ? INFO3.low.concat(INFO3.any) : INFO3.any), t0: s.t });
@@ -1552,12 +1559,12 @@ function viewGame() {
     return top + `<section class="panel" style="max-width:720px"><p class="kicker">${G.stage + 1} / ${GST.length}단계</p><h2 class="gq">${s.t}</h2><p class="lead">${s.d}</p>
 ${G.stage === 0 ? '<ul class="glegend"><li>❤️ 목숨은 3개예요. 틀리거나 시간이 지나면 하나씩 줄어요.</li><li>🔥 연속으로 맞히면 보너스 점수가 붙어요.</li><li>🔀 할 때마다 문제와 보기 순서가 바뀌어요.</li><li>📋 게임 점수는 임무 성적과 따로 기록돼요.</li></ul>' : ''}
 ${G.stage === 1 ? `<ul class="glegend"><li>📈 위쪽 그래프의 흰 점이 지금 연도예요. <b>흑점 수가 많을수록</b> 플레어가 자주 터져요.</li><li>💥 플레어 경보를 읽고 피해를 입을 시설(📻 무선 통신 · 🛰 인공위성 · ⚡ 발전소 · ✈ 북극 항로 · 🧭 지구 자기장, 버튼 순서는 할 때마다 바뀌어요)의 <b>🛡 대비</b>를 눌러요. 빨리 누를수록 점수가 커요.</li><li>📡 파란 관측 소식은 대비가 필요 없어요. 잘 읽고 판단해요!</li><li>🙅 경보가 없는 곳에 대비를 켜면 헛 대비라 ${SIM.cost}점이 줄어요.</li><li>📞 오로라 여행사·과학 기자·방송국의 질문에는 그래프의 흑점 수를 보고 대답해요.</li><li>🛡 막은 비율이 <b>방어율</b>이에요. 내 최고 방어율이 우리 반 방어율에 들어가요. (이 단계에서는 목숨이 줄지 않아요)</li></ul>` : ''}
-<div class="row" style="margin-top:12px"><button class="btn" data-act="gq">${G.stage ? '다음 단계 시작 ▶' : '시작 ▶'}</button></div>
+<div class="row" style="margin-top:12px"><button class="btn" data-act="gq">${G.stage ? '다음 단계 시작 ▶' : '시작 ▶'}</button></div>${G.stage === 0 ? rankBox() : ''}
 ${tester() ? `<div class="row" style="margin-top:14px;padding-top:12px;border-top:1px dashed #8886;align-items:center"><span class="muted">🔧 선생님 확인용 · 바로 가기</span>${GST.map((x, i) => `<button class="btn ghost" data-act="gjump" data-v="${i}"${i === G.stage ? ' disabled' : ''}>${i + 1}단계</button>`).join('')}</div>` : ''}</section>`;
   }
   if (G.phase === 'over' || G.phase === 'win') {
     return top + `<section class="panel" style="max-width:720px;text-align:center"><h2 class="gq">${G.phase === 'win' ? '🏆 모든 단계를 통과했어요!' : '💔 목숨을 모두 썼어요'}</h2><div class="gbig">${G.score}점</div>
-<p class="lead">${G.newBest ? '🎉 내 최고 기록이에요!' : `내 최고 기록: <b>${state.game.best}점</b>`} · 최대 ${G.maxStreak}연속 정답</p>${G.rate != null ? `<p class="lead">🛡 우주 기상 상황실 방어율 <b>${G.rate}%</b> (내 최고 ${state.game.rate}%)</p>` : ''}
+<p class="lead">${G.newBest ? '🎉 내 최고 기록이에요!' : `내 최고 기록: <b>${state.game.best}점</b>`} · 최대 ${G.maxStreak}연속 정답</p>${G.rate != null ? `<p class="lead">🛡 우주 기상 상황실 방어율 <b>${G.rate}%</b> (내 최고 ${state.game.rate}%)</p>` : ''}${rankBox()}
 <div class="row" style="justify-content:center;margin-top:12px"><button class="btn" data-act="gstart">🔁 다시 도전 (순서가 바뀌어요)</button><button class="btn ghost" data-act="enter" data-v="map">← 임무 목록</button></div>
 <p class="note">${CONFIG.SUBMIT_URL && state.code ? '최고 점수와 최고 방어율은 선생님 화면의 반별 순위·반 대항 방어율에 올라가요.' : ''}</p></section>`;
   }
@@ -1586,6 +1593,26 @@ async function syncGame() {
   if (!CONFIG.SUBMIT_URL || !state.code || !state.num) return;
   const g = state.game;
   try { if (await hello()) await post({ lesson: CONFIG.LESSON + ' 게임', action: 'save', code: state.code, num: state.num, name: state.name, cols: GCOLS, vals: [g.best, g.plays, g.last, g.clear, g.rate == null ? '' : g.rate] }); } catch (err) {}
+  loadRank();
+}
+// 우리 반 게임 순위 (최고 점수 기준): 1~3위와 내 순위. Apps Script가 순위 기능이 있는 버전일 때만 보여요
+async function loadRank() {
+  if (!CONFIG.SUBMIT_URL || !state.code || !state.num) return;
+  try {
+    if (!(await hello()) || !ui.rankOk) return;
+    const out = await post({ lesson: CONFIG.LESSON + ' 게임', action: 'rank', code: state.code, num: state.num, name: state.name, by: '최고 점수' });
+    if (!out || !out.ok) return;
+    ui.rank = out;
+    // 게임을 하는 중에는 화면을 다시 그리지 않아요
+    if (state.view === 'game' && G && G.phase !== 'q' && G.phase !== 'fb') render();
+  } catch (err) {}
+}
+function rankBox() {
+  const R = ui.rank; if (!R || !R.total) return '';
+  const medal = ['🥇', '🥈', '🥉'];
+  const top = R.top.length ? R.top.map(t => `<li${t.rank === R.rank && t.name === state.name ? ' class="me"' : ''}><span>${medal[t.rank - 1] || t.rank + '위'}</span><b>${esc(t.name)}</b><em>${t.s}점</em></li>`).join('') : '<li class="muted">아직 점수가 있는 친구가 없어요</li>';
+  const me = R.rank ? `나는 우리 반 <b>${R.total}명</b> 중 <b class="rk">${R.rank}위</b>${R.rank <= 3 ? ' 🎉' : ''}` : '내 점수를 보내는 중이에요…';
+  return `<div class="grank"><h3>🏆 우리 반 순위 <small>(최고 점수 기준)</small></h3><ol>${top}</ol><p>${me}</p></div>`;
 }
 // 교사 화면: 반별 게임 최고 점수
 function gameBox(T, cls, clsName) {
@@ -1755,7 +1782,7 @@ function tabSetup() { Stage.set(Object.assign(BASE(), { big: true }, TABS[ui.tab
 function enter(v) {
   if (['map', 'm1', 'm2', 'm3', 'm4', 'game', 'cert'].includes(v) && !state.num) v = 'intro';
   if (v === 'game' && !gameOpen()) v = 'map';
-  gStop(); if (v === 'game') gNew();
+  gStop(); if (v === 'game') { gNew(); loadRank(); }
   const i = MISSIONS.findIndex(m => m.v === v);
   if (i > 0 && !unlocked(i)) v = 'map';
   state.view = v; ui.fb = {}; ui.submitMsg = '';
@@ -1876,7 +1903,7 @@ async function post(body) {
 async function hello() {
   if (ui.server != null) return ui.server;
   const out = await post({ action: 'hello' });
-  ui.server = !!(out && out.lessons);
+  ui.server = !!(out && out.lessons); ui.rankOk = !!(out && out.rank);
   return ui.server;
 }
 const COLS = ['임무 1 태양의 표면', '임무 2 태양의 대기', '임무 3 태양 활동과 지구', '임무 4 확인 퀴즈', '표면 문제 (한 번에)', '대기 분류·문제 (한 번에)', '활동·지구 문제 (한 번에)', '확인 퀴즈 (한 번에)', '틀린 답'];
