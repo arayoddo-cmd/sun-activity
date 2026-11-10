@@ -26,6 +26,7 @@ body::before{background-image:radial-gradient(1.2px 1.2px at 24px 36px,#ffffffb0
 body::after{background:radial-gradient(circle at 100% 0,transparent 0 259px,rgba(255,207,90,.10) 260px 261px,transparent 262px),radial-gradient(circle at 100% 0,transparent 0 459px,rgba(124,196,255,.08) 460px 461px,transparent 462px),radial-gradient(circle at 100% 0,transparent 0 719px,rgba(124,196,255,.07) 720px 721px,transparent 722px),radial-gradient(circle at 100% 0,transparent 0 1039px,rgba(180,150,255,.06) 1040px 1041px,transparent 1042px)}
 .panel{backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 #app{max-width:1280px;margin:0 auto;padding:14px 16px 60px}
+#app:has(.cl-stage){max-width:1880px} /* 수업 모드(TV)는 화면을 넓게 */
 h1,h2,h3,.title{font-family:"Do Hyeon","Noto Sans KR",sans-serif;font-weight:400;letter-spacing:.5px;margin:0}
 h1{font-size:clamp(36px,6vw,58px);line-height:1.15}
 h3{font-size:22px;margin-bottom:6px}
@@ -88,7 +89,20 @@ label{display:block;font-weight:700;margin:10px 0 4px}
 button.blank:not(.show){color:transparent}
 .blank.ok{border-color:var(--ok);color:var(--ok)}
 /* 수업 모드: TV로 함께 보도록 관측 화면을 크게, 정리 카드는 아래에 큰 글씨로 */
+/* 수업 모드: 넓은 화면에서는 버튼을 관측 화면 오른쪽 세로 칸에 모아 스크롤 없이 조작해요 */
 .cl-stage .stage{height:max(420px,calc(100vh - 200px))}
+@media (min-width:1000px){
+  .cl-stage{display:grid;grid-template-columns:minmax(0,1fr) clamp(250px,21vw,340px);gap:12px;align-items:start}
+  .cl-stage .stage{height:max(420px,calc(100vh - 100px))}
+  .cl-side{max-height:calc(100vh - 100px);overflow-y:auto;overflow-x:hidden;padding-right:2px}
+  .cl-side .ctrl{flex-direction:column;align-items:stretch;margin:0 0 10px}
+  .cl-side .ctrl>*{max-width:100%}
+  .cl-side .group{border-radius:16px;padding:5px}
+  .cl-side .group .lbl{flex-basis:100%;padding:2px 8px 4px}
+  .cl-side .group .chip{flex:1 1 auto}
+  .cl-side .ctrl>.chip,.cl-side .ctrl>button{width:100%}
+  .cl-side input[type=range]{width:100%}
+}
 .cl-stage .chip{font-size:17px;min-height:46px}
 .cl-stage .group .chip{min-height:42px}
 .cl-stage .stage .hud{font-size:clamp(18px,1.9vw,28px)}
@@ -1355,7 +1369,7 @@ ${CONFIG.SUBMIT_URL ? '<div style="text-align:right"><button class="btn ghost sm
 function viewClass() {
   const T = TABS[ui.tab];
   return `<div class="top"><span class="title" style="font-size:26px">👩‍🏫 수업 모드</span><div class="tabs">${TABS.map((t, i) => `<button class="tab${on(i === ui.tab)}" data-act="tab" data-i="${i}">${t.name}</button>`).join('')}</div><span class="grow"></span><button class="btn ghost small" data-act="enter" data-v="intro">← 처음 화면</button></div>
-<div class="cl-stage"><div class="stage-slot"></div>${ctrls()}</div>
+<div class="cl-stage"><div class="stage-slot"></div><div class="cl-side">${ctrls()}</div></div>
 <section class="panel concept big"><div class="row"><h3 style="flex:1">${T.title}</h3><button class="btn ghost small" data-act="revall">빈칸 모두 보기 / 가리기</button></div>
 <ol>${T.lines.map((l, i) => `<li>${fill(l, ui.tab + '-' + i)}</li>`).join('')}</ol>
 <div class="ask">💬 ${T.ask}</div><p class="note">빈칸을 누르면 하나씩 답이 보여요. (학습지 5~7쪽, 교과서 232~237쪽)</p></section>`;
