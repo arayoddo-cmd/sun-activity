@@ -291,17 +291,18 @@ const ROT = 360 / 27; // 태양이 하루에 자전하는 각(어림) — 8일�
 const PHOTO = {};
 function photo(n) { let i = PHOTO[n]; if (!i) { i = PHOTO[n] = new Image(); i.src = 'images/' + n + '.jpg'; } return i.complete && i.naturalWidth ? i : null; }
 // 처음 화면을 여는 동안 사진을 미리 불러 둬요 (모두 합쳐 약 1MB)
-['eclipse-1999', 'eclipse-2017', 'zoom-chrom', 'zoom-corona', 'zoom-limb304', 'zoom-limb171', 'disk-quiet', 'spot', 'granulation', 'prom', 'flare', 'act-max', 'act-min', 'aurora'].concat(Array.from({ length: 9 }, (_, i) => 'disk-10' + (19 + i))).forEach(photo);
+['eclipse-1999', 'eclipse-2017', 'zoom-chrom', 'zoom-corona', 'chrom-ring', 'zoom-limb171', 'disk-quiet', 'spot', 'granulation', 'prom', 'flare', 'act-max', 'act-min', 'aurora'].concat(Array.from({ length: 9 }, (_, i) => 'disk-10' + (19 + i))).forEach(photo);
 const AR = day => { const lo = (-58 + 13.7 * day) * D2R, la = -18 * D2R; return { x: Math.cos(la) * Math.sin(lo), y: -Math.sin(la), f: Math.cos(lo) }; };
 // 사진 속 표시 위치 (사진 픽셀 기준)
-const PH_SPOT = [[330, 345, 135, 125], [420, 125, 85, 70], [690, 250, 95, 85], [710, 405, 65, 55]]; // spot.jpg 흑점 자리 (가운데 x, y, 가로·세로 반지름)
+const PH_SPOT = [[440, 300, 140, 140], [235, 185, 45, 35]]; // spot.jpg(800×800) 흑점 자리 (가운데 x, y, 가로·세로 반지름)
 const PH_ECL = { 'eclipse-1999': [448, 448, 204], 'eclipse-2017': [519, 324, 126] }; // 달 가운데와 반지름
 /* 채층·코로나 확대 사진 (1000px 폭). 원 = 달(일식 사진) 또는 태양(SDO 사진)의 가운데와 반지름 (사진 픽셀)
    zoom-chrom: 1999년 일식에서 홍염이 있는 가장자리, zoom-corona: 같은 일식의 오른쪽 코로나
-   zoom-limb304·171: NASA SDO 2014년 2월 25일 태양 서쪽 가장자리 (자외선 사진, 304Å는 채층, 171Å는 코로나)
+   chrom-ring: 채층의 붉은빛(Hα)만 통과시키는 필터로 찍은 태양에서 광구 부분을 검게 가린 사진 → 붉은 채층 고리와 홍염 (900px, 가운데 450,450 반지름 381)
+   zoom-limb171: NASA SDO 2014년 2월 25일 태양 서쪽 가장자리 (자외선 사진 171Å, 코로나)
    네 번째 값: 칸이 좁을 때도 가장자리가 잘리지 않게 칸 가운데에 둘 사진 속 자리 */
 const ZOOM = {
-  chrom: [['zoom-chrom', [-338.4, 1105.6, 1112], '1999년 개기 일식 · Luc Viatour (CC BY-SA 3.0)', [450, 380]], ['zoom-limb304', [-1000, 350, 1600], 'NASA SDO 자외선 사진 (색은 입힌 것)', [620, 350]]],
+  chrom: [['zoom-chrom', [-338.4, 1105.6, 1112], '1999년 개기 일식 · Luc Viatour (CC BY-SA 3.0)', [450, 380]], ['chrom-ring', [450, 450, 381], 'Hα 필터 사진에서 광구를 가림 · Astrobond (CC BY-SA 4.0)', [450, 450], true]],
   corona: [['zoom-corona', [154, 375.4, 384.7], '1999년 개기 일식 · Luc Viatour (CC BY-SA 3.0)', [600, 375]], ['zoom-limb171', [-1200, 350, 1920], 'NASA SDO 자외선 사진 (색은 입힌 것)', [740, 350]]]
 };
 
@@ -309,7 +310,7 @@ const ZOOM = {
    view: 'surface' 광구(확대·단면) · 'eclipse' 개기 일식 · 'events' 홍염과 플레어 · 'cycle' 흑점 수 변화 · 'earth' 지구에 미치는 영향 */
 const Stage = (() => {
   const S = { view: 'surface', act: 1, speed: 1, playing: false, loop: false, day: 0, zoom: false, cut: false, grid: false, ghost: false, probe: null,
-    cover: 0, year: Y0, marks: false, ext: false, period: false, found: {}, pshape: 'loop', fx: null, fxSeen: {}, photo: false, big: false, ez: null, rotv: false };
+    cover: 0, year: Y0, marks: false, ext: false, period: false, found: {}, pshape: 'loop', fx: null, fxSeen: {}, photo: false, big: false, ez: null, rotv: false, inside: false };
   const SPF = [0.5, 1, 2];
   const hooks = { watch: null, change: null };
   const el = document.createElement('div'); el.className = 'stage';
@@ -453,6 +454,7 @@ const Stage = (() => {
   function drawSurface(t) {
     if (S.zoom) return S.cut ? drawCut(t) : (S.photo && drawZoomPhoto()) || drawZoom();
     if (S.rotv) return drawRotView(t);
+    if (S.inside) return drawInside(t);
     ctx.fillStyle = '#03050d'; ctx.fillRect(0, 0, W, H); stars(1);
     const R = Math.min(W * .36, H * .4), cx = W / 2, cy = H / 2 + fs * .5; L = { cx, cy, R };
     glow(cx, cy, R * .95, R * 1.25, 'rgba(255,170,60,A)', .35);
@@ -548,6 +550,61 @@ const Stage = (() => {
     fs = f0;
     return '🧭 태양의 자전 방향 · 태양의 북극 위에서 내려다본 모습';
   }
+  /* 🔪 태양의 속: 핵 → 복사층 → 대류층 → 광구 (수업 PPT의 태양 구조 그림처럼 한쪽을 잘라 낸 모습)
+     복사층에도 뜨거운 기체(물질)가 꽉 차 있어요. 다만 섞이며 움직이지 않고, 에너지가 빛(복사)으로 흡수·방출을 되풀이하며 천천히 전해져요 */
+  function drawInside(t) {
+    ctx.fillStyle = '#03050d'; ctx.fillRect(0, 0, W, H); stars(.7); L = {};
+    // 넓은 화면: 왼쪽 태양 · 가운데 이름표 · 오른쪽 설명 카드 / 좁은 화면: 위 태양과 이름표 · 아래 카드
+    const wide = W >= H * 1.2, top = hudBottom(), gw = wide ? W * .6 : W, gh = wide ? H - top : (H - top) * .58, lw = fs * 8.2;
+    const R = Math.max(fs * 3, Math.min((gw - lw - fs) / 2.3, gh * .42)), sx = Math.max(R * 1.12 + fs * .4, (gw - lw) / 2 - R * .1), sy = top + gh / 2 + fs * .2;
+    const rC = .25, rR = .7, a0 = -Math.PI * .58, a1 = Math.PI * .08, sp = SPF[S.speed];
+    glow(sx, sy, R * .95, R * 1.3, 'rgba(255,170,60,A)', .35);
+    ctx.drawImage(sunSprite(R), sx - R, sy - R, 2 * R, 2 * R);
+    const sector = (r, c) => { ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.arc(sx, sy, r * R, a0, a1); ctx.closePath(); ctx.fill(); };
+    // 잘라 낸 단면: 대류층 → 복사층 → 핵
+    const gC = ctx.createRadialGradient(sx, sy, R * rR, sx, sy, R); gC.addColorStop(0, '#e0611c'); gC.addColorStop(1, '#f08a2c'); sector(1, gC);
+    const gR = ctx.createRadialGradient(sx, sy, R * rC, sx, sy, R * rR); gR.addColorStop(0, '#ffd66b'); gR.addColorStop(1, '#ffab3d'); sector(rR, gR);
+    const gK = ctx.createRadialGradient(sx, sy, 0, sx, sy, R * rC); gK.addColorStop(0, '#ffffff'); gK.addColorStop(.6, '#fff4b0'); gK.addColorStop(1, '#ffe07a'); sector(rC, gK);
+    ctx.strokeStyle = 'rgba(80,20,0,.55)'; ctx.lineWidth = 2; [rC, rR].forEach(r => { ctx.beginPath(); ctx.arc(sx, sy, r * R, a0, a1); ctx.stroke(); });
+    ctx.strokeStyle = '#fff3c0'; ctx.lineWidth = Math.max(2.5, R * .02); ctx.beginPath(); ctx.arc(sx, sy, R, a0, a1); ctx.stroke(); // 광구
+    ctx.strokeStyle = 'rgba(80,20,0,.6)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx + Math.cos(a0) * R, sy + Math.sin(a0) * R); ctx.lineTo(sx, sy); ctx.lineTo(sx + Math.cos(a1) * R, sy + Math.sin(a1) * R); ctx.stroke();
+    // 복사층: 빛이 지그재그로 흡수·방출되며 바깥으로 (천천히)
+    const P = (a, r) => [sx + Math.cos(a) * r * R, sy + Math.sin(a) * r * R];
+    for (let k = 0; k < 4; k++) {
+      const a = a0 + (a1 - a0) * (k + .5) / 4, steps = 9, pts = [];
+      for (let j = 0; j <= steps; j++) { const r = rC + (rR - rC) * j / steps, w = (j % 2 ? 1 : -1) * .07 * (j && j < steps ? 1 : 0); pts.push(P(a + w, r)); }
+      ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1.6; ctx.beginPath(); pts.forEach(([x, y], j) => j ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke();
+      const u = ((t * sp * .12 + k * .27) % 1) * steps, j = Math.floor(u), f = u - j, [xa, ya] = pts[j], [xb, yb] = pts[Math.min(steps, j + 1)];
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(xa + (xb - xa) * f, ya + (yb - ya) * f, Math.max(2.5, R * .018), 0, 7); ctx.fill();
+    }
+    // 대류층: 뜨거운 기체는 올라가고(빨강), 식은 기체는 내려가요(파랑)
+    const cr = (1 - rR) / 2, cm = rR + cr;
+    for (let k = 0; k < 4; k++) {
+      const a = a0 + (a1 - a0) * (k + .5) / 4, [cx, cy] = P(a, cm), rr = cr * R * .78, sd = k % 2 ? 1 : -1;
+      ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(cx, cy, rr, 0, 7); ctx.stroke();
+      for (let q = 0; q < 3; q++) { const th = sd * (t * sp * 1.2 + q * 2.09) + a, x = cx + Math.cos(th) * rr, y = cy + Math.sin(th) * rr, out = Math.cos(th - a) > 0;
+        ctx.fillStyle = out ? '#ff4a2a' : '#4aa3ff'; ctx.beginPath(); ctx.arc(x, y, Math.max(2.5, R * .02), 0, 7); ctx.fill(); }
+    }
+    // 이름표
+    const am = (a0 + a1) / 2, lx = sx + R * 1.08;
+    const lb = (tx, r, a, y, c) => { const [px, py] = P(a, r), b = pill(tx, lx, y, { c, a: 'l', s: fs * .78 }); ptr(b, px, py, c); };
+    const ly = sy - R * 1.05;
+    lb('광구 (표면, 약 6000℃)', 1, a0 + .25, ly - fs * .2, '#fff3c0');
+    lb('대류층', cm, am - .3, ly + fs * 2, '#ff8a5a');
+    lb('복사층', (rC + rR) / 2, am + .25, ly + fs * 4.2, '#ffd66b');
+    lb('핵 (약 1500만 ℃)', 0.08, am, ly + fs * 6.4, '#ffffff');
+    // 설명 카드
+    const C = [['☢ 핵', '수소 핵융합 반응으로 에너지를 만들어요. 약 1500만 ℃', '#ffffff'],
+      ['✨ 복사층', '뜨거운 기체(물질)로 꽉 차 있지만 섞이며 움직이지는 않아요. 에너지가 빛(복사)으로 흡수·방출을 되풀이하며 아주 천천히 바깥으로 전해져요.', '#ffd66b'],
+      ['🔄 대류층', '뜨거운 기체가 올라가고 식은 기체가 내려가는 대류로 에너지를 광구까지 옮겨요. → 광구의 쌀알무늬', '#ff8a5a']];
+    const bx = wide ? W * .61 : fs * .5, bw = wide ? W * .38 : W - fs, by0 = wide ? top : top + gh + fs * .2, room = H - by0 - fs * .4, f0 = fs;
+    const hOf = () => C.reduce((s, [, tx]) => { const z = fs * .92; ctx.font = font(z); return s + z * 2.6 + wrap(tx, bw - z * 1.4).length * z * 1.45 + fs * .5; }, 0);
+    for (let i = 0; i < 4 && hOf() > room; i++) fs *= Math.max(.6, room / hOf());
+    let by = by0 + (wide ? Math.max(0, (room - hOf()) / 2) : 0);
+    C.forEach(([tt, tx, c]) => { const z = fs * .92; ctx.font = font(z); const h = z * 2.6 + wrap(tx, bw - z * 1.4).length * z * 1.45; card(tt, tx, bx, by, bw, c); by += h + fs * .5; });
+    fs = f0;
+    return '🔪 태양의 속 · 핵 → 복사층 → 대류층 → 광구로 에너지가 전달돼요';
+  }
   // 확대: 쌀알무늬 속의 흑점
   function drawZoom() {
     const tw = Math.max(60, Math.round(W / 3)), th = Math.max(40, Math.round(H / 3));
@@ -576,24 +633,29 @@ const Stage = (() => {
     const wide = W >= H * 1.15, g = 6, w = wide ? (W - g) / 2 : W, h = wide ? H : (H - g) / 2, x2 = wide ? w + g : 0, y2 = wide ? 0 : h + g;
     const m1 = cover(a, 0, 0, w, h), m2 = cover(b, x2, y2, w, h);
     L = { zph: { m1, w, h, x2, y2 } };
-    const [ux, uy] = m1(372, 380), b1 = pill('흑점: 주변보다 온도가 낮아 어두운 부분', w / 2, h - fs * 4.2, { c: '#7cc4ff' }); ptr(b1, ux, uy, '#7cc4ff');
+    const [ux, uy] = m1(440, 300), b1 = pill('흑점: 주변보다 온도가 낮아 어두운 부분', w / 2, h - fs * 4.2, { c: '#7cc4ff' }); ptr(b1, ux, uy, '#7cc4ff');
     const [gx, gy] = m2(625, 465), b2 = pill('쌀알무늬: 밝은 알갱이 + 어두운 경계', x2 + w / 2, y2 + h - fs * 4.2, { c: '#ffcf5a' }); ptr(b2, gx, gy, '#ffcf5a');
-    credit('NASA SDO · 2014년 10월 23일', 0, h, w); credit('NSF 이노우에 태양 망원경 (NSO/AURA/NSF, CC BY 4.0)', x2, y2 + h, w);
+    credit('미국 국립태양관측소 진공탑 망원경 (퍼블릭 도메인)', 0, h, w); credit('T. Rimmele / NSO/AURA/NSF (CC BY 4.0) · 색은 입힌 것', x2, y2 + h, w);
     if (S.probe) probeMark();
     return `📷 실제 사진 · 흑점과 쌀알무늬${S.probe ? '' : ' · 👆 눌러서 온도 재기'}`;
   }
   // 단면: 광구 아래의 대류 (상승하는 곳은 밝고, 하강하는 곳은 어두워요)
   function drawCut(t) {
     // 이름표 두 줄이 들어갈 자리를 글씨 크기에 맞춰 위쪽에 비워 둬요
-    const n = W > 900 ? 5 : W > 560 ? 4 : 3, cw = W / n, l1 = Math.max(H * .1, hudBottom()), l2 = Math.max(H * .2, l1 + fs * 2.2), yt = Math.max(H * .3, l2 + fs * 2.4), ys = yt + H * .1, yb = H * .95;
+    const n = W > 900 ? 5 : W > 560 ? 4 : 3, cw = W / n, l1 = Math.max(H * .1, hudBottom()), l2 = Math.max(H * .2, l1 + fs * 2.2), yt = Math.max(H * .3, l2 + fs * 2.4), ys = yt + H * .15, yb = H * .95;
     const bg = ctx.createLinearGradient(0, ys, 0, yb); bg.addColorStop(0, '#d9741c'); bg.addColorStop(1, '#5a1d06');
     ctx.fillStyle = '#03050d'; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = bg; ctx.fillRect(0, ys, W, yb - ys);
-    for (let i = 0; i < n; i++) { // 위에서 본 광구 띠
+    // 위에서 본 광구 띠: 🔍 확대 화면과 같은 쌀알무늬 사진 위에, 칸 가운데(상승)는 밝게·경계(하강)는 어둡게 살짝 덧칠해요
+    const gp = photo('granulation');
+    if (gp) cover(gp, 0, yt, W, ys - yt);
+    for (let i = 0; i < n; i++) {
       const x0 = i * cw, g = ctx.createLinearGradient(x0, 0, x0 + cw, 0);
       g.addColorStop(0, '#7a3406'); g.addColorStop(.18, '#d88a24'); g.addColorStop(.5, '#ffe58a'); g.addColorStop(.82, '#d88a24'); g.addColorStop(1, '#7a3406');
-      ctx.fillStyle = g; ctx.fillRect(x0, yt, cw + 1, ys - yt);
+      ctx.save(); if (gp) { ctx.globalCompositeOperation = 'overlay'; ctx.globalAlpha = .75; }
+      ctx.fillStyle = g; ctx.fillRect(x0, yt, cw + 1, ys - yt); ctx.restore();
     }
+    if (gp) credit('쌀알무늬 사진: NSO/AURA/NSF', 0, ys, W);
     ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1; ctx.strokeRect(.5, yt, W - 1, ys - yt);
     // 칸마다 양쪽으로 도는 대류 고리: 가운데에서 올라가고(고온), 위에서 옆으로 퍼진 뒤 경계에서 내려가요(저온)
     const sp = SPF[S.speed] * .5, cym = (ys + yb) / 2 + (yb - ys) * .02, ry = (yb - ys) * .38, rx = cw * .22;
@@ -619,7 +681,7 @@ const Stage = (() => {
     const xc = cw * (n > 3 ? 1.5 : .5), xd = cw * (n > 3 ? 2 : 1);
     const b1 = pill('밝은 곳: 고온의 기체가 상승', xc, l1, { c: '#ffb36b' }); ptr(b1, xc, yt + 4, '#ffb36b');
     const b2 = pill('어두운 곳: 저온의 기체가 하강', clamp(xd + cw * .6, 0, W), l2, { c: '#7cc4ff' }); ptr(b2, xd, yt + 4, '#7cc4ff');
-    ctx.font = font(fs * .9); ctx.fillStyle = '#fff'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('▲ 위에서 본 광구 (쌀알무늬)', 8, yt - fs * .7);
+    ctx.font = font(fs * .9); ctx.fillStyle = '#fff'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('▲ 위에서 본 광구 (쌀알무늬 실제 사진)', 8, yt - fs * .7);
     ctx.fillText('▼ 광구 아래 단면 (대류)', 8, yb - fs * .4);
     return '✂ 단면: 광구 아래에서 대류가 일어나요 · 🔴 상승(고온) 🔵 하강(저온)';
   }
@@ -695,12 +757,12 @@ const Stage = (() => {
     return '';
   }
   function ovArea(d, R) { if (d >= 2 * R) return 0; return (2 * R * R * Math.acos(d / (2 * R)) - d / 2 * Math.sqrt(4 * R * R - d * d)) / (Math.PI * R * R); }
-  // 채층·코로나 확대: 왼쪽(위) 개기 일식 사진 확대, 오른쪽(아래) 위성이 자외선으로 찍은 가장자리
+  // 채층·코로나 확대: 왼쪽(위) 개기 일식 사진 확대, 오른쪽(아래) 채층은 Hα 고리 사진, 코로나는 위성이 자외선으로 찍은 가장자리
   function drawAtmoZoom() {
-    const [[n1, c1, cr1, f1], [n2, c2, cr2, f2]] = ZOOM[S.ez], a = photo(n1), b = photo(n2); if (!a || !b) return null;
+    const [[n1, c1, cr1, f1], [n2, c2, cr2, f2, fit2]] = ZOOM[S.ez], a = photo(n1), b = photo(n2); if (!a || !b) return null;
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
     const wide = W >= H * 1.15, g = 6, w = wide ? (W - g) / 2 : W, h = wide ? H : (H - g) / 2, x2 = wide ? w + g : 0, y2 = wide ? 0 : h + g;
-    const m1 = cover(a, 0, 0, w, h, false, f1), m2 = cover(b, x2, y2, w, h, false, f2);
+    const m1 = cover(a, 0, 0, w, h, false, f1), m2 = cover(b, x2, y2, w, h, !!fit2, f2); // fit2: 고리 전체가 보이게 칸에 맞춰요
     // 원(가운데 cx, cy, 반지름 r)에서 각 deg 방향으로 반지름의 k배 되는 곳
     const at = (m, [cx, cy, r], deg, k) => m(cx + Math.cos(deg * D2R) * r * k, cy + Math.sin(deg * D2R) * r * k);
     const lab = (t, m, c, deg, k, bx, by, col) => { const [x, y] = at(m, c, deg, k), bb = pill(t, bx, by, { c: col }); ptr(bb, x, y, col); };
@@ -710,8 +772,9 @@ const Stage = (() => {
       lab('채층: 광구 바로 위 얇은 붉은 층', m1, c1, -49, 1.004, w * .5, top + fs * .2, '#ff8a9a');
       lab('홍염', m1, c1, -41, 1.035, w * .78, top + fs * 2.6, '#ffb36b');
       lab('달 (광구를 가림)', m1, c1, -41, .9, w * .3, bot, '#a9b4d8');
-      lab('채층', m2, c2, 0, 1.006, x2 + w * .72, y2 + top2 + fs * .2, '#ff8a9a');
-      lab('광구 쪽 (태양 안)', m2, c2, 0, .88, x2 + w * .3, y2 + bot, '#ffcf5a');
+      lab('채층: 붉은 고리', m2, c2, 140, 1.0, x2 + w * .32, y2 + bot, '#ff8a9a');
+      lab('홍염', m2, c2, -52, 1.07, x2 + w * .78, y2 + top2 + fs * .2, '#ffb36b');
+      const [qx, qy] = m2(c2[0], c2[1]); pill('광구를 가린 부분', qx, qy, { c: '#a9b4d8' });
     } else {
       lab('코로나: 채층 위로 넓게 뻗은 진주색 대기', m1, c1, -8, 1.45, w * .55, top + fs * .2, '#e8e4ff');
       lab('달 (광구를 가림)', m1, c1, 20, .6, w * .3, bot, '#a9b4d8');
@@ -898,11 +961,11 @@ const Stage = (() => {
   /* ── ⑤ 태양 활동이 지구에 미치는 영향 ── */
   const FX = {
     storm: ['🧲 자기 폭풍', '태양풍에 의해 지구 자기장이 일시적으로 불규칙하게 변해요.'],
-    aurora: ['🌌 오로라', '태양에서 온 전기를 띤 입자가 공기 입자와 충돌하여 빛을 내요. 평소보다 더 자주, 더 넓은 지역에서 강하게 생겨요.'],
-    radio: ['📡 무선 통신 장애', '전파 신호가 방해를 받아 무선 통신에 장애가 생겨요. (델린저 현상)'],
-    sat: ['🛰 인공위성 성능 저하', '인공위성의 다양한 센서가 고장 나거나 성능이 떨어져요.'],
+    aurora: ['🌌 오로라', '태양에서 온 전기를 띤 입자가 지구의 고층 대기에 있는 기체와 충돌하여 빛을 내요. 주로 고위도 지방에서 나타나는데, 평소보다 더 자주, 더 넓은 지역에서 강하게 생겨요.'],
+    radio: ['📡 무선 통신 장애', '전파 신호가 방해를 받아 장거리 무선 통신에 장애가 생겨요. (델린저 현상) 휴대 전화가 잘 안 될 수도 있어요.'],
+    sat: ['🛰 인공위성 성능 저하', '인공위성의 다양한 센서가 고장 나거나 성능이 떨어져요. 위성 위치 확인 시스템(GPS)에 오류가 생겨 정확한 위치를 알기 어려워져요.'],
     power: ['⚡ 정전·화재', '전력 장비가 손상되어 정전이나 화재가 생길 수 있어요.'],
-    air: ['✈ 항공 분야 피해', '태양풍이 강할 때는 비행기가 북극 부근을 운항할 수 없어 다른 길로 돌아가요.']
+    air: ['✈ 항공 분야 피해', '태양풍이 강할 때는 비행기가 북극 부근을 운항할 수 없어 다른 길로 돌아가요. 비행기 승객과 우주인은 X선 같은 방사선에 더 많이 노출될 수 있어요.']
   };
   const P = Array.from({ length: 200 }, (_, i) => ({ x: Math.random(), y0: Math.random() * 2 - 1, v: .8 + Math.random() * .4, k: i }));
   function drawEarth(t, dt) {
@@ -990,7 +1053,7 @@ const Stage = (() => {
   function pt(e) { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
   cv.addEventListener('pointerdown', e => {
     const [x, y] = pt(e);
-    if (S.view === 'surface' && !S.cut && (S.zoom || !S.rotv)) {
+    if (S.view === 'surface' && !S.cut && (S.zoom || (!S.rotv && !S.inside))) {
       let kind = null;
       if (S.zoom && L.zph) { // 확대 사진: 흑점 사진 속 흑점 자리를 눌렀는지
         const z = L.zph;
@@ -1033,17 +1096,17 @@ const Stage = (() => {
 /* ───────── 수업 모드 (학습지 5~7쪽 빈칸) ───────── */
 const TABS = [
   { name: '① 태양과 광구', title: '☀ 태양과 태양의 표면(광구)', setup: { view: 'surface', act: 1 },
-    lines: ['태양: 스스로 [빛]을 내는 천체로, 지구에 많은 영향을 미쳐요.', '[광구]: 스스로 빛을 내는 천체의 표면, 밝고 둥글게 보이는 태양의 표면', '광구의 평균 온도: 약 [6000]℃', '광구(태양의 표면)에는 [흑점]과 [쌀알무늬]가 나타나요.'],
-    ask: '<b>재 봐요</b> 태양을 눌러 온도를 재 보세요. 밝은 곳과 검은 점은 온도가 어떻게 다를까요?<br><b>한자로 기억해요</b> 광구 = 빛 광(光) + 공 구(球)' },
+    lines: ['태양: 태양계에서 스스로 [빛]을 내는 유일한 천체 → [항성]', '태양은 온도가 매우 높은 [기체]로 이루어져 있고, 많은 양의 에너지를 우주 공간으로 내보내요.', '태양의 속: [핵](수소 핵융합 반응으로 에너지를 만들어요, 약 1500만 ℃) → 복사층 → [대류]층 → 광구', '[광구]: 스스로 빛을 내는 천체의 표면, 밝고 둥글게 보이는 태양의 표면', '광구의 평균 온도: 약 [6000]℃', '광구(태양의 표면)에는 [흑점]과 [쌀알무늬]가 나타나요.'],
+    ask: '<b>재 봐요</b> 태양을 눌러 온도를 재 보세요. 밝은 곳과 검은 점은 온도가 어떻게 다를까요?<br><b>한자로 기억해요</b> 항성 = 항상 항(恒) + 별 성(星) · 광구 = 빛 광(光) + 공 구(球)<br><b>태양의 속</b> 🔪 태양의 속을 눌러 보세요. 핵에서 만든 에너지가 복사층에서는 복사로, 대류층에서는 대류로 광구까지 전달돼요. 대류층의 대류가 광구에 쌀알무늬를 만들어요.' },
   { name: '② 쌀알무늬', title: '🍚 쌀알무늬', setup: { view: 'surface', zoom: true, cut: false },
     lines: ['쌀알무늬: 광구에 나타나는 쌀알 모양의 무늬', '광구 아래에서 일어나는 [대류] 현상으로 생겨요.', '[고온]의 기체가 상승하는 곳 → [밝다]', '[저온]의 기체가 하강하는 곳 → [어둡다]'],
     ask: '<b>관찰해요</b> 확대한 광구에서 밝은 알갱이와 어두운 경계를 찾아보세요. (📷 실제 사진을 누르면 망원경으로 찍은 쌀알무늬가 보여요)<br><b>찾아봐요</b> ✂ 단면을 눌러 보세요. 빨간 화살표(상승)와 파란 화살표(하강) 위쪽의 광구는 각각 밝은가요, 어두운가요?' },
   { name: '③ 흑점', title: '⚫ 흑점', setup: { view: 'surface', grid: true, ghost: true, day: 0, playing: true, act: 1 },
-    lines: ['흑점: 광구에 나타나는 불규칙한 모양의 [어두운] 부분', '주변보다 온도가 약 [2000]℃ [낮아] 어둡게 보여요. → 흑점의 온도 약 [4000]℃', '흑점은 모양과 크기가 변하며, 어떤 흑점은 행성보다 크기도 해요.', '지구에서 관측하면 흑점의 위치가 변해요. → 태양이 [자전]하기 때문', '지구에서 보면 흑점은 [동쪽]에서 [서쪽]으로 움직여요.', '태양 활동이 활발하면 흑점 수가 [많아]져요.'],
+    lines: ['흑점: 광구에 나타나는 불규칙한 모양의 [어두운] 부분', '주변보다 온도가 약 [2000]℃ [낮아] 어둡게 보여요. → 흑점의 온도 약 [4000]℃', '흑점이 생기는 까닭: 태양의 [자기장]이 강한 곳에서 대류가 방해되어 에너지가 잘 올라오지 못해서','흑점은 모양과 크기가 변하며, 어떤 흑점은 행성보다 크기도 해요.', '지구에서 관측하면 흑점의 위치가 변해요. → 태양이 [자전]하기 때문', '지구에서 보면 흑점은 [동쪽]에서 [서쪽]으로 움직여요.', '태양 활동이 활발하면 흑점 수가 [많아]져요.'],
     ask: '<b>관찰해요</b> ▶ 8일 동안 관측을 눌러 보세요. 흑점은 어느 쪽에서 어느 쪽으로 움직이나요? 흑점이 움직이는 것으로 무엇을 알 수 있을까요?<br><b>헷갈리지 않게</b> 화면의 동쪽·서쪽은 지구에서 태양을 바라볼 때의 방향이에요. 🧭 자전 방향을 누르면 태양도 지구처럼 시계 반대 방향으로 자전하는 모습을 볼 수 있어요.<br><b>재 봐요</b> 🔍 확대에서 흑점을 눌러 온도를 재 보세요.' },
   { name: '④ 태양의 대기', title: '🌑 태양의 대기 (채층과 코로나)', setup: { view: 'eclipse', cover: 0, playing: true, act: 1 },
-    lines: ['태양의 대기는 [채층]과 [코로나]로 구분해요.', '평소에는 광구가 밝아서 보기 어렵고, 광구가 완전히 가려지는 [개기 일식] 때 볼 수 있어요.', '채층: 광구 바로 위를 얇게 둘러싼 [붉은]색의 대기층', '코로나: 채층 위로 넓게 뻗어 있는 [진주]색의 희박한 대기층. 온도가 매우 높아요. (100만 ℃ 이상)', '태양의 활동이 활발할수록(흑점 수가 많을수록) 코로나는 매우 [크고] 밝게 나타나요.'],
-    ask: '<b>비교해요</b> 개기 일식이 되면 태양 활동을 😴 조용할 때와 🔥 활발할 때로 바꿔 보세요. 코로나의 크기가 어떻게 달라지나요?<br><b>확대해 봐요</b> 🔍 채층 확대·🔍 코로나 확대를 누르면 일식 사진과 위성 사진으로 가까이에서 볼 수 있어요.<br><b>생각해요</b> 왜 평소에는 태양의 대기가 보이지 않을까요?' },
+    lines: ['태양의 대기는 [채층]과 [코로나]로 구분해요.', '평소에는 광구가 밝아서 보기 어렵고, 광구가 완전히 가려지는 [개기 일식] 때 볼 수 있어요.', '채층: 광구 바로 위를 얇게 둘러싼 [붉은]색의 대기층 (하부 대기)', '코로나: 채층 위로 넓게 뻗어 있는 [진주]색의 희박한 대기층 (상부 대기). 온도가 매우 높아요. (100만 ℃ 이상)', '태양의 활동이 활발할수록(흑점 수가 많을수록) 코로나는 매우 [크고] 밝게 나타나요.'],
+    ask: '<b>비교해요</b> 개기 일식이 되면 태양 활동을 😴 조용할 때와 🔥 활발할 때로 바꿔 보세요. 코로나의 크기가 어떻게 달라지나요?<br><b>확대해 봐요</b> 🔍 채층 확대·🔍 코로나 확대를 누르면 실제 사진으로 가까이에서 볼 수 있어요. (채층: 일식 사진 + 채층의 붉은빛만 보는 필터로 찍고 광구를 가린 사진 / 코로나: 일식 사진 + 위성 사진)<br><b>생각해요</b> 왜 평소에는 태양의 대기가 보이지 않을까요?' },
   { name: '⑤ 홍염과 플레어', title: '🔥 태양의 대기에서 나타나는 현상', setup: { view: 'events', act: 1, pshape: 'loop' },
     lines: ['태양의 대기에서는 [홍염]과 [플레어]가 나타나기도 해요.', '홍염: 채층 위로 거대하게 분출되는 가스. [불꽃] 덩어리 기둥이나 고리 모양으로, 코로나층까지 솟아오르기도 해요.', '플레어: 채층에서 일어나는 폭발 현상. [흑점] 부근에서 [폭발]이 일어나 채층의 일부가 매우 밝아지고, 많은 양의 에너지가 일시적으로 방출돼요.', '태양 활동이 활발해지는 시기에 홍염과 플레어가 [자주] 나타나요.'],
     ask: '<b>해 봐요</b> 🔥 홍염 솟아오르기, 💥 플레어 일으키기를 눌러 보세요. 홍염 모양을 고리·불꽃으로 바꿔 볼 수도 있어요.<br><b>구분해요</b> 흑점·쌀알무늬(표면) / 채층·코로나(대기) / 홍염·플레어(대기에서 나타나는 현상)' },
@@ -1051,8 +1114,8 @@ const TABS = [
     lines: ['태양 활동은 약 [11]년을 주기로 변하며, [흑점 수]의 변화로 알 수 있어요.', '극대기: 흑점 수가 가장 [많은] 시기 → 태양 활동 활발', '극소기: 흑점 수가 가장 [적은] 시기', '그래프의 A와 B의 태양 활동 정도 비교: A [>] B', '태양 활동이 활발할 때: 흑점 수가 [많아]지고, 홍염과 [플레어]가 자주 발생하고, 코로나의 크기가 [커]지고, 태양풍이 [강]해져요.'],
     ask: '<b>끌어 봐요</b> 그래프를 손가락으로 끌어 연도를 바꿔 보세요. 흑점 수가 많을 때 오른쪽 태양은 어떻게 보이나요?<br><b>예측해요</b> 2013년 초에 "올해는 태양풍이 강해 무선 통신이 원활하지 않을 수 있다"는 예보가 있었어요. 이런 상황이 다시 생길 것으로 예상되는 때는 언제일까요?' },
   { name: '⑦ 지구에 미치는 영향', title: '🌍 태양 활동이 지구에 미치는 영향', setup: { view: 'earth', act: 0, fx: null },
-    lines: ['코로나가 커지면 태양에서 오는 전기를 띤 입자의 흐름인 [태양풍]이 강해져요.', '[자기 폭풍]: 지구 자기장이 불규칙하게 변해요.', '[오로라]가 더 자주, 더 넓은 지역에서 생겨요.', '전파 신호가 방해를 받아 무선 통신 장애가 생겨요. ([델린저] 현상)', '인공위성 성능 저하, 항공 분야 피해, 전력 장비 손상으로 [정전]이나 화재가 생길 수 있어요.', '국가기상위성센터에서는 태양 활동을 관측하여 [우주 기상]을 예보해 피해를 줄이려고 노력해요.'],
-    ask: '<b>비교해요</b> 평소에는 무엇이 태양풍의 피해를 막아 줄까요? 태양 활동을 🔥 활발할 때로 바꾸고 아래 영향 버튼을 하나씩 눌러 보세요.<br><b>실제 피해</b> 1989년 캐나다 퀘벡 주 발전소 정전 · 2008년 우리나라 인공위성(무궁화 호) 통신 서비스 중단 · 2017년 북미 출발 국제선 북극 항로 우회 운항<br>※ 오로라: 태양에서 방출된 전기를 띤 입자가 공기 입자와 충돌하여 빛을 내는 현상' }
+    lines: ['코로나가 커지면 태양에서 오는 전기를 띤 입자의 흐름인 [태양풍]이 강해져요.', '[자기 폭풍]: 지구 자기장이 불규칙하게 변해요.', '[오로라]가 더 자주, 더 넓은 지역에서 생겨요. (주로 [고위도] 지방에서 나타나요)', '전파 신호가 방해를 받아 장거리 무선 통신 장애가 생겨요. ([델린저] 현상) 휴대 전화가 잘 안 될 수도 있어요.', '인공위성 고장·성능 저하, 위성 위치 확인 시스템([GPS]) 오류, 전력 장비 손상으로 [정전]이나 화재가 생길 수 있어요.', '항공 분야 피해: 비행기 승객과 우주인이 [X선] 같은 방사선에 더 많이 노출될 수 있어요.', '국가기상위성센터에서는 태양 활동을 관측하여 [우주 기상]을 예보해 피해를 줄이려고 노력해요.'],
+    ask: '<b>비교해요</b> 평소에는 무엇이 태양풍의 피해를 막아 줄까요? 태양 활동을 🔥 활발할 때로 바꾸고 아래 영향 버튼을 하나씩 눌러 보세요.<br><b>실제 피해</b> 1989년 캐나다 퀘벡 주 발전소 정전 · 2008년 우리나라 인공위성(무궁화 호) 통신 서비스 중단 · 2017년 북미 출발 국제선 북극 항로 우회 운항<br>※ 오로라: 태양에서 방출된 전기를 띤 입자가 지구의 고층 대기에 있는 기체(공기 입자)와 충돌하여 빛을 내는 현상. 주로 극지방 가까운 고위도 지방에서 나타나요.' }
 ];
 
 /* ───────── 탐사 모드 문제 (모든 학생이 같은 문제) ───────── */
@@ -1103,7 +1166,10 @@ const QUIZ = [
   { s: '<보기> 사진 중 태양의 표면에서 볼 수 있는 것을 모두 고른 것은?', fig: 'five', o: ['ㄱ, ㄴ', 'ㄷ, ㄹ', 'ㄴ, ㅁ', 'ㄱ, ㄷ'], a: 1, ex: 'ㄱ 홍염, ㄴ 코로나, ㄷ 쌀알무늬, ㄹ 흑점, ㅁ 채층. 표면에서는 쌀알무늬와 흑점을 볼 수 있어요.' },
   { s: '그래프의 A처럼 흑점 수가 가장 많은 시기의 이름과 그때의 태양 활동은?', fig: 'graphA', o: ['극소기, 활발하다', '극대기, 조용하다', '극소기, 조용하다', '극대기, 활발하다'], a: 3, ex: '흑점 수는 약 11년을 주기로 변해요. 흑점 수가 많을수록 태양 활동이 활발해요.' },
   { s: '두 개기 일식 사진 중 태양 활동이 더 활발할 때 찍은 것과 그 까닭은?', fig: 'corona2', o: ['(나), 코로나가 커서', '(가), 코로나가 작아서', '(가), 달이 더 커서', '(나), 달이 더 작아서'], a: 0, ex: '태양 활동이 활발할수록 코로나가 크고 밝게 나타나요.' },
-  { s: '사진은 우주 정거장에서 찍은 오로라예요. 태양 활동이 활발할 때 일어나는 일이 아닌 것은?', fig: 'pAurora', o: ['오로라가 더 자주, 더 넓은 지역에서 생긴다.', '무선 통신 장애(델린저 현상)가 생긴다.', '태양풍이 약해진다.', '인공위성의 성능이 떨어진다.'], a: 2, ex: '태양 활동이 활발하면 코로나가 커져 태양풍이 강해져요.' }
+  { s: '사진은 우주 정거장에서 찍은 오로라예요. 태양 활동이 활발할 때 일어나는 일이 아닌 것은?', fig: 'pAurora', o: ['오로라가 더 자주, 더 넓은 지역에서 생긴다.', '무선 통신 장애(델린저 현상)가 생긴다.', '태양풍이 약해진다.', '인공위성의 성능이 떨어진다.'], a: 2, ex: '태양 활동이 활발하면 코로나가 커져 태양풍이 강해져요.' },
+  // 🔥 도전 문제 2개: 여러 내용을 함께 판단해야 해요
+  { s: '🔥 도전! 그래프의 A 시기와 B 시기를 비교한 것으로 옳은 것을 <보기>에서 모두 고른 것은?', box: ['ㄱ. 흑점 수: A > B', 'ㄴ. 코로나의 크기: A < B', 'ㄷ. 지구에서 오로라가 생기는 횟수: A > B', 'ㄹ. 플레어가 일어나는 횟수: A > B'], fig: 'graphAB', o: ['ㄱ, ㄴ', 'ㄷ, ㄹ', 'ㄱ, ㄷ, ㄹ', 'ㄴ, ㄷ, ㄹ'], a: 2, ex: 'A는 흑점 수가 가장 많은 극대기, B는 가장 적은 극소기예요. 태양 활동이 활발한 A 때는 코로나가 더 크고(ㄴ ✗), 플레어가 자주 일어나고, 태양풍이 강해져 오로라도 자주 생겨요.' },
+  { s: '🔥 도전! 광구에서 볼 수 있는 쌀알무늬와 흑점에 대한 설명으로 옳은 것을 <보기>에서 모두 고른 것은?', box: ['ㄱ. 쌀알무늬의 어두운 경계는 저온의 기체가 하강하는 곳이다.', 'ㄴ. 흑점은 고온의 기체가 상승하는 곳이어서 어둡게 보인다.', 'ㄷ. 흑점은 자기장이 강해 대류가 방해되어 주변보다 온도가 낮은 곳이다.', 'ㄹ. 쌀알무늬와 흑점은 개기 일식 때만 볼 수 있다.'], o: ['ㄱ, ㄴ', 'ㄱ, ㄷ', 'ㄴ, ㄷ', 'ㄷ, ㄹ'], a: 1, ex: '쌀알무늬는 광구 아래의 대류로 생겨요(밝은 곳 상승, 어두운 곳 하강). 흑점은 자기장이 강한 곳에서 대류가 방해되어 에너지가 잘 올라오지 못해 주변보다 약 2000℃ 낮아 어두워요(ㄴ ✗). 둘 다 광구에 있어서 평소에 볼 수 있고, 개기 일식 때는 달이 광구를 가려 오히려 안 보여요(ㄹ ✗).' }
 ];
 /* 정답 자리 옮기기: 정답이 첫 번째에 몰리지 않게 정해진 차례(ROT_A)대로 정답을 다른 자리와 바꿔요.
    모든 학생이 같은 순서로 받아요. 숫자·연도·ㄱㄴㄷ 조합처럼 차례가 있는 보기는 그대로 두고,
@@ -1151,7 +1217,7 @@ const tag = (t, tx, ty, px, py) => `<line x1="${tx}" y1="${ty}" x2="${px}" y2="$
 const PCR = '<text x="99%" y="99%" text-anchor="end" font-size="7" fill="#a9b4d8">실제 사진: NASA SDO · NSO · Luc Viatour</text>';
 const FIGS = {
   // A: 흑점 무리 사진의 큰 흑점, B: 쌀알무늬 사진
-  spotAB: () => `<svg class="fig ph" viewBox="0 0 250 132">${pic('spot', 8, 6, 115)}${pic('granulation', 128, 6, 115)}${tag('A', 22, 20, 52, 72)}${tag('B', 230, 24, 196, 52)}${svgText(65, 129, '태양 표면 확대 (1)', { s: 9, c: '#a9b4d8' })}${svgText(185, 129, '태양 표면 확대 (2)', { s: 9, c: '#a9b4d8' })}</svg>`,
+  spotAB: () => `<svg class="fig ph" viewBox="0 0 250 132">${pic('spot', 8, 6, 115)}${pic('granulation', 128, 6, 115)}${tag('A', 22, 20, 71, 49)}${tag('B', 230, 24, 196, 52)}${svgText(65, 129, '태양 표면 확대 (1)', { s: 9, c: '#a9b4d8' })}${svgText(185, 129, '태양 표면 확대 (2)', { s: 9, c: '#a9b4d8' })}</svg>`,
   // A: 채층 (일식 때 달 가장자리 붉은 층), B: 홍염, C: 코로나
   atmo3: () => `<svg class="fig ph" viewBox="0 0 330 112">${pic('zoom-chrom', 5, 5, 100)}${pic('prom', 115, 5, 100)}${pic('zoom-corona', 225, 5, 100)}${tag('A', 18, 18, 41, 40)}${tag('B', 192, 20, 140, 74)}${tag('C', 312, 18, 302, 45)}${PCR}</svg>`,
   graphA: () => figGraph([[2001.6, 'A']]),
@@ -1213,10 +1279,10 @@ function ctrls() {
   const act = grp('태양 활동', 'act', [[0, '😴 조용할 때'], [1, '🔥 활발할 때']], x => S.act === x);
   const play = lbl => `<button class="chip big${S.playing ? '' : ' play'}" data-act="play">${S.playing ? '⏸ 멈춤' : lbl}</button>`;
   if (v === 'surface') {
-    if (!S.zoom && !S.rotv) h += `<div class="ctrl">${play('▶ 8일 동안 관측')}${grp('날짜', 'day', [[0, '처음'], [4, '4일 후'], [8, '8일 후']], x => !S.playing && Math.round(S.day) === x)}${spd}</div>`;
-    const togs = S.rotv && !S.zoom ? [['rotv', '🧭 자전 방향']]
-      : (S.cut ? [] : [['photo', '📷 실제 사진']]).concat(S.zoom ? [['zoom', '🔍 확대 (쌀알무늬·흑점)'], ['cut', '✂ 단면 (대류)']] : [['zoom', '🔍 확대 (쌀알무늬·흑점)'], ['grid', '🌐 경선·위선'], ['ghost', '👣 처음 위치'], ['rotv', '🧭 자전 방향']]);
-    h += `<div class="ctrl">${S.rotv && !S.zoom ? '<button class="chip big play" data-act="tog" data-v="rotv">↩ 태양 관측으로 돌아가기</button>' : ''}${grp('보기', 'tog', togs, k => S[k])}${S.zoom ? (S.cut ? spd : '') : S.rotv ? '' : act}</div>`;
+    if (!S.zoom && !S.rotv && !S.inside) h += `<div class="ctrl">${play('▶ 8일 동안 관측')}${grp('날짜', 'day', [[0, '처음'], [4, '4일 후'], [8, '8일 후']], x => !S.playing && Math.round(S.day) === x)}${spd}</div>`;
+    const togs = S.rotv && !S.zoom ? [['rotv', '🧭 자전 방향']] : S.inside && !S.zoom ? [['inside', '🔪 태양의 속']]
+      : (S.cut ? [] : [['photo', '📷 실제 사진']]).concat(S.zoom ? [['zoom', '🔍 확대 (쌀알무늬·흑점)'], ['cut', '✂ 단면 (대류)']] : [['inside', '🔪 태양의 속'], ['zoom', '🔍 확대 (쌀알무늬·흑점)'], ['grid', '🌐 경선·위선'], ['ghost', '👣 처음 위치'], ['rotv', '🧭 자전 방향']]);
+    h += `<div class="ctrl">${S.rotv && !S.zoom ? '<button class="chip big play" data-act="tog" data-v="rotv">↩ 태양 관측으로 돌아가기</button>' : ''}${S.inside && !S.zoom ? '<button class="chip big play" data-act="tog" data-v="inside">↩ 태양 관측으로 돌아가기</button>' : ''}${grp('보기', 'tog', togs, k => S[k])}${S.zoom ? (S.cut ? spd : '') : S.rotv ? '' : S.inside ? spd : act}</div>`;
   } else if (v === 'eclipse') {
     const ez = grp('확대 사진', 'ez', [['chrom', '🔍 채층 확대'], ['corona', '🔍 코로나 확대']], k => S.ez === k);
     h += S.ez ? `<div class="ctrl"><button class="chip big play" data-act="ez" data-v="">↩ 개기 일식으로 돌아가기</button>${ez}</div>`
@@ -1264,10 +1330,11 @@ function mTop(title) {
 // 문제 풀 때 펼쳐 보는 한눈에 정리
 function tipBox() {
   return `<details class="tip"${ui.tipOpen ? ' open' : ''}><summary>💡 태양 한눈에 정리 (눌러서 펼치기)</summary>
-<table class="ttable"><tr><th>태양의 표면 (광구)</th><td><b>흑점</b>: 주변보다 온도가 낮아 어두운 부분(약 4000℃), 태양의 자전으로 위치가 변함 · <b>쌀알무늬</b>: 광구 아래의 대류로 생김 (상승 밝음, 하강 어두움) · 광구 평균 약 6000℃</td></tr>
-<tr><th>태양의 대기</th><td>개기 일식 때 관측 · <b>채층</b>: 광구 바로 위 얇은 붉은색 · <b>코로나</b>: 채층 위로 넓게 뻗은 진주색, 온도가 매우 높음(100만 ℃ 이상)</td></tr>
+<table class="ttable"><tr><th>태양</th><td>태양계에서 스스로 빛을 내는 유일한 천체(<b>항성</b>) · 속: 핵(핵융합으로 에너지 생성, 약 1500만 ℃) → 복사층 → 대류층 → 광구</td></tr>
+<tr><th>태양의 표면 (광구)</th><td><b>흑점</b>: 주변보다 온도가 낮아 어두운 부분(약 4000℃), 자기장이 강해 대류가 방해되는 곳, 태양의 자전으로 위치가 변함 · <b>쌀알무늬</b>: 광구 아래의 대류로 생김 (상승 밝음, 하강 어두움) · 광구 평균 약 6000℃</td></tr>
+<tr><th>태양의 대기</th><td>개기 일식 때 관측 · <b>채층</b>(하부 대기): 광구 바로 위 얇은 붉은색 · <b>코로나</b>(상부 대기): 채층 위로 넓게 뻗은 진주색, 온도가 매우 높음(100만 ℃ 이상)</td></tr>
 <tr><th>대기에서 나타나는 현상</th><td><b>홍염</b>: 채층 위로 분출되는 가스 (불꽃·고리 모양, 코로나층까지 솟기도 함) · <b>플레어</b>: 채층에서 일어나는 폭발, 흑점 부근에서 채층 일부가 매우 밝아짐</td></tr>
-<tr><th>태양 활동 활발 (흑점 수 많음, 약 11년 주기)</th><td>흑점 수↑ · 홍염·플레어 자주 · 코로나 크기↑ · 태양풍 강해짐 → 지구: 자기 폭풍, 오로라 자주·넓게, 무선 통신 장애(델린저 현상), 인공위성 성능 저하, 항공 분야 피해, 정전·화재 · 국가기상위성센터가 우주 기상을 예보해요</td></tr></table></details>`;
+<tr><th>태양 활동 활발 (흑점 수 많음, 약 11년 주기)</th><td>흑점 수↑ · 홍염·플레어 자주 · 코로나 크기↑ · 태양풍 강해짐 → 지구: 자기 폭풍, 오로라 자주·넓게(주로 고위도), 무선 통신 장애(델린저 현상), 인공위성 고장·GPS 오류, 항공 분야 피해(승객·우주인 방사선 노출), 정전·화재 · 국가기상위성센터가 우주 기상을 예보해요</td></tr></table></details>`;
 }
 
 /* ───────── 화면 ───────── */
@@ -1349,12 +1416,12 @@ ${CONFIG.SUBMIT_URL ? `<p class="muted">진행 상황은 임무를 풀 때마다
    1단계 이게 뭘까?(사진 일부가 점점 넓어져요 + 지금은 안 보이는 것 고르기) → 2단계 우주 기상 상황실(실시간)
    목숨 3개, 연속 정답 보너스, 할 때마다 문제·보기 순서가 바뀌어요. 점수는 임무 성적과 따로 '태양 게임 현황' 탭에 기록해요.
    내용은 교과서 232~237쪽·학습지 1-2에 있는 것만 써요. */
-const GSZ = { spot: [800, 600], granulation: [800, 800], prom: [800, 600], flare: [800, 600], 'zoom-chrom': [1000, 751], 'zoom-corona': [1000, 750], 'eclipse-1999': [900, 886], 'eclipse-2017': [1000, 666], aurora: [1100, 732] };
+const GSZ = { spot: [800, 800], granulation: [800, 800], prom: [800, 600], flare: [800, 600], 'zoom-chrom': [1000, 751], 'zoom-corona': [1000, 750], 'eclipse-1999': [900, 886], 'eclipse-2017': [1000, 666], aurora: [1100, 732] };
 const gsz = n => GSZ[n] || [512, 512];
 const shuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 // 1단계: f = 처음에 크게 보여 줄 사진 속 자리(사진 픽셀), z = 처음 확대 배율. 보기에는 헷갈리는 짝(홍염·플레어, 채층·코로나)을 꼭 넣어요
 const G1 = [
-  { n: 'spot', f: [330, 345], z: 5, a: '흑점', o: ['흑점', '쌀알무늬', '플레어', '홍염'], ex: '광구에 나타나는 어두운 부분이에요. 주변보다 온도가 약 2000℃ 낮아서 어둡게 보여요.' },
+  { n: 'spot', f: [440, 300], z: 4, a: '흑점', o: ['흑점', '쌀알무늬', '플레어', '홍염'], ex: '광구에 나타나는 어두운 부분이에요. 주변보다 온도가 약 2000℃ 낮아서 어둡게 보여요.' },
   { n: 'granulation', f: [400, 400], z: 5, a: '쌀알무늬', o: ['쌀알무늬', '흑점', '채층', '코로나'], ex: '광구 아래의 대류로 생긴 무늬예요. 밝은 곳은 고온의 기체가 상승하는 곳, 어두운 곳은 저온의 기체가 하강하는 곳이에요.' },
   { n: 'prom', f: [250, 415], z: 4, a: '홍염', o: ['홍염', '플레어', '코로나', '흑점'], ex: '홍염은 채층 위로 거대하게 분출되는 가스예요. 플레어는 흑점 부근의 폭발로 채층 일부가 매우 밝아지는 현상이에요.' },
   { n: 'flare', f: [392, 300], z: 4, a: '플레어', o: ['플레어', '홍염', '흑점', '쌀알무늬'], ex: '흑점 부근에서 폭발이 일어나 채층의 일부가 매우 밝아졌어요. 홍염은 채층 위로 솟아오르는 가스예요. (위성이 자외선으로 찍고 색을 입힌 사진)' },
@@ -1777,7 +1844,7 @@ function render() {
 }
 // 화면을 바꿀 때마다 새로 시작하는 값 (찾은 극대기·누른 영향 기록도 새로)
 // 처음에는 직접 그린 그림을 보여 주고, 📷 실제 사진은 누를 때만 보여요
-const BASE = () => ({ playing: false, loop: false, speed: 1, act: 1, day: 0, zoom: false, cut: false, grid: false, ghost: false, cover: 0, year: Y0, marks: false, ext: false, period: false, found: {}, pshape: 'loop', fx: null, fxSeen: {}, photo: false, big: false, ez: null, rotv: false });
+const BASE = () => ({ playing: false, loop: false, speed: 1, act: 1, day: 0, zoom: false, cut: false, grid: false, ghost: false, cover: 0, year: Y0, marks: false, ext: false, period: false, found: {}, pshape: 'loop', fx: null, fxSeen: {}, photo: false, big: false, ez: null, rotv: false, inside: false });
 function tabSetup() { Stage.set(Object.assign(BASE(), { big: true }, TABS[ui.tab].setup)); if (TABS[ui.tab].setup.view === 'events') Stage.prom(false); }
 function enter(v) {
   if (['map', 'm1', 'm2', 'm3', 'm4', 'game', 'cert'].includes(v) && !state.num) v = 'intro';
@@ -1822,7 +1889,7 @@ app.addEventListener('click', async e => {
   else if (a === 'act') { Stage.set({ act: +v }); render(); }
   else if (a === 'day') { Stage.set({ day: +v, playing: false }); render(); }
   else if (a === 'tog') {
-    Stage.set({ [v]: !S[v] }); if (v === 'zoom' && !S.zoom) Stage.set({ cut: false }); if (v === 'zoom' || (v === 'rotv' && S.rotv)) Stage.set({ rotv: v === 'rotv', playing: false }); if (S.zoom && S.cut) Stage.hooks.watch('cut');
+    Stage.set({ [v]: !S[v] }); if (v === 'zoom' && !S.zoom) Stage.set({ cut: false }); if (v === 'zoom' || (v === 'rotv' && S.rotv)) Stage.set({ rotv: v === 'rotv', playing: false }); if (S[v] && (v === 'zoom' || v === 'rotv')) Stage.set({ inside: false }); if (v === 'inside' && S.inside) Stage.set({ zoom: false, rotv: false, playing: false }); if (S.zoom && S.cut) Stage.hooks.watch('cut');
     // 수업 모드: ① 광구에서 🔍 확대를 누르면 ② 쌀알무늬 정리로, ②에서 확대를 끄면 ①로 넘어가요
     if (state.view === 'class' && v === 'zoom') { if (S.zoom && ui.tab === 0) ui.tab = 1; else if (!S.zoom && ui.tab === 1) ui.tab = 0; }
     render();
