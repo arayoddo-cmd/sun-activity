@@ -110,6 +110,13 @@ button.blank:not(.show){color:transparent}
 .concept.big h3{font-size:clamp(24px,2.6vw,34px)}
 .concept.big li{font-size:clamp(22px,2.4vw,32px);margin:12px 0}
 .concept.big .ask{font-size:clamp(19px,1.9vw,26px)}
+button.blank:not(.show){color:#ffcf5aa8;letter-spacing:.12em}
+.concept.big h3{font-size:clamp(30px,3.2vw,48px)}
+.concept.big li{font-size:clamp(28px,3vw,46px);margin:14px 0;line-height:1.9}
+.concept.big .ask{font-size:clamp(24px,2.4vw,36px);line-height:1.6}
+.concept.big .note{font-size:clamp(18px,1.6vw,24px)}
+.concept.big .blank{min-width:1.6em;padding:0 .3em}
+.concept.big ol{font-size:clamp(28px,3vw,46px);padding-left:1.6em}
 .ask{background:#1c2a5c;border-left:4px solid var(--accent);border-radius:8px;padding:10px 14px;margin-top:12px;font-size:15px}
 .ask b{color:var(--accent)}
 
@@ -297,6 +304,9 @@ const SPOTS = (() => {
   });
   return out;
 })();
+/* 시뮬레이션 이름표에서 강조할 암기 용어 (하늘색, 1.3배) */
+const KEYW = /(쌀알무늬|자기 폭풍|델린저 현상|태양풍|코로나|플레어|복사층|대류층|흑점|광구|채층|홍염|오로라|극대기|극소기|항성|핵(?!융))/;
+const KEYC = '#5ff2ff', KEYS = 1.3;
 const ROT = 360 / 27; // 태양이 하루에 자전하는 각(어림) — 8일이면 흑점이 화면 가운데에서 서쪽 가장자리까지 가요
 
 /* ───────── 실제 사진 (images 폴더) ─────────
@@ -346,13 +356,18 @@ const Stage = (() => {
   function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
   const font = (z, b) => `${b ? '700 ' : ''}${z}px "Do Hyeon","Noto Sans KR",sans-serif`;
   // 이름표: 천체를 가리지 않게 바깥쪽 자리를 골라 붙이고, 점선으로 가리켜요
+  // 꼭 외울 용어(광구·채층·홍염 …)는 이름표 안에서 하늘색으로 더 크게 써요
   function pill(t, x, y, o) {
-    o = o || {}; const z = o.s || fs; ctx.font = font(z);
-    const w = ctx.measureText(t).width + z * 1.1, h = z * 1.65;
+    o = o || {}; const z = o.s || fs, parts = t.split(KEYW), kz = z * KEYS;
+    const fnt = i => i % 2 ? font(kz, true) : font(z);
+    const ws = parts.map((p, i) => { ctx.font = fnt(i); return ctx.measureText(p).width; });
+    const key = parts.length > 1, w = ws.reduce((a, b) => a + b, 0) + z * 1.1, h = (key ? kz : z) * 1.65;
     let x0 = o.a === 'l' ? x : o.a === 'r' ? x - w : x - w / 2; x0 = clamp(x0, 4, Math.max(4, W - w - 4));
     const y0 = clamp(y - h / 2, 4, H - h - 4);
-    rr(x0, y0, w, h, h / 2); ctx.fillStyle = o.bg || 'rgba(8,16,46,.9)'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = o.c || '#ffcf5a'; ctx.stroke();
-    ctx.fillStyle = o.tc || o.c || '#ffcf5a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x0 + w / 2, y0 + h / 2 + 1);
+    rr(x0, y0, w, h, h / 2); ctx.fillStyle = o.bg || 'rgba(8,16,46,.9)'; ctx.fill(); ctx.lineWidth = key ? 2.5 : 1.5; ctx.strokeStyle = o.c || '#ffcf5a'; ctx.stroke();
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    let cx = x0 + z * .55;
+    parts.forEach((p, i) => { if (!p) return; ctx.font = fnt(i); ctx.fillStyle = i % 2 ? KEYC : (o.tc || o.c || '#ffcf5a'); ctx.fillText(p, cx, y0 + h / 2 + 1); cx += ws[i]; });
     return { x: x0, y: y0, w, h };
   }
   function ptr(b, x, y, c) {
@@ -1293,14 +1308,16 @@ function ctrls() {
   const act = grp('태양 활동', 'act', [[0, '😴 조용할 때'], [1, '🔥 활발할 때']], x => S.act === x);
   const play = lbl => `<button class="chip big${S.playing ? '' : ' play'}" data-act="play">${S.playing ? '⏸ 멈춤' : lbl}</button>`;
   if (v === 'surface') {
-    if (!S.zoom && !S.rotv && !S.inside) h += `<div class="ctrl">${play('▶ 8일 동안 관측')}${grp('날짜', 'day', [[0, '처음'], [4, '4일 후'], [8, '8일 후']], x => !S.playing && Math.round(S.day) === x)}${spd}</div>`;
-    const togs = S.rotv && !S.zoom ? [['rotv', '🧭 자전 방향']] : S.inside && !S.zoom ? [['inside', '🔪 태양의 속']]
-      : (S.cut ? [] : [['photo', '📷 실제 사진']]).concat(S.zoom ? [['zoom', '🔍 확대 (쌀알무늬·흑점)'], ['cut', '✂ 단면 (대류)']] : [['inside', '🔪 태양의 속'], ['zoom', '🔍 확대 (쌀알무늬·흑점)'], ['grid', '🌐 경선·위선'], ['ghost', '👣 처음 위치'], ['rotv', '🧭 자전 방향']]);
-    h += `<div class="ctrl">${S.rotv && !S.zoom ? '<button class="chip big play" data-act="tog" data-v="rotv">↩ 태양 관측으로 돌아가기</button>' : ''}${S.inside && !S.zoom ? '<button class="chip big play" data-act="tog" data-v="inside">↩ 태양 관측으로 돌아가기</button>' : ''}${grp('보기', 'tog', togs, k => S[k])}${S.zoom ? (S.cut ? spd : '') : S.rotv ? '' : S.inside ? spd : act}</div>`;
+    // 화면 바꾸기: 어느 화면에 있든 한 번 누르면 바로 그 화면으로 가요 (돌아가기를 먼저 누르지 않아도 돼요)
+    const mode = S.zoom ? 'zoom' : S.inside ? 'inside' : S.rotv ? 'rotv' : 'main';
+    h += `<div class="ctrl">${grp('화면', 'smode', [['main', '☀ 태양 관측'], ['inside', '🔪 태양의 속'], ['zoom', '🔍 확대 (쌀알무늬·흑점)'], ['rotv', '🧭 자전 방향']], x => mode === x)}</div>`;
+    if (mode === 'main') h += `<div class="ctrl">${play('▶ 8일 동안 관측')}${grp('날짜', 'day', [[0, '처음'], [4, '4일 후'], [8, '8일 후']], x => !S.playing && Math.round(S.day) === x)}${spd}</div>`;
+    const togs = mode === 'main' ? [['photo', '📷 실제 사진'], ['grid', '🌐 경선·위선'], ['ghost', '👣 처음 위치']] : mode === 'zoom' ? (S.cut ? [] : [['photo', '📷 실제 사진']]).concat([['cut', '✂ 단면 (대류)']]) : [];
+    const tail = mode === 'main' ? act : mode === 'inside' || (mode === 'zoom' && S.cut) ? spd : '';
+    if (togs.length || tail) h += `<div class="ctrl">${togs.length ? grp('보기', 'tog', togs, k => S[k]) : ''}${tail}</div>`;
   } else if (v === 'eclipse') {
-    const ez = grp('확대 사진', 'ez', [['chrom', '🔍 채층 확대'], ['corona', '🔍 코로나 확대']], k => S.ez === k);
-    h += S.ez ? `<div class="ctrl"><button class="chip big play" data-act="ez" data-v="">↩ 개기 일식으로 돌아가기</button>${ez}</div>`
-      : `<div class="ctrl">${play(S.cover >= 1 ? '↺ 다시 일식 진행' : '▶ 일식 진행')}<span class="group"><span class="lbl">달 위치</span><input class="rng" type="range" min="0" max="1" step="0.002" value="${S.cover}" data-rng="cover" aria-label="달 위치"></span>${spd}</div><div class="ctrl">${act}${grp('보기', 'tog', [['photo', '📷 개기 일식 때 실제 사진']], k => S[k])}${ez}</div>`;
+    h += `<div class="ctrl">${grp('화면', 'ezv', [['none', '🌑 개기 일식'], ['chrom', '🔍 채층 확대'], ['corona', '🔍 코로나 확대']], k => (S.ez || 'none') === k)}</div>`;
+    if (!S.ez) h += `<div class="ctrl">${play(S.cover >= 1 ? '↺ 다시 일식 진행' : '▶ 일식 진행')}<span class="group"><span class="lbl">달 위치</span><input class="rng" type="range" min="0" max="1" step="0.002" value="${S.cover}" data-rng="cover" aria-label="달 위치"></span>${spd}</div><div class="ctrl">${act}${grp('보기', 'tog', [['photo', '📷 개기 일식 때 실제 사진']], k => S[k])}</div>`;
   } else if (v === 'events') {
     h += `<div class="ctrl"><button class="chip big play" data-act="prom">🔥 홍염 솟아오르기</button><button class="chip big hot" data-act="flare">💥 플레어 일으키기</button>${grp('홍염 모양', 'pshape', [['loop', '고리'], ['flame', '불꽃']], x => S.pshape === x)}</div><div class="ctrl">${grp('보기', 'tog', [['photo', '📷 실제 사진']], k => S[k])}${act}${spd}</div>`;
   } else if (v === 'cycle') {
@@ -1311,9 +1328,11 @@ function ctrls() {
   }
   return h;
 }
-function fill(str, key) {
-  let n = 0;
-  return str.replace(/\[(.+?)\]/g, (m, w) => { const k = key + '-' + (n++), show = ui.rev[k]; return `<button class="blank${show ? ' show' : ''}" data-act="reveal" data-k="${k}">${w}</button>`; });
+/* 빈칸 힌트: 한글은 초성만, 숫자·영문은 ? 로 보여 줘요. (답을 누르면 원래 글자) */
+const CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+const cho = w => w.replace(/<[^>]*>/g, '').replace(/[가-힣]/g, c => CHO[Math.floor((c.charCodeAt(0) - 0xAC00) / 588)]).replace(/[0-9]+(\.[0-9]+)?/g, '?').replace(/[A-Za-z]+/g, '?');
+function fill(str, key) {  let n = 0;
+  return str.replace(/\[(.+?)\]/g, (m, w) => { const k = key + '-' + (n++), show = ui.rev[k]; return `<button class="blank${show ? ' show' : ''}" data-act="reveal" data-k="${k}">${show ? w : cho(w)}</button>`; });
 }
 function qList(m, locked) {
   const [qs, recf] = QS[m], rec = recf();
@@ -1908,6 +1927,14 @@ app.addEventListener('click', async e => {
     if (state.view === 'class' && v === 'zoom') { if (S.zoom && ui.tab === 0) ui.tab = 1; else if (!S.zoom && ui.tab === 1) ui.tab = 0; }
     render();
   }
+  else if (a === 'smode') {
+    const was = S.zoom;
+    Stage.set({ zoom: v === 'zoom', inside: v === 'inside', rotv: v === 'rotv', playing: false });
+    if (v !== 'zoom') Stage.set({ cut: false });
+    if (state.view === 'class') { if (v === 'zoom' && ui.tab === 0) ui.tab = 1; else if (was && v !== 'zoom' && ui.tab === 1) ui.tab = 0; }
+    render();
+  }
+  else if (a === 'ezv') { Stage.set({ ez: v === 'none' ? null : v, playing: false }); render(); }
   else if (a === 'sview') { Stage.set({ view: v, playing: false }); if (v === 'events') Stage.prom(false); render(); }
   // 홍염·플레어 버튼은 움직이는 그림으로 보여 줘요 (사진 보기였으면 그림으로 바꿔요)
   else if (a === 'prom' || a === 'flare') { const ph = S.photo; Stage.set({ photo: false }); a === 'prom' ? Stage.prom() : Stage.flare(); if (ph) render(); }
