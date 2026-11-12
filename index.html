@@ -2047,5 +2047,50 @@ async function submit() {
 
 enter('intro');
 </script>
+<!-- ───────── 수업 모드 레이저 포인터: 학생들이 TV에서 선생님이 가리키는 곳을 쉽게 찾도록 ─────────
+     수업 모드에서만 마우스 위치에 빨간 고리가 따라다니고, 누르면 퍼지는 물결이 나와요.
+     왼쪽 아래 버튼으로 켜고 끌 수 있어요(브라우저에 기억). 터치(전자칠판·태블릿)로 누를 때는 물결만 나와요. -->
+<style>
+#lp-ring{position:fixed;left:0;top:0;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;border:5px solid #ff2d6f;background:radial-gradient(circle,#ff2d6f 0 5px,#ff2d6f33 6px 100%);box-shadow:0 0 18px 6px #ff2d6faa,inset 0 0 10px #ff2d6f88;pointer-events:none;z-index:2147483646;display:none;transition:width .12s,height .12s,margin .12s}
+#lp-ring.down{width:48px;height:48px;margin:-24px 0 0 -24px}
+.lp-wave{position:fixed;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:4px solid #ff2d6f;pointer-events:none;z-index:2147483645;animation:lpw .6s ease-out forwards}
+@keyframes lpw{to{transform:scale(7);opacity:0}}
+#lp-btn{position:fixed;left:14px;bottom:14px;z-index:2147483647;display:none;padding:8px 14px;border-radius:999px;border:2px solid #ff2d6f;background:#140a1ce6;color:#ffd0de;font:700 15px "Noto Sans KR",sans-serif;cursor:pointer}
+#lp-btn.off{border-color:#6b7394;color:#aab3d6}
+body.lp-on,body.lp-on *{cursor:none!important}
+body.lp-on #lp-btn{cursor:pointer!important}
+</style>
+<div id="lp-ring"></div><button id="lp-btn" type="button"></button>
+<script>
+(() => {
+  const ring = document.getElementById('lp-ring'), btn = document.getElementById('lp-btn');
+  let want = true, mouse = false, x = -100, y = -100;
+  try { want = localStorage.getItem('lp-off') !== '1'; } catch (e) {}
+  const inClass = () => !!document.querySelector('.cl-stage');
+  const sync = () => {
+    const cls = inClass(), on = cls && want && mouse;
+    btn.style.display = cls ? 'block' : 'none';
+    btn.textContent = want ? '🔴 포인터 켜짐' : '⚪ 포인터 꺼짐'; btn.classList.toggle('off', !want);
+    ring.style.display = on ? 'block' : 'none';
+    document.body.classList.toggle('lp-on', on && !btn.matches(':hover'));
+  };
+  btn.addEventListener('click', e => { e.stopPropagation(); want = !want; try { localStorage.setItem('lp-off', want ? '0' : '1'); } catch (er) {} sync(); });
+  addEventListener('pointermove', e => {
+    mouse = e.pointerType === 'mouse'; x = e.clientX; y = e.clientY;
+    ring.style.transform = `translate(${x}px,${y}px)`; sync();
+  }, { passive: true });
+  addEventListener('pointerdown', e => {
+    if (!inClass() || !want || e.target === btn) return;
+    if (e.pointerType === 'mouse') ring.classList.add('down');
+    const w = document.createElement('div'); w.className = 'lp-wave'; w.style.left = e.clientX + 'px'; w.style.top = e.clientY + 'px';
+    document.body.appendChild(w); setTimeout(() => w.remove(), 650);
+  }, true);
+  addEventListener('pointerup', () => ring.classList.remove('down'), true);
+  document.addEventListener('mouseleave', () => { ring.style.display = 'none'; });
+  new MutationObserver(sync).observe(document.getElementById('app') || document.body, { childList: true });
+  sync();
+})();
+</script>
+
 </body>
 </html>
