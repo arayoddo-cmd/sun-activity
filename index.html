@@ -117,6 +117,12 @@ button.blank:not(.show){color:#ffcf5aa8;letter-spacing:.12em}
 .concept.big .note{font-size:clamp(18px,1.6vw,24px)}
 .concept.big .blank{min-width:1.6em;padding:0 .3em}
 .concept.big ol{font-size:clamp(28px,3vw,46px);padding-left:1.6em}
+.wsp{display:inline-block;background:#3dff8f;color:#03230f;font-weight:900;border-radius:999px;padding:4px 16px;font-size:clamp(17px,1.5vw,22px);box-shadow:0 0 16px #3dff8f88;white-space:nowrap;margin:0 8px}
+.wsp.none{background:#c4b0ff;color:#1a0b45;box-shadow:0 0 16px #c4b0ff88}
+.concept.big .wsp{font-size:clamp(24px,2.3vw,34px);padding:6px 22px}
+.concept .ex{color:#c4b0ff}
+.concept .wsk{color:#fff}
+.concept.big .leg{font-size:clamp(20px,1.8vw,28px)}
 .ask{background:#1c2a5c;border-left:4px solid var(--accent);border-radius:8px;padding:10px 14px;margin-top:12px;font-size:15px}
 .ask b{color:var(--accent)}
 
@@ -1123,28 +1129,32 @@ const Stage = (() => {
 })();
 
 /* ───────── 수업 모드 (학습지 5~7쪽 빈칸) ───────── */
+/* 학습지에 없는 내용(수업 PPT·교과서에서 더한 것)은 X()로 감싸 보라색으로 보여요. pg = 학습지 쪽 안내 */
+const X = s => '<span class="ex">' + s + '</span>';
+const wsp = T => T.pg ? `<span class="wsp">📒 학습지 ${T.pg}</span>` : '<span class="wsp none">📒 학습지에 없는 더 알아보기</span>';
+const WSLEG = '<p class="note leg">빈칸을 누르면 하나씩 답이 보여요. · <b class="wsk">흰 글씨</b> = 학습지 내용 · <span class="ex">보라 글씨</span> = 학습지에 없는 더 알아보기</p>';
 const TABS = [
-  { name: '① 태양과 광구', title: '☀ 태양과 태양의 표면(광구)', setup: { view: 'surface', act: 1 },
-    lines: ['태양: 태양계에서 스스로 [빛]을 내는 유일한 천체 → [항성]', '태양은 온도가 매우 높은 [기체]로 이루어져 있고, 많은 양의 에너지를 우주 공간으로 내보내요.', '태양의 속: [핵](수소 핵융합 반응으로 에너지를 만들어요, 약 1500만 ℃) → 복사층 → [대류]층 → 광구', '[광구]: 스스로 빛을 내는 천체의 표면, 밝고 둥글게 보이는 태양의 표면', '광구의 평균 온도: 약 [6000]℃', '광구(태양의 표면)에는 [흑점]과 [쌀알무늬]가 나타나요.'],
+  { name: '① 태양과 광구', title: '☀ 태양과 태양의 표면(광구)', pg: '5쪽 1-(1) 태양의 표면', setup: { view: 'surface', act: 1 },
+    lines: ['태양: 스스로 [빛]을 내는 천체로, 지구에 많은 영향을 미쳐요. ' + X('태양계에서 유일하게 스스로 빛을 내는 [항성]'), X('태양은 온도가 매우 높은 [기체]로 이루어져 있고, 많은 양의 에너지를 우주 공간으로 내보내요.'), X('태양의 속: [핵](수소 핵융합 반응으로 에너지를 만들어요, 약 1500만 ℃) → 복사층 → [대류]층 → 광구'), '[광구]: 스스로 빛을 내는 천체의 표면, 밝고 둥글게 보이는 태양의 표면', '광구의 평균 온도: 약 [6000]℃', '광구(태양의 표면)에는 [흑점]과 [쌀알무늬]가 나타나요.'],
     ask: '<b>재 봐요</b> 태양을 눌러 온도를 재 보세요. 밝은 곳과 검은 점은 온도가 어떻게 다를까요?<br><b>한자로 기억해요</b> 항성 = 항상 항(恒) + 별 성(星) · 광구 = 빛 광(光) + 공 구(球)<br><b>태양의 속</b> 🔪 태양의 속을 눌러 보세요. 핵에서 만든 에너지가 복사층에서는 복사로, 대류층에서는 대류로 광구까지 전달돼요. 대류층의 대류가 광구에 쌀알무늬를 만들어요.' },
-  { name: '② 쌀알무늬', title: '🍚 쌀알무늬', setup: { view: 'surface', zoom: true, cut: false },
+  { name: '② 쌀알무늬', title: '🍚 쌀알무늬', pg: '5쪽 쌀알무늬', setup: { view: 'surface', zoom: true, cut: false },
     lines: ['쌀알무늬: 광구에 나타나는 쌀알 모양의 무늬', '광구 아래에서 일어나는 [대류] 현상으로 생겨요.', '[고온]의 기체가 상승하는 곳 → [밝다]', '[저온]의 기체가 하강하는 곳 → [어둡다]'],
     ask: '<b>관찰해요</b> 확대한 광구에서 밝은 알갱이와 어두운 경계를 찾아보세요. (📷 실제 사진을 누르면 망원경으로 찍은 쌀알무늬가 보여요)<br><b>찾아봐요</b> ✂ 단면을 눌러 보세요. 빨간 화살표(상승)와 파란 화살표(하강) 위쪽의 광구는 각각 밝은가요, 어두운가요?' },
-  { name: '③ 흑점', title: '⚫ 흑점', setup: { view: 'surface', grid: true, ghost: true, day: 0, playing: true, act: 1 },
-    lines: ['흑점: 광구에 나타나는 불규칙한 모양의 [어두운] 부분', '주변보다 온도가 약 [2000]℃ [낮아] 어둡게 보여요. → 흑점의 온도 약 [4000]℃', '흑점이 생기는 까닭: 태양의 [자기장]이 강한 곳에서 대류가 방해되어 에너지가 잘 올라오지 못해서','흑점은 모양과 크기가 변하며, 어떤 흑점은 행성보다 크기도 해요.', '지구에서 관측하면 흑점의 위치가 변해요. → 태양이 [자전]하기 때문', '지구에서 보면 흑점은 [동쪽]에서 [서쪽]으로 움직여요.', '태양 활동이 활발하면 흑점 수가 [많아]져요.'],
+  { name: '③ 흑점', title: '⚫ 흑점', pg: '5쪽 흑점', setup: { view: 'surface', grid: true, ghost: true, day: 0, playing: true, act: 1 },
+    lines: ['흑점: 광구에 나타나는 불규칙한 모양의 [어두운] 부분', '주변보다 온도가 약 [2000]℃ [낮아] 어둡게 보여요. → 흑점의 온도 약 [4000]℃', X('흑점이 생기는 까닭: 태양의 [자기장]이 강한 곳에서 대류가 방해되어 에너지가 잘 올라오지 못해서'), X('흑점은 모양과 크기가 변하며, 어떤 흑점은 행성보다 크기도 해요.'), '지구에서 관측하면 흑점의 위치가 변해요. → 태양이 [자전]하기 때문', X('지구에서 보면 흑점은 [동쪽]에서 [서쪽]으로 움직여요.'), '태양 활동이 활발하면 흑점 수가 [많아]져요.'],
     ask: '<b>관찰해요</b> ▶ 8일 동안 관측을 눌러 보세요. 흑점은 어느 쪽에서 어느 쪽으로 움직이나요? 흑점이 움직이는 것으로 무엇을 알 수 있을까요?<br><b>헷갈리지 않게</b> 화면의 동쪽·서쪽은 지구에서 태양을 바라볼 때의 방향이에요. 🧭 자전 방향을 누르면 태양도 지구처럼 시계 반대 방향으로 자전하는 모습을 볼 수 있어요.<br><b>재 봐요</b> 🔍 확대에서 흑점을 눌러 온도를 재 보세요.' },
-  { name: '④ 태양의 대기', title: '🌑 태양의 대기 (채층과 코로나)', setup: { view: 'eclipse', cover: 0, playing: true, act: 1 },
-    lines: ['태양의 대기는 [채층]과 [코로나]로 구분해요.', '평소에는 광구가 밝아서 보기 어렵고, 광구가 완전히 가려지는 [개기 일식] 때 볼 수 있어요.', '채층: 광구 바로 위를 얇게 둘러싼 [붉은]색의 대기층 (하부 대기)', '코로나: 채층 위로 넓게 뻗어 있는 [진주]색의 희박한 대기층 (상부 대기). 온도가 매우 높아요. (100만 ℃ 이상)', '태양의 활동이 활발할수록(흑점 수가 많을수록) 코로나는 매우 [크고] 밝게 나타나요.'],
+  { name: '④ 태양의 대기', title: '🌑 태양의 대기 (채층과 코로나)', pg: '5쪽 1-(2) 태양의 대기', setup: { view: 'eclipse', cover: 0, playing: true, act: 1 },
+    lines: ['태양의 대기는 [채층]과 [코로나]로 구분해요.', '평소에는 광구가 밝아서 보기 어렵고, 광구가 완전히 가려지는 [개기 일식] 때 볼 수 있어요.', '채층: 광구 바로 위를 얇게 둘러싼 [붉은]색의 대기층 ' + X('(하부 대기)'), '코로나: 채층 위로 넓게 뻗어 있는 [진주]색의 희박한 대기층 ' + X('(상부 대기)') + '. 온도가 매우 높아요. ' + X('(100만 ℃ 이상)'), '태양의 활동이 활발할수록(흑점 수가 많을수록) 코로나는 매우 [크고] 밝게 나타나요.'],
     ask: '<b>비교해요</b> 개기 일식이 되면 태양 활동을 😴 조용할 때와 🔥 활발할 때로 바꿔 보세요. 코로나의 크기가 어떻게 달라지나요?<br><b>확대해 봐요</b> 🔍 채층 확대·🔍 코로나 확대를 누르면 실제 사진으로 가까이에서 볼 수 있어요. (채층: 일식 사진 + 채층의 붉은빛만 보는 필터로 찍고 광구를 가린 사진 / 코로나: 일식 사진 + 위성 사진)<br><b>생각해요</b> 왜 평소에는 태양의 대기가 보이지 않을까요?' },
-  { name: '⑤ 홍염과 플레어', title: '🔥 태양의 대기에서 나타나는 현상', setup: { view: 'events', act: 1, pshape: 'loop' },
-    lines: ['태양의 대기에서는 [홍염]과 [플레어]가 나타나기도 해요.', '홍염: 채층 위로 거대하게 분출되는 가스. [불꽃] 덩어리 기둥이나 고리 모양으로, 코로나층까지 솟아오르기도 해요.', '플레어: 채층에서 일어나는 폭발 현상. [흑점] 부근에서 [폭발]이 일어나 채층의 일부가 매우 밝아지고, 많은 양의 에너지가 일시적으로 방출돼요.', '태양 활동이 활발해지는 시기에 홍염과 플레어가 [자주] 나타나요.'],
+  { name: '⑤ 홍염과 플레어', title: '🔥 태양의 대기에서 나타나는 현상', pg: '5쪽 대기에서 나타나는 현상', setup: { view: 'events', act: 1, pshape: 'loop' },
+    lines: ['태양의 대기에서는 [홍염]과 [플레어]가 나타나기도 해요.', '홍염: 채층 위로 거대하게 분출되는 가스. [불꽃] 덩어리 기둥이나 고리 모양' + X(', 코로나층까지 솟아오르기도 해요.'), '플레어: 채층에서 일어나는 폭발 현상. [흑점] 부근에서 [폭발]이 일어나 채층의 일부가 매우 밝아지고, 많은 양의 에너지가 일시적으로 방출돼요.', '태양 활동이 활발해지는 시기에 홍염과 플레어가 [자주] 나타나요.'],
     ask: '<b>해 봐요</b> 🔥 홍염 솟아오르기, 💥 플레어 일으키기를 눌러 보세요. 홍염 모양을 고리·불꽃으로 바꿔 볼 수도 있어요.<br><b>구분해요</b> 흑점·쌀알무늬(표면) / 채층·코로나(대기) / 홍염·플레어(대기에서 나타나는 현상)' },
-  { name: '⑥ 태양 활동의 변화', title: '📈 태양 활동의 변화 (흑점 수)', setup: { view: 'cycle', marks: true, ext: true, period: true, year: 1986, playing: true },
-    lines: ['태양 활동은 약 [11]년을 주기로 변하며, [흑점 수]의 변화로 알 수 있어요.', '극대기: 흑점 수가 가장 [많은] 시기 → 태양 활동 활발', '극소기: 흑점 수가 가장 [적은] 시기', '그래프의 A와 B의 태양 활동 정도 비교: A [>] B', '태양 활동이 활발할 때: 흑점 수가 [많아]지고, 홍염과 [플레어]가 자주 발생하고, 코로나의 크기가 [커]지고, 태양풍이 [강]해져요.'],
+  { name: '⑥ 태양 활동의 변화', title: '📈 태양 활동의 변화 (흑점 수)', pg: '6쪽 2 태양 활동의 변화 + 탐구', setup: { view: 'cycle', marks: true, ext: true, period: true, year: 1986, playing: true },
+    lines: ['태양 활동은 약 [11]년을 주기로 변하며, [흑점 수]의 변화로 알 수 있어요.', X('극대기: 흑점 수가 가장 [많은] 시기 → 태양 활동 활발'), X('극소기: 흑점 수가 가장 [적은] 시기'), '그래프의 A와 B의 태양 활동 정도 비교: A [>] B', '태양 활동이 활발할 때: 흑점 수가 [많아]지고, 홍염과 [플레어]가 자주 발생하고, 코로나의 크기가 [커]지고, 태양풍이 [강]해져요.'],
     ask: '<b>끌어 봐요</b> 그래프를 손가락으로 끌어 연도를 바꿔 보세요. 흑점 수가 많을 때 오른쪽 태양은 어떻게 보이나요?<br><b>예측해요</b> 2013년 초에 "올해는 태양풍이 강해 무선 통신이 원활하지 않을 수 있다"는 예보가 있었어요. 이런 상황이 다시 생길 것으로 예상되는 때는 언제일까요?' },
-  { name: '⑦ 지구에 미치는 영향', title: '🌍 태양 활동이 지구에 미치는 영향', setup: { view: 'earth', act: 0, fx: null },
-    lines: ['코로나가 커지면 태양에서 오는 전기를 띤 입자의 흐름인 [태양풍]이 강해져요.', '[자기 폭풍]: 지구 자기장이 불규칙하게 변해요.', '[오로라]가 더 자주, 더 넓은 지역에서 생겨요. (주로 [고위도] 지방에서 나타나요)', '전파 신호가 방해를 받아 장거리 무선 통신 장애가 생겨요. ([델린저] 현상) 휴대 전화가 잘 안 될 수도 있어요.', '인공위성 고장·성능 저하, 위성 위치 확인 시스템([GPS]) 오류, 전력 장비 손상으로 [정전]이나 화재가 생길 수 있어요.', '항공 분야 피해: 비행기 승객과 우주인이 [X선] 같은 방사선에 더 많이 노출될 수 있어요.', '국가기상위성센터에서는 태양 활동을 관측하여 [우주 기상]을 예보해 피해를 줄이려고 노력해요.'],
-    ask: '<b>비교해요</b> 평소에는 무엇이 태양풍의 피해를 막아 줄까요? 태양 활동을 🔥 활발할 때로 바꾸고 아래 영향 버튼을 하나씩 눌러 보세요.<br><b>실제 피해</b> 1989년 캐나다 퀘벡 주 발전소 정전 · 2008년 우리나라 인공위성(무궁화 호) 통신 서비스 중단 · 2017년 북미 출발 국제선 북극 항로 우회 운항<br>※ 오로라: 태양에서 방출된 전기를 띤 입자가 지구의 고층 대기에 있는 기체(공기 입자)와 충돌하여 빛을 내는 현상. 주로 극지방 가까운 고위도 지방에서 나타나요.' }
+  { name: '⑦ 지구에 미치는 영향', title: '🌍 태양 활동이 지구에 미치는 영향', pg: '6쪽 2-(2) 활발할 때 나타나는 현상', setup: { view: 'earth', act: 0, fx: null },
+    lines: ['코로나가 커지면 태양에서 오는 전기를 띤 입자의 흐름인 [태양풍]이 강해져요.', '[자기 폭풍]: 지구 자기장이 불규칙하게 변해요.', '[오로라]가 더 자주, 더 넓은 지역에서 생겨요. ' + X('(주로 [고위도] 지방에서 나타나요)'), '※ 오로라: 태양에서 방출된 전기를 띤 입자가 공기 입자와 충돌하여 빛을 내는 현상', '전파 신호가 방해를 받아 무선 통신 장애가 생겨요. ([델린저] 현상) ' + X('휴대 전화가 잘 안 될 수도 있어요.'), '인공위성 성능 저하' + X('·고장, 위성 위치 확인 시스템([GPS]) 오류') + ', 전력 장비 손상으로 [정전] 또는 화재가 생길 수 있어요.', '항공 분야 피해' + X(': 비행기 승객과 우주인이 [X선] 같은 방사선에 더 많이 노출될 수 있어요.'), X('국가기상위성센터에서는 태양 활동을 관측하여 [우주 기상]을 예보해 피해를 줄이려고 노력해요.')],
+    ask: '<b>비교해요</b> 평소에는 무엇이 태양풍의 피해를 막아 줄까요? 태양 활동을 🔥 활발할 때로 바꾸고 아래 영향 버튼을 하나씩 눌러 보세요.<br><b>실제 피해</b> 1989년 캐나다 퀘벡 주 발전소 정전 · 2008년 우리나라 인공위성(무궁화 호) 통신 서비스 중단 · 2017년 북미 출발 국제선 북극 항로 우회 운항' }
 ];
 
 /* ───────── 탐사 모드 문제 (모든 학생이 같은 문제) ───────── */
@@ -1387,11 +1397,11 @@ ${CONFIG.SUBMIT_URL ? '<div style="text-align:right"><button class="btn ghost sm
 }
 function viewClass() {
   const T = TABS[ui.tab];
-  return `<div class="top"><span class="title" style="font-size:26px">👩‍🏫 수업 모드</span><div class="tabs">${TABS.map((t, i) => `<button class="tab${on(i === ui.tab)}" data-act="tab" data-i="${i}">${t.name}</button>`).join('')}</div><span class="grow"></span><button class="btn ghost small" data-act="enter" data-v="intro">← 처음 화면</button></div>
+  return `<div class="top"><span class="title" style="font-size:26px">👩‍🏫 수업 모드</span><div class="tabs">${TABS.map((t, i) => `<button class="tab${on(i === ui.tab)}" data-act="tab" data-i="${i}">${t.name}</button>`).join('')}</div>${wsp(T)}<span class="grow"></span><button class="btn ghost small" data-act="enter" data-v="intro">← 처음 화면</button></div>
 <div class="cl-stage"><div class="stage-slot"></div><div class="cl-side">${ctrls()}</div></div>
-<section class="panel concept big"><div class="row"><h3 style="flex:1">${T.title}</h3><button class="btn ghost small" data-act="revall">빈칸 모두 보기 / 가리기</button></div>
+<section class="panel concept big"><div class="row"><h3 style="flex:1">${T.title}</h3>${wsp(T)}<button class="btn ghost small" data-act="revall">빈칸 모두 보기 / 가리기</button></div>
 <ol>${T.lines.map((l, i) => `<li>${fill(l, ui.tab + '-' + i)}</li>`).join('')}</ol>
-<div class="ask">💬 ${T.ask}</div><p class="note">빈칸을 누르면 하나씩 답이 보여요. (학습지 5~7쪽, 교과서 232~237쪽)</p></section>`;
+<div class="ask">💬 ${T.ask}</div>${WSLEG}</section>`;
 }
 function viewMap() {
   const n = MISSIONS.filter(m => m.done()).length;
@@ -1919,10 +1929,10 @@ app.addEventListener('click', async e => {
   }
   else if (a === 'play') { Stage.play(); render(); }
   else if (a === 'spd') { Stage.set({ speed: +v }); render(); }
-  else if (a === 'act') { Stage.set({ act: +v }); render(); }
+  else if (a === 'act') { Stage.set({ act: +v }); if (S.view === 'eclipse' && !S.ez) Stage.set({ cover: 1, playing: false }); render(); } // 일식 화면: 태양 활동을 바꾸면 바로 개기 일식으로 (코로나 크기 비교)
   else if (a === 'day') { Stage.set({ day: +v, playing: false }); render(); }
   else if (a === 'tog') {
-    Stage.set({ [v]: !S[v] }); if (v === 'zoom' && !S.zoom) Stage.set({ cut: false }); if (v === 'zoom' || (v === 'rotv' && S.rotv)) Stage.set({ rotv: v === 'rotv', playing: false }); if (S[v] && (v === 'zoom' || v === 'rotv')) Stage.set({ inside: false }); if (v === 'inside' && S.inside) Stage.set({ zoom: false, rotv: false, playing: false }); if (S.zoom && S.cut) Stage.hooks.watch('cut');
+    Stage.set({ [v]: !S[v] }); if (v === 'photo' && S.photo && S.view === 'eclipse') Stage.set({ cover: 1, playing: false }); /* 일식 화면: 실제 사진을 켜면 바로 개기 일식으로 */ if (v === 'zoom' && !S.zoom) Stage.set({ cut: false }); if (v === 'zoom' || (v === 'rotv' && S.rotv)) Stage.set({ rotv: v === 'rotv', playing: false }); if (S[v] && (v === 'zoom' || v === 'rotv')) Stage.set({ inside: false }); if (v === 'inside' && S.inside) Stage.set({ zoom: false, rotv: false, playing: false }); if (S.zoom && S.cut) Stage.hooks.watch('cut');
     // 수업 모드: ① 광구에서 🔍 확대를 누르면 ② 쌀알무늬 정리로, ②에서 확대를 끄면 ①로 넘어가요
     if (state.view === 'class' && v === 'zoom') { if (S.zoom && ui.tab === 0) ui.tab = 1; else if (!S.zoom && ui.tab === 1) ui.tab = 0; }
     render();
@@ -1934,7 +1944,7 @@ app.addEventListener('click', async e => {
     if (state.view === 'class') { if (v === 'zoom' && ui.tab === 0) ui.tab = 1; else if (was && v !== 'zoom' && ui.tab === 1) ui.tab = 0; }
     render();
   }
-  else if (a === 'ezv') { Stage.set({ ez: v === 'none' ? null : v, playing: false }); render(); }
+  else if (a === 'ezv') { Stage.set({ ez: v === 'none' ? null : v, playing: false }); if (v === 'none') Stage.set({ cover: 1 }); render(); } // 🌑 개기 일식 버튼은 바로 개기 일식 모습 (진행은 ↺ 다시 일식 진행)
   else if (a === 'sview') { Stage.set({ view: v, playing: false }); if (v === 'events') Stage.prom(false); render(); }
   // 홍염·플레어 버튼은 움직이는 그림으로 보여 줘요 (사진 보기였으면 그림으로 바꿔요)
   else if (a === 'prom' || a === 'flare') { const ph = S.photo; Stage.set({ photo: false }); a === 'prom' ? Stage.prom() : Stage.flare(); if (ph) render(); }
